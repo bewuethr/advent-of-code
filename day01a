@@ -1,6 +1,6 @@
 #!/bin/bash
 
-input="$1"
+input=$(cat "$1")
 floor=0
 
 for (( i = 0; i < ${#input}; ++i )); do
