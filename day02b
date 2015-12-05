@@ -1,0 +1,34 @@
+#!/bin/bash
+
+debug=0
+
+min_circumf () {
+    local a=$1
+    local b=$2
+    local c=$3
+    local min=$(( 2*a + 2*b ))
+    if (( 2*a + 2*c < min )); then
+        min=$(( 2*a + 2*c ))
+    fi
+    if (( 2*b + 2*c < min )); then
+        min=$(( 2*b + 2*c ));
+    fi
+    (( debug )) && echo "Minimum: $min" >&2
+    printf "$min"
+}
+
+regex='([[:digit:]]+)x([[:digit:]]+)x([[:digit:]]+)'
+total=0
+
+while read line; do
+    (( debug )) && echo "Line: $line" >&2
+    [[ "$line" =~ $regex ]]
+    dim1=${BASH_REMATCH[1]}
+    dim2=${BASH_REMATCH[2]}
+    dim3=${BASH_REMATCH[3]}
+    smallest=$(min_circumf $dim1 $dim2 $dim3)
+    (( total += smallest + dim1 * dim2 * dim3 ))
+    (( debug )) && echo "Sum: $total" >&2
+done < day02a_input
+
+echo "Total ribbon needed: $total"
