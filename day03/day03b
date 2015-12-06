@@ -1,0 +1,29 @@
+#!/bin/bash
+
+input=$(cat day03_input)
+
+# Santa's coordinates
+xs=0
+ys=0
+
+# Robo-Santa's coordinates
+xr=0
+yr=0
+
+declare -A visited=([$xs/$ys]=1)
+
+flag=0  # 0: Santa, 1: Robo-Santa
+
+for (( i = 0; i < ${#input}; ++i )); do
+    case ${input:$i:1} in
+        '>') if (( flag )); then (( ++xr )); else (( ++xs )); fi ;;
+        '^') if (( flag )); then (( ++yr )); else (( ++ys )); fi ;;
+        '<') if (( flag )); then (( --xr )); else (( --xs )); fi ;;
+        'v') if (( flag )); then (( --yr )); else (( --ys )); fi ;;
+    esac
+    visited[$xs/$ys]=1
+    visited[$xr/$yr]=1
+    (( flag = flag == 0 ? 1 : 0 ))
+done
+
+echo "The Santas have visited ${#visited[@]} houses."
