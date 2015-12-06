@@ -1,0 +1,19 @@
+#!/bin/bash
+
+input=$(cat day03_input)
+
+x=0
+y=0
+declare -A visited=([$x/$y]=1)
+
+for (( i = 0; i < ${#input}; ++i )); do
+    case ${input:$i:1} in
+        '>') (( ++x )) ;;
+        '^') (( ++y )) ;;
+        '<') (( --x )) ;;
+        'v') (( --y )) ;;
+    esac
+    visited[$x/$y]=1
+done
+
+echo "Santa has visited ${#visited[@]} houses."
