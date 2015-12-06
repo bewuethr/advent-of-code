@@ -1,0 +1,17 @@
+#!/bin/bash
+
+re1='[aeiou].*[aeiou].*[aeiou]'
+re2=$(for i in {a..z}; do printf "$i$i|"; done)
+re2="${re2:0:-1}" # Remove last pipe
+re3='ab|cd|pq|xy'
+
+nice_strings=0
+
+while read line; do
+    if [[ "$line" =~ $re1 && "$line" =~ $re2 && ! "$line" =~ $re3 ]]; then
+        echo "Match: $line"
+        (( ++nice_strings ))
+    fi
+done < day05_input
+
+echo "Number of nice strings: $nice_strings."
