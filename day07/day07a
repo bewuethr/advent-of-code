@@ -44,7 +44,7 @@ get_output () {
 }
 
 declare -A wires
-num_tot=339
+num_tot=$(wc -l < day07_input)
 solved=0
 
 re1='^([[:digit:]]+) -> ([[:lower:]]+)$'
