@@ -29,6 +29,6 @@ while read line; do
     smallest=$(min_circumf $dim1 $dim2 $dim3)
     (( total += smallest + dim1 * dim2 * dim3 ))
     (( debug )) && echo "Sum: $total" >&2
-done < day02a_input
+done < input
 
 echo "Total ribbon needed: $total"

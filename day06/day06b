@@ -28,7 +28,7 @@ while read line; do
     done
     (( ++idx ))
     (( idx % 50 == 0 && idx > 0 )) && echo "Processed $idx instructions..."
-done < day06_input
+done < input
 
 brightness=0
 for light in "${grid[@]}"; do

@@ -7,7 +7,7 @@ use List::Util qw(sum);
 use Data::Dumper;
 
 my @grid;
-my $ifname = "day06_input";
+my $ifname = "input";
 
 open my $fh, '<', $ifname;
 

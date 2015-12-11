@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use 5.022;
 
-my $ifname = 'day08_input';
+my $ifname = 'input';
 open my $fh, '<', $ifname or die "Can't open $ifname: $!";
 
 my $total;

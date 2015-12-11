@@ -12,6 +12,6 @@ while read line; do
         echo "Match: $line"
         (( ++nice_strings ))
     fi
-done < day05_input
+done < input
 
 echo "Number of nice strings: $nice_strings."

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-before=$(cat day08_input | wc -c)
+before=$(cat input | wc -c)
 
-after=$(sed -e 's/\\\\/S/g' -e 's/\\"/Q/g' -e 's/\\x[[:xdigit:]]\{2\}/X/g' day08_input | wc -c)
+after=$(sed -e 's/\\\\/S/g' -e 's/\\"/Q/g' -e 's/\\x[[:xdigit:]]\{2\}/X/g' input | wc -c)
 
 echo "Chars before: $before"
 echo "Chars after: $after"

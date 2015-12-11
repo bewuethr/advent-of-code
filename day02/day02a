@@ -28,6 +28,6 @@ while read line; do
     smallest=$(min $s1 $s2 $s3)
     (( total += 2 * (s1 + s2 + s3) + smallest ))
     (( debug )) && echo "Sum: $total" >&2
-done < day02a_input
+done < input
 
 echo "Total square footage needed: $total"

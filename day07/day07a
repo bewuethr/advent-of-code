@@ -44,7 +44,7 @@ get_output () {
 }
 
 declare -A wires
-num_tot=$(wc -l < day07_input)
+num_tot=$(wc -l < input)
 solved=0
 
 re1='^([[:digit:]]+) -> ([[:lower:]]+)$'
@@ -83,5 +83,5 @@ while (( solved < num_tot )); do
             echo "Illegal assignment: $line"
             exit 1
         fi
-    done < day07_input
+    done < input
 done

@@ -2,5 +2,5 @@
 
 # Bash regex in its conditions don't support backreferences, so I cheated
 
-n_strings=$(grep -E "(..).*\1" day05_input | grep -cE "(.).\1")
+n_strings=$(grep -E "(..).*\1" input | grep -cE "(.).\1")
 echo "Number of good strings: $n_strings"

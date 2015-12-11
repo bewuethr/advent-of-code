@@ -29,7 +29,7 @@ while read line; do
     done
     (( ++idx ))
     (( idx % 50 == 0 )) && echo "Processed $idx instructions..."
-done < day06_input
+done < input
 
 l_count=0
 for row in "${grid[@]}"; do

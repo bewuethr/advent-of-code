@@ -1,6 +1,6 @@
 #!/bin/bash
 
-input=$(cat day03_input)
+input=$(cat input)
 
 x=0
 y=0
