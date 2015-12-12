@@ -1,0 +1,10 @@
+#!/bin/bash
+
+num=$(cat input)
+
+for i in {1..50}; do
+    echo "Iteration $i"
+    num=$(fold -1 <<< $num | uniq -c | tr -d $'\n ')
+done
+
+echo "Length of final: ${#num}"
