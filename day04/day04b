@@ -1,6 +1,6 @@
 #!/bin/bash
 
-input='yzbqklnj'
+input=$(cat input)
 i=282749
 
 while true; do

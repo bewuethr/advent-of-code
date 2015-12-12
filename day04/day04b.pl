@@ -4,7 +4,8 @@ use 5.022;
 use warnings;
 use Digest::MD5 qw(md5_hex);
 
-my $secret = "yzbqklnj";
+my $secret = `cat input`;
+chomp $secret;
 my $try = 282749;    # Answer from part 1
 
 while (1) {
