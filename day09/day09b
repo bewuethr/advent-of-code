@@ -1,0 +1,63 @@
+#!/bin/bash
+
+get_dist () {
+    local arr=("$@")
+    local dist=0
+    local i
+    for (( i = 1; i < ${#arr[@]}; ++i )); do
+        local key="${names[${arr[$i]}]}/${names[${arr[$((i-1))]}]}"
+        (( dist += grid[$key] ))
+    done
+    echo $dist
+}
+
+generate () {
+    local n=$1
+    shift
+    local arr=("$@")
+    if (( n == 1 )); then
+        local dist=$(get_dist "${arr[@]}")
+        if (( dist > max_dist )); then
+            echo "New longest trip: $dist for ${arr[@]}" >&2
+            max_dist=$dist
+        fi
+        return
+    fi
+    local i
+    for (( i = 0; i <= n-1; ++i )); do
+        generate $(( n-1 )) "${arr[@]}"
+        local idx1
+        if (( n % 2 == 0 )); then
+            idx1=$i
+        else
+            idx1=0
+        fi
+        idx2=$(( n-1 ))
+        local tmp="${arr[$idx1]}"
+        arr[$idx1]="${arr[$idx2]}"
+        arr[$idx2]="$tmp"
+        (( ++ctr ))
+    done
+}
+
+declare -A grid
+declare -A names_hash
+
+while read -r from _ to _ dist; do
+    names_hash[$from]=1
+    names_hash[$to]=1
+    grid[$from/$to]=$dist
+    grid[$to/$from]=$dist
+done < input
+
+names=("${!names_hash[@]}")
+echo "${names[@]} ${#names[@]}" >&2
+
+sequence=($(seq 0 $(( ${#names[@]} - 1 )) ))
+max_dist=$(get_dist "${sequence[@]}")
+echo "First distance: $max_dist"
+
+ctr=0
+generate ${#sequence[@]} "${sequence[@]}"
+echo "The maximum distance is $max_dist."
+echo "This took $ctr swaps"
