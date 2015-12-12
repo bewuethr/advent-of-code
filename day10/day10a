@@ -1,0 +1,29 @@
+#!/bin/bash
+
+lookandsay () {
+    local num="$1"
+    local i
+    local digit=${num:0:1}
+    local ctr=0
+    local res
+    for (( i = 0; i < ${#num}; ++i )); do
+        if [[ ${num:$i:1} == $digit ]]; then
+            (( ++ctr ))
+        else
+            res+=$ctr$digit
+            ctr=1
+            digit=${num:$i:1}
+        fi
+    done
+    res+=$ctr$digit
+    echo "$res"
+}
+
+num=$(cat input)
+
+for i in {1..40}; do
+    echo "Iteration $i"
+    num=$(lookandsay $num)
+done
+
+echo "Length of final: ${#num}"
