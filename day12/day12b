@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Get parsed input, leaves only (requires JSON.sh)
+parsed=$(json_parse -l < input)
+
+# Get leafs with value red that are in an object, return the part before the
+# name of the object
+remove=$(grep -Po '(.*)(?="."][[:space:]]+"red")' <<< "$parsed")
+
+# Remove all the lines that are in the objects to be removed; use sed to escape
+# the unmatched square brackets
+filtered=$(grep -vf <(echo "$remove" | sed 's/\[/\\[/') <<< "$parsed")
+
+# Count sum of numbers after removing part in brackets
+sum=0
+re='(-?[[:digit:]]+)'
+while read -r line; do
+    if [[ "$line" =~ $re ]]; then
+        (( sum += ${BASH_REMATCH[1]} ))
+    fi
+done < <(echo "$filtered" | sed 's/\[.*\][[:space:]]\+//')
+
+echo "Sum without objects that have a 'red' value: $sum"
