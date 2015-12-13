@@ -46,8 +46,8 @@ meets_req () {
 re1='i|o|l'
 
 re2=$(
+    line=$(echo {a..z} | tr -d ' ')
     for i in {0..23}; do
-        line=$(echo {a..z} | tr -d ' ')
         echo "${line:i:3}"
     done | tr $'\n' '|'
 )
