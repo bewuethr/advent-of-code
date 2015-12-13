@@ -7,6 +7,6 @@ while read -r line; do
     if [[ "$line" =~ $re ]]; then
         (( sum += ${BASH_REMATCH[1]} ))
     fi
-done < input
+done < <(json_pp < input)
 
 echo "Sum of all numbers: $sum"
