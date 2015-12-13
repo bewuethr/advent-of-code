@@ -1,0 +1,10 @@
+#!/bin/bash
+
+passwd=vzbxxyzz # From first part
+
+while true; do
+    passwd=$(perl -e '$w = shift; print substr ++$w, -8' $passwd)
+    grep -Ev 'i|o|l' <<< "$passwd" |
+    grep -E 'abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz' |
+    grep -P '(.)\1.*(?!\1)(.)\2' && { echo "Next password: $passwd"; exit; }
+done
