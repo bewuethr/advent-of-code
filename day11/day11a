@@ -1,0 +1,72 @@
+#!/bin/bash
+
+increment () {
+    local passwd="$1"
+    local i=1
+    local new_passwd
+    local letter
+
+    while true; do
+        letter=$(tr a-hjkmnp-z b-hjkmnp-za <<< ${passwd: -$i:1})
+        new_passwd="${passwd:0:-$i}$letter"
+        if (( i > 1 )); then
+            new_passwd+="${passwd: -$((i-1))}"
+        fi
+        if [[ $letter == a ]]; then # we have wrapped around
+            if (( i < ${#passwd} )); then
+                (( ++i ))
+            else
+                break
+            fi
+        else
+            break
+        fi
+        passwd="$new_passwd"
+    done
+
+    echo "$new_passwd"
+}
+
+meets_req () {
+    local word="$1"
+    if [[ ! "$word" =~ $re1 ]] && [[ "$word" =~ $re2 ]] && [[ "$word" =~ $re3 ]]; then
+        local re4=$(tr --squeeze-repeats '|' <<< "${re3/${BASH_REMATCH[0]}}")
+        re4="${re4#|}"
+        re4="${re4%|}"
+        if [[ "$word" =~ $re4 ]]; then
+            return 0
+        else
+            return 1
+        fi
+    else
+        return 1
+    fi
+}
+
+re1='i|o|l'
+
+re2=$(
+    for i in {0..23}; do
+        line=$(echo {a..z} | tr -d ' ')
+        echo "${line:i:3}"
+    done | tr $'\n' '|'
+)
+re2=${re2%|}
+    
+re3=$(
+    echo {a..z}{a..z} |
+    fold -w 3 |
+    grep -E '(.)\1' |
+    tr --squeeze-repeats $' \n' '|'
+)
+re3=${re3%|}
+
+passwd=$(cat input)
+
+while true; do
+    if meets_req "$passwd"; then
+        echo "New password: $passwd"
+        break
+    fi
+    passwd=$(increment "$passwd")
+done
