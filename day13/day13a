@@ -1,0 +1,88 @@
+#!/bin/bash
+
+get_happiness () {
+    local arr=("$@")
+    local n="${#arr[@]}"
+    local happy=0
+    local i
+    local left
+    local right
+
+    for (( i = 0; i < n; ++i)); do
+        left=$(( i-1 ))
+        right=$(( i+1 ))
+
+        if (( i == 0 )); then
+            left=$(( n-1 ))
+        elif (( i == n-1 )); then
+            right=0
+        fi
+
+        local lkey="${namemap[${arr[$i]}]}/${namemap[${arr[$left]}]}"
+        local rkey="${namemap[${arr[$i]}]}/${namemap[${arr[$right]}]}"
+        # echo "L:  $lkey ${grid[$lkey]}, R: $rkey ${grid[$rkey]}" >&2
+        (( happy += grid[$lkey] + grid[$rkey] ))
+    done
+    echo $happy
+}
+
+generate () {
+    local N=$1
+    shift
+    local arr=("$@")
+    local c
+    local n
+    for (( n = 0; n < N; ++n )); do
+        c[$n]=0
+    done
+    local happy=$(get_happiness "${arr[@]}" 7)
+
+    for (( n = 1; n < N; )); do
+        if (( c[n] < n )); then
+            local idx
+            if (( n % 2 == 1 )); then
+                idx=${c[$n]}
+            else
+                idx=0
+            fi
+            local tmp="${arr[$idx]}"
+            arr[$idx]="${arr[$n]}"
+            arr[$n]="$tmp"
+            (( ++c[n] ))
+            n=1
+            happy=$(get_happiness "${arr[@]}" 7)
+            if (( happy > max_happy )); then
+                echo "New maximum happiness: $happy for ${arr[@]} 7" >&2
+                max_happy=$happy
+            fi
+        else
+            c[$n]=0
+            (( ++n ))
+        fi
+    done
+}
+
+declare -A grid
+declare -A names
+
+re='^([[:alpha:]]+) would ([[:alpha:]]+) ([[:digit:]]+) .* ([[:alpha:]]+)\.$'
+
+while read -r line; do
+    [[ "$line" =~ $re ]]
+    person="${BASH_REMATCH[1]}"
+    sign="${BASH_REMATCH[2]}"
+    amount="${BASH_REMATCH[3]}"
+    neighbour="${BASH_REMATCH[4]}"
+    if [[ "$sign" == "lose" ]]; then
+        (( amount = -amount ))
+    fi
+    grid["$person"/"$neighbour"]=$amount
+    names["$person"]=1
+done < input
+
+namemap=("${!names[@]}")
+
+sequence=($(seq 0 $(( ${#namemap[@]} - 2 )) ))
+
+generate $(( ${#sequence[@]} )) "${sequence[@]}"
+echo "The maximum happiness is $max_happy"
