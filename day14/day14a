@@ -1,0 +1,44 @@
+#!/bin/bash
+
+while read v t_fly t_rest; do
+    speed+=($v)
+    flytime+=($t_fly)
+    resttime+=($t_rest)
+done < <(cut --delimiter ' ' --fields=4,7,14 input)
+
+t=0
+t_max=2503
+n=${#speed[@]}
+
+for (( i = 0; i < n; ++i )); do
+    status[$i]='F'
+    timer[$i]=0
+    dist[$i]=0
+done
+
+while (( t < t_max )); do
+    for (( i = 0; i < n; ++i )); do
+        (( ++timer[$i] ))
+        if [[ ${status[$i]} == F ]]; then
+            (( dist[$i] += speed[$i] ))
+            if (( timer[$i] == flytime[$i] )); then
+                status[$i]='R'
+                timer[$i]=0
+            fi
+        else
+            if (( timer[$i] == resttime[$i] )); then
+                status[$i]='F'
+                timer[$i]=0
+            fi
+        fi
+    done
+    (( ++t ))
+done
+
+for (( i = 0; i < n; ++i )); do
+    if (( dist[$i] > max_dist )); then
+        max_dist=${dist[$i]}
+    fi
+done
+
+echo "Max distance traveled after $t_max s: $max_dist km"
