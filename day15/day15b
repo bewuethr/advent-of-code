@@ -1,0 +1,57 @@
+#!/bin/bash
+
+score () {
+    local ingr=("$@")
+    local cap
+    local dur
+    local fla
+    local tex
+    local cal
+    for i in {0..3}; do
+        (( cap += ingr[$i] * caps[$i] ))
+        (( dur += ingr[$i] * durs[$i] ))
+        (( fla += ingr[$i] * flas[$i] ))
+        (( tex += ingr[$i] * texs[$i] ))
+        (( cal += ingr[$i] * cals[$i] ))
+    done
+    if (( cal != 500 )); then
+	echo 0
+	return
+    fi
+    for i in cap dur fla tex; do
+	if (( ${!i} <= 0 )); then
+	    echo 0
+	    return
+	fi
+    done
+	
+    local score
+    (( score = cap * dur * fla * tex ))
+    echo "$score"
+}
+
+while read name cap dur fla tex cal; do
+    names+=(${name%:})
+    caps+=(${cap%,})
+    durs+=(${dur%,})
+    flas+=(${fla%,})
+    texs+=(${tex%,})
+    cals+=($cal)
+done < <(cut --fields=1,3,5,7,9,11 -d ' ' input)
+
+max_score=0
+
+for (( i = 0; i <= 100; ++i )); do
+    for (( j = i; j <= 100; ++j )); do
+        for (( k = j; k <= 100; ++k )); do
+            cookie_score=$(score $i $(( j-i )) $(( k-j )) $(( 100-k )) )
+            if (( cookie_score > max_score )); then
+                max_score=$cookie_score
+                echo "New best 500 cal cookie at $max_score points"
+            fi
+        done
+    done
+done
+
+echo "Best 500 cal cookie found: $max_score"
+
