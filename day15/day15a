@@ -12,14 +12,16 @@ score () {
         (( fla += ingr[$i] * flas[$i] ))
         (( tex += ingr[$i] * texs[$i] ))
     done
-    echo "$cap $dur $fla $tex" >&2
+    for i in cap dur fla tex; do
+	if (( ${!i} <= 0 )); then
+	    echo 0
+	    return
+	fi
+    done
+	
     local score
-    (( score = cap * dur * fla * text ))
-    if (( score > 0 )); then
-        echo "$score"
-    else
-        echo 0
-    fi
+    (( score = cap * dur * fla * tex ))
+    echo "$score"
 }
 
 while read name cap dur fla tex cal; do
@@ -30,10 +32,6 @@ while read name cap dur fla tex cal; do
     texs+=(${tex%,})
     cals+=($cal)
 done < <(cut --fields=1,3,5,7,9,11 -d ' ' input)
-
-# for i in {0..3}; do
-#     echo "${names[$i]}: cap: ${caps[$i]} dur: ${durs[$i]} fla: ${flas[$i]} tex: ${texs[$i]} cal: ${cals[$i]}"
-# done
 
 max_score=0
 
