@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# cats and trees: Sue has more than measured
+# pomeranians and golfish: Sue  has fewer than measured
+
+declare -A sue
+
+sue=([children]=3 [cats]=7 [samoyeds]=2 [pomeranians]=3 [akitas]=0
+     [vizslas]=0 [goldfish]=5 [trees]=3 [cars]=2 [perfumes]=1)
+
+while read _ num key0 val0 key1 val1 key2 val2; do
+    num=${num%:}
+    keys=(${key0%:} ${key1%:} ${key2%:})
+    vals=(${val0%,} ${val1%,} $val2)
+
+    matches=0
+    for i in {0..2}; do
+        case ${keys[$i]} in
+            cats | trees )
+                if (( sue[${keys[$i]}] < vals[$i] )); then (( ++matches )); fi
+                ;;
+            pomeranians | goldfish )
+                if (( sue[${keys[$i]}] > vals[$i] )); then (( ++matches )); fi
+                ;;
+            *)
+                if (( sue[${keys[$i]}] == vals[$i] )); then (( ++matches )); fi
+                ;;
+        esac
+
+        if (( matches == 3 )); then
+            echo "$num: ${keys[@]} => ${vals[@]}"
+            echo "The correct Sue is number $num."
+            break
+        fi
+    done
+done < input
