@@ -1,0 +1,21 @@
+#!/bin/bash
+
+declare -r total=150
+
+mapfile -t containers < <(sort -nr input)
+
+combo=0
+solutions=0
+
+for combo in $(seq 510 917504); do
+    idx=$(bc <<< "obase=2; $combo")
+    sum=0
+    for i in $(seq 1 ${#idx}); do
+        (( sum += (${idx: -i:1} * ${containers[@]: -i:1}) ))
+    done
+    if (( sum == total )); then
+        (( ++solutions ))
+        echo -e "\n$solutions\n${containers[@]}\n$idx ($combo)\n$sum"
+    fi
+done
+echo "Total solutions: $solutions"
