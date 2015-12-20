@@ -1,0 +1,78 @@
+#!/bin/bash
+
+count_neighbours () {
+    local x="$1"
+    local y="$2"
+    local lights_on=0
+    local xx
+    local yy
+    for xx in $(seq $((x-1)) $((x+1))); do
+        if (( xx < 0 || xx > 99 )); then continue; fi
+        for yy in $(seq $((y-1)) $((y+1))); do
+            if (( yy < 0 || yy > 99 )); then continue; fi
+            if (( xx == x && yy == y )); then continue; fi
+            if [[ ${lights[yy]:xx:1} == '#' ]]; then
+                (( ++lights_on ))
+            fi
+        done
+    done
+    echo $lights_on
+}
+
+mapfile -t lights < input
+
+echo "${lights[0]}"
+echo "${lights[1]}"
+echo "${lights[2]}"
+
+
+for step in {1..100}; do
+ 
+    ncount=()
+
+    # Create grid with burning neighbours count
+    for y in {0..99}; do
+        for x in {0..99}; do
+            ncount[y]+=$(count_neighbours $x $y)
+        done
+    done
+
+    # Update light grid
+    for y in {0..99}; do
+        new_row=()
+        for x in {0..99}; do
+            if [[ ${lights[y]:x:1} == '#' ]]; then
+                if (( ${ncount[y]:x:1} == 2 || ${ncount[y]:x:1} == 3 )); then
+                    new_row+='#'
+                else
+                    new_row+='.'
+                fi
+            else
+                if (( ${ncount[y]:x:1} == 3 )); then
+                    new_row+='#'
+                else
+                    new_row+='.'
+                fi
+            fi
+        done
+        lights[y]="$new_row"
+    done
+
+    echo -e "\nStep $step:"
+    echo "${lights[0]}"
+    echo "${lights[1]}"
+    echo "${lights[2]}"
+
+done
+
+# Count how many are burning
+burning=0
+for y in {0..99}; do
+    for x in {0..99}; do
+        if [[ ${lights[y]:x:1} == '#' ]]; then
+            (( ++burning ))
+        fi
+    done
+done
+
+echo "There are $burning lights burning after step $step."
