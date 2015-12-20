@@ -1,0 +1,28 @@
+#!/bin/bash
+
+while IFS= read -r line; do
+    if [[ -n $line ]]; then
+        if [[ $line == *=\>* ]]; then
+            replacements+=("$line")
+        else
+            start_mol="$line"
+        fi
+    fi
+done < input
+
+declare -A new_mols
+
+re='([[:alnum:]]+) => ([[:alnum:]]+)'
+for replacement in "${replacements[@]}"; do
+    [[ $replacement =~ $re ]]
+    from="${BASH_REMATCH[1]}"
+    to="${BASH_REMATCH[2]}"
+    num_reps=$(grep -o "$from" <<< "$start_mol" | wc -l)
+
+    for n in $(seq 1 $num_reps); do
+        new_mol=$(sed s/"$from"/"$to"/$n <<< "$start_mol")
+        new_mols["$new_mol"]=1
+    done
+done
+
+echo "There are ${#new_mols[@]} unique molecules reachable."
