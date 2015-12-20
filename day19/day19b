@@ -1,0 +1,32 @@
+#!/bin/bash
+
+while IFS= read -r line; do
+    if [[ -n $line ]]; then
+        if [[ $line == *=\>* ]]; then
+            replacements+=("$line")
+        else
+            mol="$line"
+        fi
+    fi
+done < input
+
+steps=0
+
+re='([[:alnum:]]+) => ([[:alnum:]]+)'
+
+while [[ $mol != e ]]; do
+    for replacement in "${replacements[@]}"; do
+        [[ $replacement =~ $re ]]
+        from="${BASH_REMATCH[2]}"
+        to="${BASH_REMATCH[1]}"
+
+        num_reps=$(grep -o "$from" <<< "$mol" | wc -l)
+        if (( num_reps > 0 )); then
+            mol=$(sed s/"$from"/"$to"/g <<< "$mol")
+            (( steps += num_reps ))
+            grep "$to" <<< $mol
+        fi
+    done
+done
+
+echo "We reached 'e' after $steps steps."
