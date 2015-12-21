@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Calculate prime numbers up to argument
+# Calculate prime numbers up to argument (Sieve of Eratosthenes)
+# Put result into global array "primes"
 get_primes () {
     local num="$1"
     local sqrt=$(bc <<< "sqrt($1)")
@@ -24,7 +25,8 @@ get_primes () {
     done
 }
 
-# Return associative array of prime factors and their power
+# For a given number, get the prime factor decomposition
+# Write prime factors into associative array of prime factors (keys) and their power (values)
 get_prime_factors () {
     local num="$1"
     local prime
@@ -43,7 +45,7 @@ get_prime_factors () {
     fi
 }
 
-# Calculate sum of divisors
+# Calculate sum of divisors via prime factors
 get_sigma () {
     local num="$1"
     declare -A prime_factors
@@ -56,24 +58,42 @@ get_sigma () {
     echo "$sigma"
 }
 
+# Script starts here
 min_pres=$(< input)
-(( min_pres /= 10 ))
-get_primes 2000
-step=100000
-start=100000
-lasthouse=$min_pres
+(( min_pres /= 10 ))    # Every elf leaves 10 presents
 
+get_primes 2000         # Pre-calculate primes up to 2000 (won't need any more)
+
+step=100000             # Big steps between houses at first
+start=100000            # Start at this house
+
+lasthouse=$min_pres     # Must be higher than the first house we find
+
+# Repeate this until the step is 1 and we find a house
 while (( step >= 1 )); do
     for (( house = start; sigma < min_pres; house += step )); do
+
+        # Get number of presents for this house
         sigma=$(get_sigma $house)
+
+        # If we previously found a house with a lower number, we're past it now
         if (( house > lasthouse )); then
             echo "House count higher than with bigger step, skipping..."
             break
         fi
     done
+
+    # Remember house number where we found enough presents
     lasthouse=$(( house - step ))
+
     printf "Stepsize: %7d, first house: %8d\n" $step $lasthouse
+
+    # Half the step for next round
     (( step /= 2 ))
+
+    # Start at with a number 3/4 of what we know to have enough presents
     (( start = house / 4 * 3))
+
+    # Reset this because the loop condition checks it
     sigma=0
 done
