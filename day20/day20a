@@ -1,0 +1,79 @@
+#!/bin/bash
+
+# Calculate prime numbers up to argument
+get_primes () {
+    local num="$1"
+    local sqrt=$(bc <<< "sqrt($1)")
+    local idx
+    local i
+    for i in $(seq 0 $num); do
+        idx[i]=1
+    done
+    for i in $(seq 2 $sqrt); do
+        if (( idx[i] )); then
+            for (( j = i**2; j <= num; j += i )); do
+                idx[$j]=0
+            done
+        fi
+    done
+
+    for (( i = 2; i < ${#idx[@]}; ++i )); do
+        if (( idx[i] )); then
+            primes+=($i)
+        fi
+    done
+}
+
+# Return associative array of prime factors and their power
+get_prime_factors () {
+    local num="$1"
+    local prime
+    for prime in "${primes[@]}"; do
+
+        if (( prime ** 2 > num )); then
+            break
+        fi
+        while (( num % prime == 0 )); do
+            (( ++prime_factors[$prime] ))
+            (( num /= prime ))
+        done
+    done
+    if (( num > 1 )); then
+        (( ++prime_factors[$num] ))
+    fi
+}
+
+# Calculate sum of divisors
+get_sigma () {
+    local num="$1"
+    declare -A prime_factors
+    get_prime_factors "$1"
+    local factor
+    local sigma=1
+    for factor in "${!prime_factors[@]}"; do
+        (( sigma *= (factor ** (prime_factors[$factor] + 1) - 1) / (factor - 1) ))
+    done
+    echo "$sigma"
+}
+
+min_pres=$(< input)
+(( min_pres /= 10 ))
+get_primes 2000
+step=100000
+start=100000
+lasthouse=$min_pres
+
+while (( step >= 1 )); do
+    for (( house = start; sigma < min_pres; house += step )); do
+        sigma=$(get_sigma $house)
+        if (( house > lasthouse )); then
+            echo "House count higher than with bigger step, skipping..."
+            break
+        fi
+    done
+    lasthouse=$(( house - step ))
+    printf "Stepsize: %7d, first house: %8d\n" $step $lasthouse
+    (( step /= 2 ))
+    (( start = house / 4 * 3))
+    sigma=0
+done
