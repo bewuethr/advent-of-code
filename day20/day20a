@@ -92,7 +92,7 @@ while (( step >= 1 )); do
     (( step /= 2 ))
 
     # Start at with a number 3/4 of what we know to have enough presents
-    (( start = house / 4 * 3))
+    (( start = house / 4 * 3 ))
 
     # Reset this because the loop condition checks it
     sigma=0
