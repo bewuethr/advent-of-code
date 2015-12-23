@@ -1,0 +1,58 @@
+#!/bin/bash
+
+loses_fight () {
+    local p_attack
+    (( p_attack = p_damage - b_armor > 1 ? p_damage - b_armor : 1 ))
+    local b_attack
+    (( b_attack = b_damage - p_armor > 1 ? b_damage - p_armor : 1 ))
+    local p_hitpoints=100
+    local b_hitpoints=$b_startpoints
+    while true; do
+        (( b_hitpoints -= p_attack ))
+        if (( b_hitpoints <= 0 )); then
+            return 1
+        fi
+        (( p_hitpoints -= b_attack ))
+        if (( p_hitpoints <= 0 )); then
+            return 0
+        fi
+    done
+}
+
+mapfile -t boss < input
+b_startpoints=${boss[0]##* }
+b_damage=${boss[1]##* }
+b_armor=${boss[2]##* }
+
+w_cost=(8 10 25 40 74)
+w_damage=(4 5 6 7 8)
+a_cost=(0 13 31 53 75 102)
+a_armor=(0 1 2 3 4 5)
+r_cost=(0 0 25 50 100 20 40 80)
+r_damage=(0 0 1 2 3 0 0 0)
+r_armor=(0 0 0 0 0 1 2 3)
+
+max_cost=0
+
+for weapon in {0..4}; do
+    for armor in {0..5}; do
+        for ring1 in {0..6}; do
+            for ring2 in $(seq $((ring1+1)) 7); do
+                (( cost = w_cost[weapon] + a_cost[armor] + r_cost[ring1] + r_cost[ring2] ))
+                (( p_damage = w_damage[weapon] + r_damage[ring1] + r_damage[ring2] ))
+                (( p_armor = a_armor[armor] + r_armor[ring1] + r_armor[ring2] ))
+                if (( cost < max_cost )); then
+                    continue
+                fi
+                if loses_fight; then
+                    if (( cost > max_cost )); then
+                        max_cost=$cost
+                        echo "New most expensive equipment to lose: $max_cost"
+                    fi
+                fi
+            done
+        done
+    done
+done
+
+echo "The most expensive losing equipment costs $max_cost."
