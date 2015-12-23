@@ -1,12 +1,12 @@
 #!/bin/bash
 
 wins_fight () {
-    local b_hitpoints=b_startpoints
+    local b_hitpoints=$b_startpoints
     local p_hitpoints=100
     local p_attack
     (( p_attack = damage - b_armor > 1 ? damage - b_armor : 1 ))
     local b_attack
-    (( b_attack = b_damage - armor > 1 ? b_damage - armor : 1 ))
+    (( b_attack = b_damage - p_armor > 1 ? b_damage - p_armor : 1 ))
     while true; do
         (( b_hitpoints -= p_attack ))
         if (( b_hitpoints <= 0 )); then
@@ -40,7 +40,7 @@ for weapon in {0..4}; do
             for ring2 in $(seq $((ring1+1)) 7); do
                 (( cost = w_cost[weapon] + a_cost[armor] + r_cost[ring1] + r_cost[ring2] ))
                 (( damage = w_damage[weapon] + r_damage[ring1] + r_damage[ring2] ))
-                (( armor = a_armor[armor] + r_armor[ring1] + r_armor[ring2] ))
+                (( p_armor = a_armor[armor] + r_armor[ring1] + r_armor[ring2] ))
                 if wins_fight; then
                     if (( cost < min_cost )); then
                         min_cost=$cost
