@@ -3,7 +3,6 @@
 use strict;
 use warnings;
 use 5.022;
-use POSIX;
 
 sub player_loses {
     my ($p_hp, $p_att, $p_arm, $b_hp, $b_att, $b_arm) = @_;
