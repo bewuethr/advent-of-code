@@ -1,0 +1,166 @@
+#!/bin/bash
+
+# Show current stats and apply effect
+display_status () {
+    echo "- Player has $player_hp hit points, $armor armor, $mana mana"
+    echo -e "- Boss has $boss_hp hit points"
+    local effect
+    for effect in "${!timer[@]}"; do
+        if (( timer[$effect] > 0 )); then
+            (( --timer[$effect] ))
+            case "$effect" in
+                shield)
+                    echo "Shield's timer is now ${timer[$effect]}."
+                    if (( timer[$effect] == 0 )); then
+                        echo "Shield wears off, decreasing armor by $shield_armor."
+                        armor=0
+                    fi
+                    ;;
+                poison)
+                    echo "Poison deals ${damage[poison]} damage; its timer is now ${timer[$effect]}."
+                    (( boss_hp -= damage[poison] ))
+                    if (( timer[$effect] == 0 )); then
+                        echo "Poison wears off."
+                    fi
+                    ;;
+                recharge)
+                    echo "Recharge provides $recharge_mana mana; its timer is now ${timer[$effect]}."
+                    (( mana += recharge_mana ))
+                    if (( timer[$effect] == 0 )); then
+                        echo "Recharge wears off."
+                    fi
+                    ;;
+            esac
+        fi
+    done
+    echo
+}
+
+# Choice of player activities and player turn
+display_menu () {
+    if (( mana < cost[missile] )); then
+        echo "Can't afford any spell, player loses."
+        exit 0
+    fi
+    local options=(
+        "Magic Missile (${cost[missile]} mana, ${damage[missile]} damage)"
+        "Drain (${cost[drain]} mana, ${damage[drain]} damage, heals $drain_heal HP)"
+        "Shield (${cost[shield]} mana, armor +$shield_armor for ${duration[shield]} turns)"
+        "Poison (${cost[poison]} mana, ${damage[poison]} damage for ${duration[poison]} turns)"
+        "Recharge (${cost[recharge]} mana, +$recharge_mana mana for ${duration[recharge]} turns)"
+    )
+    local action
+    select action in "${options[@]}"; do
+        echo
+        echo "============================================================="
+        case $action in
+            *Missile*)
+                echo "Player casts Magic Missile, dealing ${damage[missile]} damage."
+                (( mana -= cost[missile] ))
+                (( boss_hp -= damage[missile] ))
+                break
+                ;;
+            Drain*)
+                if (( mana < cost[drain] )); then
+                    echo "Can't afford Drain"
+                    continue
+                fi
+                echo "Player casts Drain, dealing ${damage[drain]} damage, and healing $drain_heal hit points."
+                (( mana -= cost[drain] ))
+                (( boss_hp -= damage[drain] ))
+                (( player_hp += drain_heal ))
+                break
+                ;;
+            Shield*)
+                if (( mana < cost[shield] )); then
+                    echo "Can't afford Shield."
+                    continue
+                fi
+                if (( timer[shield] > 0 )); then
+                    echo "Can only cast one Shield at a time."
+                    continue
+                fi
+                echo "Player casts Shield, increasing armor by $shield_armor."
+                (( mana -= cost[shield] ))
+                (( armor += shield_armor ))
+                (( timer[shield] = duration[shield] ))
+                break
+                ;;
+            Poison*)
+                if (( mana < cost[poison] )); then
+                    echo "Can't afford Poison."
+                    continue
+                fi
+                if (( timer[poison] > 0 )); then
+                    echo "Can only cast one Poison at a time."
+                    continue
+                fi
+                echo "Player casts Poison."
+                (( mana -= cost[poison] ))
+                (( timer[poison] = duration[poison] ))
+                break
+                ;;
+            Recharge*)
+                if (( mana < cost[recharge] )); then
+                    echo "Can't afford Recharge."
+                    continue
+                fi
+                if (( timer[recharge] > 0 )); then
+                    echo "Can only cast one Recharge at a time."
+                    continue
+                fi
+                echo "Player casts Recharge."
+                (( mana -= cost[recharge] ))
+                (( timer[recharge] = duration[recharge] ))
+                break
+                ;;
+        esac
+    done
+}
+
+# Boss turn
+boss_turn () {
+    echo -e "\n-- Boss turn --"
+    display_status
+    local turn_dmg=$(( boss_dmg > armor ? boss_dmg - armor : 1 ))
+    local dmg_string
+    if (( turn_dmg == boss_dmg )); then
+        dmg_string=$turn_dmg
+    else
+        dmg_string="$boss_dmg - $armor = $turn_dmg"
+    fi
+    echo -e "Boss attacks for $dmg_string damage!\n"
+    (( player_hp -= turn_dmg ))
+    if (( player_hp <= 0 )); then
+        echo "Player has no more hit points, loses."
+        exit
+    fi
+}
+
+# Read boss stats
+mapfile -t infile < input
+boss_hp="${infile[0]##* }"
+boss_dmg="${infile[1]#* }"
+
+# Player stats
+player_hp=50
+mana=500
+armor=0
+
+# Spells
+declare -Ar cost=([missile]=53 [drain]=73 [shield]=113 [poison]=173 [recharge]=220)
+declare -Ar damage=([missile]=4 [drain]=2 [poison]=3)
+declare -Ar duration=([shield]=6 [poison]=6 [recharge]=5)
+declare -r drain_heal=2
+declare -r shield_armor=7
+declare -r recharge_mana=101
+
+# Effect timers
+declare -A timer=([shield]=0 [poison]=0 [recharge]=0)
+
+while true; do
+    echo "-- Player turn --"
+    display_status
+    display_menu
+    boss_turn
+done
