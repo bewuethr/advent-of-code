@@ -1,4 +1,4 @@
-# --- Day 3: Perfectly Spherical Houses in a Vacuum ---
+# Day 3: Perfectly Spherical Houses in a Vacuum
 
 Santa is delivering presents to an infinite two-dimensional grid of houses.
 
@@ -14,7 +14,7 @@ For example:
 
 Your puzzle answer was `2592`.
 
-## --- Part Two ---
+## Part Two
 
 The next year, to speed up the process, Santa creates a robot version of himself, *Robo-Santa*, to deliver presents with him.
 
