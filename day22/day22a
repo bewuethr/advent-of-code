@@ -8,21 +8,14 @@ fight () {
     local armor_timer=0
     local poison_timer=0
     local recharge_timer=0
-    local p_marker=''
-    local s_marker=''
-    local r_marker=''
     local combo=''
     mana_spent=0
 
     # Init boss
     local boss_hp=$boss_init
 
-#     printf "%s   %-3s  %-2s  %-2s\n" Sp M P B >&2
-#     printf "     %3d %3d %3d\n" $mana $player_hp $boss_hp >&2
-
     while true; do
         if (( mana < cost[missile] )); then
-#             echo "Player ran out of mana" >&2
             return 1
         fi
         local spell=$(( $RANDOM % 5 ))
@@ -49,7 +42,6 @@ fight () {
                 armor=7
                 armor_timer=3
                 label=S 
-                s_marker=S
                 ;;
             3)
                 if (( mana < cost[poison] || poison_timer > 0 )); then continue; fi
@@ -57,7 +49,6 @@ fight () {
                 (( mana_spent += cost[poison] ))
                 poison_timer=6
                 label=P
-                p_marker=P
                 ;;
             4)
                 if (( mana < cost[recharge] || recharge_timer > 0 )); then continue; fi
@@ -65,18 +56,14 @@ fight () {
                 (( mana_spent += cost[recharge] ))
                 recharge_timer=5
                 label=R
-                r_marker=R
                 ;;
             *)
                 continue
                 ;;
         esac
         combo+=$label
-#         printf "%s -> %3d %3d %3d %s\n" $label $mana $player_hp $boss_hp "$s_marker$p_marker$r_marker" >&2
 
         if (( boss_hp <= 0 )); then
-#             echo "Boss is dead" >&2
-            # echo $mana
             echo "$combo"
             return 0
         fi
@@ -84,12 +71,9 @@ fight () {
         if (( poison_timer > 0 )); then
             (( --poison_timer ))
             (( boss_hp -= 3 ))
-            if (( poison_timer == 0 )); then p_marker=''; fi
         fi
+
         if (( boss_hp <= 0 )); then
-#             echo "Boss is dead" >&2
-            # echo "$combo" >&2
-            # echo $mana
             echo "$combo"
             return 0
         fi
@@ -98,39 +82,29 @@ fight () {
         (( player_hp -= boss_dmg - armor ))
         if (( armor_timer > 0 )); then
             (( --armor_timer ))
-            if (( armor_timer == 0 )); then
-                armor=0
-                s_marker=''
-            fi
+            if (( armor_timer == 0 )); then armor=0; fi
         fi
+
         if (( recharge_timer > 0 )); then
             (( --recharge_timer ))
             (( mana += 101 ))
-            if (( recharge_timer == 0 )); then r_marker=''; fi
         fi
 
-#         printf "     %3d %3d %3d %s\n" $mana $player_hp $boss_hp "$s_marker$p_marker$r_marker" >&2
-        if (( player_hp <= 0 )); then
-#             echo "Player is dead" >&2
-            return 1
-        fi
+        if (( player_hp <= 0 )); then return 1; fi
 
         if (( poison_timer > 0 )); then
             (( --poison_timer ))
             (( boss_hp -= 3 ))
-            if (( poison_timer == 0 )); then p_marker=''; fi
         fi
+
         if (( boss_hp <= 0 )); then
-#             echo "Boss is dead" >&2
-            # echo "$combo" >&2
-            # echo $mana >&2
             echo "$combo"
             return 0
         fi
+
         if (( recharge_timer > 0 )); then
             (( --recharge_timer ))
             (( mana += 101 ))
-            if (( recharge_timer == 0 )); then r_marker=''; fi
         fi
     done
 }
