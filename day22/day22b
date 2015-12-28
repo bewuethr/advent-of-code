@@ -1,0 +1,137 @@
+#!/bin/bash
+
+fight () {
+    # Init player
+    local player_hp=50
+    local mana=500
+    local armor=0
+    local armor_timer=0
+    local poison_timer=0
+    local recharge_timer=0
+    local combo=''
+    mana_spent=0
+
+    # Init boss
+    local boss_hp=$boss_init
+
+    while true; do
+        if (( mana < cost[missile] )); then
+            return 1
+        fi
+        local spell=$(( $RANDOM % 5 ))
+        local label
+        case $spell in
+            0)
+                (( mana -= cost[missile] ))
+                (( mana_spent += cost[missile] ))
+                (( boss_hp -= 4 ))
+                label=M 
+                ;;
+            1)
+                if (( mana < cost[drain] )); then continue; fi
+                (( mana -= cost[drain] ))
+                (( mana_spent += cost[drain] ))
+                (( boss_hp -= 2 ))
+                (( player_hp += 2 ))
+                label=D 
+                ;;
+            2)
+                if (( mana < cost[shield] || armor_timer > 0 )); then continue; fi
+                (( mana -= cost[shield] ))
+                (( mana_spent += cost[shield] ))
+                armor=7
+                armor_timer=3
+                label=S 
+                ;;
+            3)
+                if (( mana < cost[poison] || poison_timer > 0 )); then continue; fi
+                (( mana -= cost[poison] ))
+                (( mana_spent += cost[poison] ))
+                poison_timer=6
+                label=P
+                ;;
+            4)
+                if (( mana < cost[recharge] || recharge_timer > 0 )); then continue; fi
+                (( mana -= cost[recharge] ))
+                (( mana_spent += cost[recharge] ))
+                recharge_timer=5
+                label=R
+                ;;
+            *)
+                continue
+                ;;
+        esac
+        combo+=$label
+
+        if (( boss_hp <= 0 )); then
+            echo "$combo"
+            return 0
+        fi
+
+        if (( poison_timer > 0 )); then
+            (( --poison_timer ))
+            (( boss_hp -= 3 ))
+        fi
+
+        if (( boss_hp <= 0 )); then
+            echo "$combo"
+            return 0
+        fi
+
+        # Boss fight
+        (( player_hp -= boss_dmg - armor ))
+        if (( armor_timer > 0 )); then
+            (( --armor_timer ))
+            if (( armor_timer == 0 )); then armor=0; fi
+        fi
+
+        if (( recharge_timer > 0 )); then
+            (( --recharge_timer ))
+            (( mana += 101 ))
+        fi
+
+        if (( player_hp <= 0 )); then return 1; fi
+
+        if (( poison_timer > 0 )); then
+            (( --poison_timer ))
+            (( boss_hp -= 3 ))
+        fi
+
+        if (( boss_hp <= 0 )); then
+            echo "$combo"
+            return 0
+        fi
+
+        if (( recharge_timer > 0 )); then
+            (( --recharge_timer ))
+            (( mana += 101 ))
+        fi
+
+        # Part 2
+        (( --player_hp ))
+        if (( player_hp <= 0 )); then
+            # echo "Player is dead" >&2
+            return 1
+        fi
+
+    done
+}
+
+# Read boss stats
+mapfile -t infile < input
+boss_init="${infile[0]##* }"
+boss_dmg="${infile[1]#* }"
+
+# Spells
+declare -Ar cost=([missile]=53 [drain]=73 [shield]=113 [poison]=173 [recharge]=229)
+
+min_spent=100000
+
+while true; do
+    if fight; then
+        if (( mana_spent < min_spent )); then
+            min_spent=$mana_spent
+            echo "New lowest winning mana spending: $min_spent"
+        fi
+    fi
+done
