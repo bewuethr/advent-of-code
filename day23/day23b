@@ -61,7 +61,7 @@ while (( idx >= 0 && idx < ${#instr[@]} )); do
             exit 1
             ;;
     esac
-    printf "%10s %9d %9d\n" "$cur_instr" ${regs[a]} ${regs[b]} >&2
+    printf "%-10s %9d %9d\n" "$cur_instr" ${regs[a]} ${regs[b]} >&2
 done
 
 echo "Register b contains now ${regs[b]}".
