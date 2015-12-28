@@ -1,0 +1,67 @@
+#!/bin/bash
+
+mapfile -t instr < input
+
+declare -A regs=([a]=0 [b]=0)
+idx=0
+
+re='[[:alpha:]]{3} ([[:alpha:]]), (\+|-)([[:digit:]]+)'
+
+while (( idx >= 0 && idx < ${#instr[@]} )); do
+    cur_instr="${instr[$idx]}"
+    case "$cur_instr" in
+        hlf*)
+            var=${cur_instr#* }
+            (( regs[$var] /= 2 ))
+            (( ++idx ))
+            ;;
+        tpl*)
+            var=${cur_instr#* }
+            (( regs[$var] *= 3 ))
+            (( ++idx ))
+            ;;
+        inc*)
+            var=${cur_instr#* }
+            (( ++regs[$var] ))
+            (( ++idx ))
+            ;;
+        jmp*)
+            val=${cur_instr#* }
+            sign=${val:0:1}
+            dist=${val:1}
+            if [[ $sign == '-' ]]; then (( dist *= -1 )); fi
+            (( idx += dist ))
+            ;;
+        jie*)
+            [[ $cur_instr =~ $re ]]
+            reg="${BASH_REMATCH[1]}"
+            if (( regs[$reg] % 2 != 0 )); then
+                (( ++idx ))
+            else
+                sign="${BASH_REMATCH[2]}"
+                dist="${BASH_REMATCH[3]}"
+                if [[ $sign == '-' ]]; then (( dist *= -1 )); fi
+                (( idx += dist ))
+            fi
+            ;;
+        jio*)
+            [[ $cur_instr =~ $re ]]
+            reg="${BASH_REMATCH[1]}"
+            if (( regs[$reg] != 1 )); then
+                (( ++idx ))
+            else
+                sign="${BASH_REMATCH[2]}"
+                dist="${BASH_REMATCH[3]}"
+                if [[ $sign == '-' ]]; then (( dist *= -1 )); fi
+                (( idx += dist ))
+            fi
+            ;;
+        *)
+            echo "Illegal instruction: $cur_instr"
+            exit 1
+            ;;
+    esac
+    printf "%10s %9d %9d\n" "$cur_instr" ${regs[a]} ${regs[b]} >&2
+done
+
+echo "Register b contains now ${regs[b]}".
