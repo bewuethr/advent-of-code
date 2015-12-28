@@ -1,4 +1,4 @@
-# Day 4: The Ideal Stocking Stuffe
+# Day 4: The Ideal Stocking Stuffer
 
 Santa needs help [mining](https://en.wikipedia.org/wiki/Bitcoin#Mining) some AdventCoins (very similar to [bitcoins](https://en.wikipedia.org/wiki/Bitcoin)) to use as gifts for all the economically forward-thinking little girls and boys.
 
