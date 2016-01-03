@@ -1,0 +1,73 @@
+#!/bin/bash
+
+print_arr () {
+    local idx=$1
+    shift
+    local pcount=$1
+    if (( pcount > min_count )); then
+        return
+    elif (( pcount < min_count )); then
+        min_count=$pcount
+        min_ent=-1
+    fi
+    shift
+    local arr=($@)
+    local i
+    local sum=0
+    local quant_ent=1
+    for (( i = 0; i <= idx; ++i )); do
+        if [[ ${arr[i]} == 1 ]]; then
+            echo -n "${packages[i]} "
+            (( sum += packages[i] ))
+            (( quant_ent *= packages[i] ))
+        fi
+    done
+    echo "=> $sum over $pcount" 
+    if (( min_ent == -1 || quant_ent < min_ent )); then
+        min_ent=$quant_ent
+        echo "New minimal entanglement: $quant_ent"
+    fi
+}
+
+subset () {
+    local idx=$1
+    shift
+    local weight=$1
+    shift
+    local pcount=$1
+    shift
+    local arr=($@)
+    if (( pcount == min_count || idx == ${#arr[@]} )); then
+        return
+    fi
+    if (( weight + packages[idx] == target )); then
+        arr[idx]=1
+        (( ++pcount ))
+        print_arr $idx $pcount ${arr[@]}
+        return
+    else 
+        subset $((idx+1)) $weight $pcount ${arr[@]}
+    fi
+    if (( weight + packages[idx] < target )); then
+        arr[idx]=1
+        (( weight += packages[idx] ))
+        (( ++pcount ))
+        subset $((idx+1)) $weight $pcount ${arr[@]}
+    fi
+}
+
+mapfile -t packages < input
+target=0
+for weight in ${packages[@]}; do
+    (( target += weight ))
+    indices+=(0)
+done
+(( target /= 4 ))
+
+min_count=${#packages[@]}
+
+echo "$target ${indices[@]}"
+
+subset 0 0 0 ${indices[@]}
+
+echo "Minimum entanglement found: $min_ent"
