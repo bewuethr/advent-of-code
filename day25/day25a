@@ -1,0 +1,25 @@
+#!/bin/bash
+
+read line < input
+re='row ([[:digit:]]+), column ([[:digit:]]+)'
+[[ $line =~ $re ]]
+goal_row=${BASH_REMATCH[1]}
+goal_column=${BASH_REMATCH[2]}
+
+row=1
+column=1
+val=20151125
+
+while true; do
+    (( val = val * 252533 % 33554393 ))
+    if (( row == 1 )); then
+        (( row = column + 1 ))
+        column=1
+    else
+        (( --row ))
+        (( ++column ))
+    fi
+    if (( row == goal_row && column == goal_column )); then break; fi
+done
+
+echo "$row/$column: $val"
