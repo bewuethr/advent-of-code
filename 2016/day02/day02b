@@ -5,7 +5,7 @@ function abs(x) { return x > 0 ? x : -x }
 function dist(x, y) { return abs(x) + abs(y) }
 
 BEGIN {
-    x = 0
+    x = -2
     y = 0
 
     # Mapping from coordinates to key labels
