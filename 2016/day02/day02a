@@ -7,7 +7,7 @@ BEGIN {
 
 {
     split($0, dirs, "")
-    for (i =1; i <= length(dirs); ++i) {
+    for (i = 1; i <= length(dirs); ++i) {
         switch (dirs[i]) {
         case "U":
             y = y > 1 ? y - 1 : y
@@ -30,4 +30,3 @@ BEGIN {
 }
 
 END { print code }
-
