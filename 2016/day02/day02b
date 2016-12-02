@@ -1,0 +1,50 @@
+#!/usr/bin/awk -f
+
+function abs(x) { return x > 0 ? x : -x }
+
+function dist(x, y) { return abs(x) + abs(y) }
+
+BEGIN {
+    x = 0
+    y = 0
+
+    # Mapping from coordinates to key labels
+    label = 1
+    for (yy = 2; yy >= -2; --yy) {
+        for (xx = -2; xx <= 2; ++xx) {
+            if (dist(xx, yy) < 3)
+                labels[xx, yy] = sprintf("%X", label++)
+        }
+    }
+}
+
+{
+    split($0, dirs, "")
+    for (i =1; i <= length(dirs); ++i) {
+        switch (dirs[i]) {
+        case "U":
+            if (dist(x, y+1) < 3)
+                ++y
+            break
+        case "D":
+            if (dist(x, y-1) < 3)
+                --y
+            break
+        case "L":
+            if (dist(x-1, y) < 3)
+                --x
+            break
+        case "R":
+            if (dist(x+1, y) < 3)
+                ++x
+            break
+        default:
+            print "Illegal direction"
+            exit
+        }
+    }
+    code = code labels[x, y]
+}
+
+END { print code }
+
