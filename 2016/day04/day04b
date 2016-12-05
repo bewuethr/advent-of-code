@@ -1,0 +1,93 @@
+#!/usr/bin/awk -f
+
+# Sort keys of subarray alphabetically
+function sort_subarray(arr, first, last,    temparr, i) {
+    # Copy keys to temp array (as values)
+    for (i = first; i <= last; ++i)
+        temparr[i] = arr[i][1]
+
+    # Sort  temp array by values
+    asort(temparr)
+
+    # Write back to array
+    for (i = 1; i <= length(temparr); ++i)
+        arr[i+first-1][1] = temparr[i]
+}
+
+# Sort array by value (descending); for equal values, sort by key (ascending)
+function sort_array(arr,     temparr, i, j, prev, first, last) {
+    # temparr is sorted by descending value of arr
+    j = 1
+    for (i in arr) {
+        temparr[j][1] = i
+        temparr[j][2] = arr[i]
+        ++j
+    }
+
+    # Loop over temparr and sort regions with equal values by key
+    prev = temparr[1][2]
+    first = 1
+    last = 1
+    for (i = 2; i <= length(temparr); ++i) {
+        if (temparr[i][2] != prev || i == length(temparr)) {
+            if (i == length(temparr))
+                last = i
+            if (last - first > 0)
+                sort_subarray(temparr, first, last)
+            first = i
+            last = i
+        }
+        else
+            ++last
+        prev = temparr[i][2]
+    }
+
+    # Write temparr back to arr
+    delete arr
+    for (i = 1; i <= length(temparr); ++i)
+        arr[i] = temparr[i][1]
+}
+
+# Rotate str by diff forward in the alphabet
+function rot_right(str, diff,    plain, cipher, i, decrypted) {
+    plain = "abcdefghijklmnopqrstuvwxyz"
+    cipher = substr(plain, diff+1) substr(plain, 1, diff)
+    for (i = 1; i <= length(str); ++i)
+        if (substr(str, i, 1) ~ /[a-z]/)
+            decrypted = decrypted substr(cipher, index(plain, substr(str, i, 1)), 1)
+        else
+            decrypted = decrypted " "
+    return decrypted
+}
+
+BEGIN {
+    FS = "-"
+    PROCINFO["sorted_in"] = "@val_num_desc"
+}
+
+{
+    delete freq
+    for (i = 1; i <= NF-1; ++i) {
+        split($i, arr, "")
+        for (j in arr)
+            ++freq[arr[j]]
+    }
+
+    sort_array(freq)
+    chksum = ""
+    for (i = 1; i <= 5; ++i)
+        chksum = chksum freq[i]
+
+    given_chksum = substr($NF, index($NF, "[") + 1, 5)
+    if (chksum == given_chksum) {
+        encrypted = $1
+        for (i = 2; i <= NF - 1; ++i)
+            encrypted = encrypted " " $i
+        decrypted = rot_right(encrypted, $NF % 26)
+        
+        if (decrypted ~ /pole/) {
+            printf("%s is in sector ID %d\n", decrypted, $NF)
+            quit
+        }
+    }
+}
