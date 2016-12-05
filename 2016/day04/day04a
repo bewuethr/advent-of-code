@@ -14,8 +14,6 @@ function sort_subarray(arr, first, last,    temparr, i) {
         arr[i+first-1][1] = temparr[i]
 }
 
-    
-
 # Sort array by value (descending); for equal values, sort by key (ascending)
 function sort_array(arr,     temparr, i, j, prev, first, last) {
     # temparr is sorted by descending value of arr
