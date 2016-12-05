@@ -1,0 +1,27 @@
+#!/bin/bash
+
+re='([[:digit:]]+)\[(.*)\]'
+
+while read -r line; do
+    [[ $line =~ $re ]]
+    id=${BASH_REMATCH[1]}
+    given_chksum=${BASH_REMATCH[2]}
+    room_name=${line%-*}
+
+    actual_chksum=$(
+        tr -d '-' <<< "$room_name" | fold -w 1 |
+        sort | uniq -c | sed 's/^ *//' | sort -t ' ' -k 1,1nr -k 2,2 |
+        head -n 5 | tr -dc 'a-z' | paste -s -d ''
+    )
+
+    if [[ $given_chksum == $actual_chksum ]]; then
+        rot=$(( id % 26 ))
+        for (( i = 0; i < rot; ++i )); do
+            room_name=$(tr a-z b-za <<< "$room_name")
+        done
+        if [[ $room_name == *pole* ]]; then
+            printf '%s has ID %d\n' "${room_name//-/ }" "$id"
+            break
+        fi
+     fi
+done < "$1"
