@@ -1,0 +1,21 @@
+#!/usr/bin/awk -f
+
+{
+    n = split($0, arr, "")
+    for (i = 1; i <= n; ++i)
+        ++freq[i][arr[i]]
+}
+
+END {
+    for (i = 1; i <= n; ++i) {
+        min = 573
+        for (j in freq[i]) {
+            if (freq[i][j] < min) {
+                min = freq[i][j]
+                letter = j
+            }
+        }
+        msg = msg letter
+    }
+    print msg
+}
