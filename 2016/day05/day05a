@@ -1,0 +1,23 @@
+#!/usr/bin/awk -f
+
+BEGIN { passwd_len = 8 }
+
+{
+    id = $0
+    idx = 0
+
+    while (1) {
+        command = "printf " id idx " | md5sum"
+        command | getline hash
+        close(command)
+
+        # hash also contains a space and a hyphen, but that doesn't matter
+        if (hash ~ /^0{5}/) {
+            passwd = passwd substr(hash, 6, 1)
+            print passwd
+            if (length(passwd) == passwd_len)
+                break
+        }
+        ++idx
+    }
+}
