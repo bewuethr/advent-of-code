@@ -1,0 +1,40 @@
+#!/usr/bin/awk -f
+
+function find_abas(abas, str,    i) {
+    for (i = 1; i <= length(str) - 2; ++i) {
+        if ( \
+            substr(str, i, 1) == substr(str, i+2, 1) && \
+            substr(str, i, 1) != substr(str, i+1, 1) \
+        ) {
+            ++abas[substr(str, i, 3)]
+        }
+    }
+    return 0
+}
+
+BEGIN { FS = "[][]" }
+
+{
+    delete abas
+    delete babs
+
+    for (i = 1; i <= NF; i += 2)
+        find_abas(abas, $i)
+        
+    for (i = 2; i <= NF - 1; i += 2)
+        find_abas(babs, $i)
+
+    for (i in abas) {
+        for (j in babs) {
+            if ( \
+                 substr(i, 1, 1) == substr(j, 2, 1) && \
+                 substr(i, 2, 1) == substr(j, 1, 1) \
+             ) {
+                 ++ssl
+                 next
+             }
+         }
+     }
+}
+
+END { print ssl }
