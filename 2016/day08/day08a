@@ -1,0 +1,50 @@
+#!/usr/bin/awk -f
+
+BEGIN {
+    xmax = 50
+    ymax = 6
+    for (x = 0; x < xmax; ++x)
+        for (y = 0; y < ymax; ++y)
+            pxmatr[x][y] = "."
+}
+
+/rect/ {
+    split($2, arr, "x")
+    for (x = 0; x < arr[1]; ++x)
+        for (y = 0; y < arr[2]; ++y)
+            pxmatr[x][y] = "#"
+}
+
+/rotate row/ {
+    split($3, arr, "=")
+    row = arr[2]
+    dist = $NF
+    for (i = 0; i < dist; ++i) {
+        tmp = pxmatr[xmax-1][row]
+        for (x = xmax-1; x > 0; --x) {
+            pxmatr[x][row] = pxmatr[x-1][row]
+        }
+        pxmatr[0][row] = tmp
+    }
+}
+
+/rotate column/ {
+    split($3, arr, "=")
+    col = arr[2]
+    dist = $NF
+    for (i = 0; i < dist; ++i) {
+        tmp = pxmatr[col][ymax-1]
+        for (y = ymax-1; y > 0; --y) {
+            pxmatr[col][y] = pxmatr[col][y-1]
+        }
+        pxmatr[col][0] = tmp
+    }
+}
+
+END {
+    for (x = 0; x < xmax; ++x)
+        for (y = 0; y < ymax; ++y)
+            if (pxmatr[x][y] == "#")
+            ++lit
+    print lit
+}
