@@ -1,0 +1,21 @@
+#!/usr/bin/awk -f
+
+{
+    compr = $0
+    gsub(/[[:blank:]]*/, "", compr)
+
+    while (match(compr, /\(([0-9]+)x([0-9]+)\)/, arr)) {
+
+        decompr = decompr substr(compr, 1, RSTART - 1)
+
+        appstring = substr(compr, RSTART + RLENGTH, arr[1])
+
+        for (i = 1; i <= arr[2]; ++i)
+            decompr = decompr appstring
+
+        compr = substr(compr, RSTART + RLENGTH + arr[1])
+    }
+
+    decompr = decompr compr
+    print length(decompr)
+}
