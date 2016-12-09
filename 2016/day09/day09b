@@ -1,0 +1,19 @@
+#!/usr/bin/awk -f
+
+function get_deco_len(str,    arr, rs, rl, len) {
+    if (match(str, /\(([0-9]+)x([0-9]+)\)/, arr)) {
+        rs = RSTART
+        rl = RLENGTH
+        len = rs - 1 \
+            + arr[2] * get_deco_len(substr(str, rs + rl, arr[1])) \
+            + get_deco_len(substr(str, rs + rl + arr[1]))
+        return len
+    }
+    else {
+        return length(str)
+    }
+}
+
+{
+    print get_deco_len($0)
+}
