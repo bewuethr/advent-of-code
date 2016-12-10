@@ -1,0 +1,44 @@
+#!/usr/bin/awk -f
+
+/goes to bot/ {
+    ++bot[$NF][$2]
+    next
+}
+
+{ 
+    gives[$2]["lowtype"]    = $6
+    gives[$2]["lowtarget"]  = $7
+    gives[$2]["hightype"]   = $(NF-1)
+    gives[$2]["hightarget"] = $NF
+}
+
+END {
+    while (1) {
+        for (i in bot) {
+            if (length(bot[i]) == 2) {
+                asorti(bot[i], chips, "@ind_num_asc")
+
+                lowchip   = chips[1]
+                lowtype   = gives[i]["lowtype"]
+                lowtarget = gives[i]["lowtarget"]
+                if (lowtype == "bot")
+                    ++bot[lowtarget][lowchip]
+                else
+                    output[lowtarget] = lowchip
+
+                highchip   = chips[2]
+                hightype   = gives[i]["hightype"]
+                hightarget = gives[i]["hightarget"]
+                if (hightype == "bot")
+                    ++bot[hightarget][highchip]
+                else
+                    output[hightarget] = highchip
+
+                if (lowchip == 17 && highchip == 61) {
+                    print i
+                    exit
+                }
+            }
+        }
+    }
+}
