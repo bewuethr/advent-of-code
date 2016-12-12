@@ -10,10 +10,7 @@ END {
         split(instr[i], arr)
 
         if (instr[i] ~ /cpy/) {
-            if (arr[2] ~ /[abcd]/)
-                regs[arr[3]] = regs[arr[2]]
-            else
-                regs[arr[3]] = arr[2]
+            regs[arr[3]] = arr[2] ~ /[abcd]/ ? regs[arr[2]] : arr[2]
             ++i
         }
 
