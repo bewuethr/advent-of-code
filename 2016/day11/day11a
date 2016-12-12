@@ -38,6 +38,7 @@ function pretty_print(state,    i, floor, obj) {
 
 # Copy state
 function copy_state(from, to) {
+    delete to
     destringify(stringify(from), to)
 }
 
@@ -85,6 +86,39 @@ function is_legal(state,    elevator, i, obj, is_first, has_generators,
     return 1
 }
 
+# Get array of stringified legal states that can be reached from the current
+# state and haven't been seen yet
+function get_next_states(state, next_states,    elev_dirs, dir, i, obj, candidate) {
+    # Possible directions for elevator
+    elev_dirs[1] = 1
+    elev_dirs[2] = -1
+    elevator = state["elevator"]
+
+    for (dir in elev_dirs) {
+        if (elevator == 1 && elev_dirs[dir] == -1 || \
+            elevator == 4 && elev_dirs[dir] == 1)
+        {
+            continue
+        }
+        # Try moving one object
+        for (obj in state[elevator]) {
+            copy_state(state, candidate)
+            delete candidate[elevator][obj]
+            candidate[elevator + elev_dirs[dir]][obj] = 1
+            candidate["elevator"] += elev_dirs[dir]
+            if (is_legal(candidate)) {
+                print "Looks like legal candidate:"
+                pretty_print(candidate)
+                cand_str = stringify(candidate)
+                if (! seen[cand_str])
+                    next_states[cand_str] = 1
+            }
+        }
+
+        # Try moving two objects
+    }
+}
+
 BEGIN { PROCINFO["sorted_in"] = "@ind_str_asc" }
 
 /nothing relevant/ { next }
@@ -105,12 +139,7 @@ END {
     state["elevator"] = 1
     goal = "1234GcoGcuGplGprGruMcoMcuMplMprMru E4"
 
-    copy_state(state, state_copy)
-    pretty_print(state_copy)
+    print "Initial state:"
     pretty_print(state)
-    print stringify(state)
-    if (is_legal(state))
-        print "is legal"
-    else
-        print "is illegal"
+    get_next_states(state, next_states)
 }
