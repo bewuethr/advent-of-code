@@ -1,0 +1,41 @@
+#!/usr/bin/awk -f
+
+function is_wall(x, y,    num, count) {
+    num = x^2 + 3*x + 2*x*y + y + y^2 + favnum
+    count = 0
+    for (; num != 0; num = rshift(num, 1))
+        count += and(num, 1)
+    return count % 2
+}
+
+function flood(x, y, len) {
+    if (x < 0 || y < 0 || is_wall(x, y) || dist[x, y])
+        return
+    dist[x, y] = len
+}
+
+{ favnum = $0 }
+
+END {
+    len = 0
+    dist[1, 1] = len
+    while (1) {
+        for (coords in dist) {
+            if (dist[coords] == len) {
+                split(coords, coord, SUBSEP)
+                x = coord[1]
+                y = coord[2]
+                flood(x+1, y, len+1)
+                flood(x-1, y, len+1)
+                flood(x, y+1, len+1)
+                flood(x, y-1, len+1)
+            }
+        }
+        ++len
+        if (len == 50)
+            break
+    }
+    for (coords in dist)
+        ++count
+    print count
+}
