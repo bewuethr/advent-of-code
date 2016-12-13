@@ -14,6 +14,7 @@ function stringify(state,    i, st_string, obj) {
 
 # Create state from string
 function destringify(string, state,    arr, floors, i, j) {
+    delete state
     split(string, arr)
     state["elevator"] = substr(arr[2], 2)
     match(arr[1], /1(.*)2(.*)3(.*)4(.*)/, floors)
@@ -86,9 +87,8 @@ function is_legal(state,    elevator, i, obj, is_first, has_generators,
     return 1
 }
 
-# Get array of stringified legal states that can be reached from the current
-# state and haven't been seen yet
-function get_next_states(state, next_states,    elev_dirs, dir, i, obj, candidate) {
+# Get array of stringified legal states that can be reached from the current state
+function get_next_states(state, next_states, move,    elev_dirs, dir, i, obj, candidate) {
     # Possible directions for elevator
     elev_dirs[1] = 1
     elev_dirs[2] = -1
@@ -107,15 +107,34 @@ function get_next_states(state, next_states,    elev_dirs, dir, i, obj, candidat
             candidate[elevator + elev_dirs[dir]][obj] = 1
             candidate["elevator"] += elev_dirs[dir]
             if (is_legal(candidate)) {
-                print "Looks like legal candidate:"
-                pretty_print(candidate)
                 cand_str = stringify(candidate)
-                if (! seen[cand_str])
+                if (! moves[cand_str]) {
                     next_states[cand_str] = 1
+                    moves[cand_str] = move
+                }
             }
         }
 
         # Try moving two objects
+        for (obj1 in state[elevator]) {
+            for (obj2 in state[elevator]) {
+                if (obj1 < obj2) {
+                    copy_state(state, candidate)
+                    delete candidate[elevator][obj1]
+                    delete candidate[elevator][obj2]
+                    candidate[elevator + elev_dirs[dir]][obj1] = 1
+                    candidate[elevator + elev_dirs[dir]][obj2] = 1
+                    candidate["elevator"] += elev_dirs[dir]
+                    if (is_legal(candidate)) {
+                        cand_str = stringify(candidate)
+                        if (! moves[cand_str]) {
+                            next_states[cand_str] = 1
+                            moves[cand_str] = move
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -138,8 +157,21 @@ BEGIN { PROCINFO["sorted_in"] = "@ind_str_asc" }
 END {
     state["elevator"] = 1
     goal = "1234GcoGcuGplGprGruMcoMcuMplMprMru E4"
+    move = 0
+    moves[stringify(state)] = move
 
-    print "Initial state:"
-    pretty_print(state)
-    get_next_states(state, next_states)
+    get_next_states(state, next_states, move+1)
+    while (1) {
+        ++move
+        print "Looking at move " move
+        for (i in next_states) {
+            if (i == goal) {
+                print moves[i] " moves"
+                exit
+            }
+            delete next_states[i]
+            destringify(i, next_state)
+            get_next_states(next_state, next_states, move+1)
+        }
+    }
 }
