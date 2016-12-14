@@ -1,0 +1,68 @@
+#!/usr/bin/awk -f
+
+function contains_triple(str,    i) {
+    for (i = 1; i <= 30; ++i) {
+        if (substr(str, i, 1) == substr(str, i+1, 1) && \
+            substr(str, i, 1) == substr(str, i+2, 1))
+        {
+            return substr(str, i, 3)
+        }
+    }
+    return 0
+}
+
+function contains_quintuple(str,    i) {
+    for (i = 1; i <= 28; ++i) {
+        if (substr(str, i, 1) == substr(str, i+1, 1) && \
+            substr(str, i, 1) == substr(str, i+2, 1) && \
+            substr(str, i, 1) == substr(str, i+3, 1) && \
+            substr(str, i, 1) == substr(str, i+4, 1))
+        {
+            return substr(str, i, 5)
+        }
+    }
+    return 0
+}
+
+BEGIN { PROCINFO["sorted_in"] = "@ind_num_asc" }
+
+{ salt = $0 }
+
+END {
+    idx = 0
+    while (1) {
+        command = "printf " salt idx " | md5sum"
+        command | getline hash
+        close(command)
+        
+        for (i = 1; i <= 2016; ++i) {
+            command = "printf " substr(hash, 1, 32) " | md5sum"
+            command | getline hash
+            close(command)
+        }
+
+        triple = contains_triple(hash)
+        if (triple) {
+            printf "Found %s at %d\n", triple, idx
+            triples[idx] = triple
+        }
+
+        quintuple = contains_quintuple(hash)
+        if (quintuple) {
+            printf "Found %s at %d\n", quintuple, idx
+            for (tri_idx in triples) {
+                # print "Checking " triples[tri_idx]
+                if (quintuple ~ triples[tri_idx] && (idx - tri_idx <= 1000) && idx != tri_idx) {
+                    ++ctr
+                    printf "%s at %d is key number %s\n", triples[tri_idx], tri_idx, ctr
+                    delete triples[tri_idx]
+                    if (ctr == 64) {
+                        printf "Triple index %d was the 64th key\n", tri_idx
+                        exit
+                    }
+                }
+            }
+        }
+        ++idx
+    }
+}
