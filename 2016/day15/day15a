@@ -1,0 +1,35 @@
+#!/usr/bin/awk -f
+
+function advance(pos, size,    i) {
+    for (i in pos) {
+        ++pos[i]
+        if (pos[i] == size[i])
+            pos[i] = 0
+    }
+}
+
+function aligned(pos, size,    i) {
+    for (i in pos) {
+        if ((pos[i] + i) % size[i] != 0)
+            return 0
+    }
+    return 1
+}
+
+{
+    size[NR] = $4
+    sub(/\./, "", $NF)
+    pos[NR] = $NF
+}
+
+END {
+    time = 0
+    while (1) {
+        if (aligned(pos, size)) {
+            print "Push button at time " time
+            exit
+        }
+        advance(pos, size)
+        ++time
+    }
+}
