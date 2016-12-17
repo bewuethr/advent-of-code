@@ -1,0 +1,61 @@
+#!/usr/bin/awk -f
+
+# Create state with coordinates from string containing path
+function str_to_state(state_str, state,    i, ctr) {
+    delete state
+    state["path"] = state_str
+    for (i = 1; i <= length(state_str); ++i)
+        ++ctr[substr(state_str, i, 1)]
+    state["x"] = 1 + ctr["R"] - ctr["L"]
+    state["y"] = 1 + ctr["D"] - ctr["U"]
+}
+
+# Write list of possible next state strings into next_states
+function get_next_states(state_str, next_states,    cur_state, command, hash, dirs, i) {
+    str_to_state(state_str, cur_state)
+
+    # Get hash for path so far
+    command = "printf " code state_str " | md5sum"
+    command | getline hash
+    close(command)
+
+    # Try candidate directions
+    dirs[1] = "U"
+    dirs[2] = "D"
+    dirs[3] = "L"
+    dirs[4] = "R"
+    for (i in dirs) {
+        if (substr(hash, i, 1) ~ /[b-f]/) {
+            if (dirs[i] == "U" && cur_state["y"] > 1)
+                next_states[cur_state["path"] "U"] = 1
+            else if (dirs[i] == "D" && cur_state["y"] < 4)
+                next_states[cur_state["path"] "D"] = 1
+            else if (dirs[i] == "L" && cur_state["x"] > 1)
+                next_states[cur_state["path"] "L"] = 1
+            else if (dirs[i] == "R" && cur_state["x"] < 4)
+                next_states[cur_state["path"] "R"] = 1
+        }
+    }
+}
+
+
+{ code = $0 }
+
+END {
+    move = 0
+    get_next_states("", next_states)
+    while (1) {
+        ++move
+        print "Looking at move " move
+        for (i in next_states) {
+            str_to_state(i, next_state)
+            if (next_state["x"] == 4 && next_state["y"] == 4) {
+                print move " moves"
+                print "Path used: " next_state["path"]
+                exit
+            }
+            delete next_states[i]
+            get_next_states(next_state["path"], next_states)
+        }
+    }
+}
