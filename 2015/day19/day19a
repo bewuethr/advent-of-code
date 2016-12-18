@@ -8,7 +8,7 @@ while IFS= read -r line; do
             start_mol="$line"
         fi
     fi
-done < input
+done < "$1"
 
 declare -A new_mols
 
