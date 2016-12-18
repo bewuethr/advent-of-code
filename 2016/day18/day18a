@@ -1,0 +1,31 @@
+#!/usr/bin/awk -f
+
+BEGIN { PROCINFO["sorted_in"] = "@ind_num_asc" }
+
+{ rows[1] = $0 }
+
+END {
+    for (i = 2; i <= 40; ++i) {
+        split("." rows[i-1] ".", prev, "")
+        for (j = 2; j <= length(prev) - 1; ++j) {
+            if (prev[j-1] == "." && prev[j+1] == "^" || \
+                prev[j+1] == "." && prev[j-1] == "^")
+            {
+                rows[i] = rows[i] "^"
+            }
+            else {
+                rows[i] = rows[i] "."
+            }
+        }
+    }
+    
+    for (i in rows) {
+        print rows[i]
+        split(rows[i], row, "")
+        for (j in row) {
+            if (row[j] == ".")
+                ++safe
+        }
+    }
+    print "Safe: " safe
+}
