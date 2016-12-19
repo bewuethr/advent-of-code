@@ -1,0 +1,30 @@
+#!/usr/bin/awk -f
+
+@load "general"
+
+BEGIN { passwd_len = 8 }
+
+{
+    id = $0
+    idx = -1
+
+    while (1) {
+        ++idx
+        hash = md5(id idx)
+
+        if (match(hash, /^0{5}([0-7])(.)/, arr)) {
+            print "Match: " hash
+            if (passwd[arr[1]])
+                continue
+            passwd[arr[1]] = arr[2]
+            print "Found letter at position " arr[1]
+            if (length(passwd) == passwd_len)
+                break
+        }
+    }
+
+    for (i = 0; i < length(passwd); ++i)
+        pass = pass passwd[i]
+    print pass
+}
+
