@@ -1,5 +1,7 @@
 #!/usr/bin/awk -f
 
+@load "general"
+
 BEGIN { passwd_len = 8 }
 
 {
@@ -7,11 +9,8 @@ BEGIN { passwd_len = 8 }
     idx = 0
 
     while (1) {
-        command = "printf " id idx " | md5sum"
-        command | getline hash
-        close(command)
+        hash = md5(id idx)
 
-        # hash also contains a space and a hyphen, but that doesn't matter
         if (hash ~ /^0{5}/) {
             passwd = passwd substr(hash, 6, 1)
             print passwd
