@@ -1,0 +1,32 @@
+#!/usr/bin/awk -f
+
+function incr(i) { return (i == elfcount) ? 1 : i+1 }
+
+{ elfcount = $0 }
+
+END {
+    # First victim
+    victim = int(elfcount/2) + 1
+    elim[victim] = 1
+    eliminated = 1
+
+    # First step size depends on number of elves
+    step = (elfcount % 2) ? 2 : 1
+
+    while (1) {
+        for (i = 1; i <= step; ++i) {
+            victim = incr(victim)
+            while (elim[victim])
+                victim = incr(victim)
+        }
+            
+        elim[victim] = 1
+
+        step = (step == 1) ? 2 : 1
+        ++eliminated
+        if (eliminated == elfcount)
+            break
+    }
+
+    print "Sole survivor: elf number " victim
+}
