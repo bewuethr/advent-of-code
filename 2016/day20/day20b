@@ -1,0 +1,41 @@
+#!/usr/bin/awk -f
+
+function min(a, b) { return a > b ? b : a }
+
+function max(a, b) { return a > b ? a : b }
+
+BEGIN { FS = "-" }
+
+{
+    ranges[NR]["lower"] = $1
+    ranges[NR]["upper"] = $2
+}
+
+END {
+    while (1) {
+        for (i in ranges) {
+            merges = 0
+            for (j in ranges) {
+                if (j == i)
+                    continue
+                if (ranges[j]["lower"] >= ranges[i]["lower"] && \
+                    ranges[j]["lower"] <= ranges[i]["upper"] || \
+                    ranges[j]["upper"] >= ranges[i]["lower"] && \
+                    ranges[j]["upper"] <= ranges[i]["upper"])
+                {
+                    ranges[i]["lower"] = min(ranges[i]["lower"], ranges[j]["lower"])
+                    ranges[i]["upper"] = max(ranges[i]["upper"], ranges[j]["upper"])
+                    delete ranges[j]
+                    ++merges
+                }
+            }
+        }
+        print length(ranges)
+        if (! merges)
+            break
+    }
+    for (i in ranges)
+        blocked += ranges[i]["upper"] - ranges[i]["lower"] + 1
+    print "Allowed: " 2^32 - blocked
+}
+
