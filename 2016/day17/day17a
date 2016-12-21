@@ -1,5 +1,7 @@
 #!/usr/bin/awk -f
 
+@load "general"
+
 # Create state with coordinates from string containing path
 function str_to_state(state_str, state,    i, ctr) {
     delete state
@@ -15,9 +17,7 @@ function get_next_states(state_str, next_states,    cur_state, command, hash, di
     str_to_state(state_str, cur_state)
 
     # Get hash for path so far
-    command = "printf " code state_str " | md5sum"
-    command | getline hash
-    close(command)
+    hash = md5(code state_str)
 
     # Try candidate directions
     dirs[1] = "U"
