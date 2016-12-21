@@ -1,0 +1,100 @@
+swap position 7 with position 4
+move position 7 to position 1
+swap position 7 with position 3
+swap position 7 with position 1
+rotate based on position of letter e
+swap letter a with letter e
+swap position 7 with position 4
+rotate right 5 steps
+move position 5 to position 2
+rotate right 1 step
+swap position 7 with position 6
+rotate left 4 steps
+move position 1 to position 2
+reverse positions 3 through 4
+reverse positions 0 through 5
+rotate based on position of letter f
+reverse positions 4 through 5
+reverse positions 3 through 4
+reverse positions 2 through 7
+rotate right 4 steps
+move position 6 to position 5
+swap position 7 with position 3
+move position 1 to position 0
+rotate based on position of letter b
+reverse positions 2 through 6
+rotate right 1 step
+move position 1 to position 6
+swap position 7 with position 1
+swap letter a with letter b
+reverse positions 0 through 2
+swap position 3 with position 7
+swap letter e with letter a
+reverse positions 2 through 5
+swap position 5 with position 4
+swap letter e with letter a
+rotate left 5 steps
+rotate right 0 steps
+swap position 5 with position 1
+rotate based on position of letter f
+rotate left 0 steps
+swap letter g with letter a
+swap position 2 with position 0
+rotate right 5 steps
+rotate right 7 steps
+reverse positions 0 through 1
+rotate left 3 steps
+swap position 7 with position 2
+move position 0 to position 1
+rotate based on position of letter e
+rotate right 0 steps
+move position 1 to position 5
+rotate based on position of letter f
+swap position 5 with position 1
+rotate based on position of letter b
+rotate based on position of letter d
+rotate based on position of letter g
+reverse positions 0 through 4
+swap letter h with letter e
+reverse positions 5 through 6
+swap position 2 with position 6
+rotate based on position of letter f
+reverse positions 3 through 4
+swap letter a with letter b
+rotate right 6 steps
+reverse positions 1 through 5
+swap position 3 with position 6
+rotate left 5 steps
+rotate left 2 steps
+move position 6 to position 1
+reverse positions 6 through 7
+swap letter f with letter e
+swap letter g with letter c
+reverse positions 0 through 3
+rotate left 4 steps
+rotate right 6 steps
+move position 6 to position 5
+move position 5 to position 2
+swap letter d with letter e
+move position 1 to position 5
+swap letter f with letter e
+rotate based on position of letter g
+move position 4 to position 7
+swap position 0 with position 3
+swap letter b with letter h
+rotate based on position of letter a
+swap letter g with letter f
+rotate left 2 steps
+reverse positions 5 through 7
+reverse positions 1 through 4
+reverse positions 2 through 4
+swap position 2 with position 6
+reverse positions 3 through 7
+swap letter e with letter b
+rotate right 1 step
+move position 6 to position 5
+move position 1 to position 4
+move position 4 to position 0
+swap position 7 with position 6
+swap letter e with letter d
+swap position 7 with position 1
