@@ -1,5 +1,7 @@
 #!/usr/bin/awk -f
 
+@load "general"
+
 function contains_triple(str,    i) {
     for (i = 1; i <= 30; ++i) {
         if (substr(str, i, 1) == substr(str, i+1, 1) && \
@@ -31,15 +33,10 @@ BEGIN { PROCINFO["sorted_in"] = "@ind_num_asc" }
 END {
     idx = 0
     while (1) {
-        command = "printf " salt idx " | md5sum"
-        command | getline hash
-        close(command)
+        hash = md5(salt idx)
         
-        for (i = 1; i <= 2016; ++i) {
-            command = "printf " substr(hash, 1, 32) " | md5sum"
-            command | getline hash
-            close(command)
-        }
+        for (i = 1; i <= 2016; ++i)
+            hash = md5(hash)
 
         triple = contains_triple(hash)
         if (triple) {
