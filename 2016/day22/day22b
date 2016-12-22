@@ -1,0 +1,84 @@
+#!/usr/bin/awk -f
+
+# Get neighbours of node (x,y) that make a viable pair with it
+function viable_pairs(x, y, viable) {
+    delete viable
+    if (x < xmax && node[x+1, y]["avail"] >= node[x, y]["used"])
+        viable[x+1, y] = 1
+    if (x > 0 && node[x-1, y]["avail"] >= node[x, y]["used"])
+        viable[x-1, y] = 1
+    if (y < ymax && node[x, y+1]["avail"] >= node[x, y]["used"])
+        viable[x, y+1] = 1
+    if (y > 0 && node[x, y-1]["avail"] >= node[x, y]["used"])
+        viable[x, y-1] = 1
+}
+
+# Move data from (x1,y1) to (x2,y2) and update goal coords if moved
+function move(x1, y1, x2, y2) {
+    if (node[x2, y2]["avail"] < node[x1, y1]["used"]) {
+        printf "Can't move %d/%d (%d) to %d/%d (%d free)\n", \
+           x1, y1, node[x1, y1]["used"], x2, y2, node[x2, y2]["free"]
+        exit
+    }
+
+    if (x2 > xmax || y2 > ymax || x2 < 0 || y2 < 0) {
+        printf "Illegal goal coordinates: %d/%d\n", x2, y2
+        exit
+    }
+
+    node[x2, y2]["used"] += node[x1, y1]["used"]
+    node[x2, y2]["avail"] -= node[x1, y1]["used"]
+    node[x1, y1]["avail"] = node[x1, y1]["size"]
+    node[x1, y1]["used"] = 0
+
+    # Did we move the goal data?
+    if (xgoal == x1 && ygoal == y2) {
+        xgoal = x2
+        ygoal = y2
+    }
+}
+
+# Print status
+function print_status(node,    x, y, str) {
+    for (y = 0; y <= ymax; ++y) {
+        for (x = 0; x <= xmax; ++x) {
+            if (node[x, y]["size"] > 100)
+                str = "#"
+            else if (x == xfree && y == yfree)
+                str = "_"
+            else if (x == xgoal && y == ygoal)
+                str = "G"
+            else
+                str = "."
+
+            if (x == 0 && y == 0)
+                str = "(" str ")"
+            else
+                str = " " str " "
+            printf "%s%s", str, x == xmax ? "\n" : "\t"
+        }
+    }
+}
+
+BEGIN { FS = "[^0-9]*" }
+
+NR > 2 {
+    x = $2 + 0
+    y = $3 + 0
+    node[x, y]["size"] = $4 + 0
+    node[x, y]["used"] = $5 + 0
+    node[x, y]["avail"] = $6 + 0
+    xmax = x > xmax ? x : xmax
+    ymax = y > ymax ? y : ymax
+    if (node[x, y]["used"] == 0) {
+        xfree = x
+        yfree = y
+    }
+}
+
+END {
+    xgoal = xmax
+    ygoal = 0
+
+    print_status(node)
+}

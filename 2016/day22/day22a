@@ -1,0 +1,21 @@
+#!/usr/bin/awk -f
+
+BEGIN { FS = "[ T]*" }
+
+NR > 2 {
+    node[NR]["size"] = $2 + 0
+    node[NR]["used"] = $3 + 0
+    node[NR]["avail"] = $4 + 0
+}
+
+END {
+    for (i = 1; i <= NR; ++i) {
+        for (j = 1; j <= NR; ++j) {
+            if (i == j)
+                continue
+            if (node[i]["used"] > 0 && node[i]["used"] <= node[j]["avail"])
+                ++pairs
+        }
+    }
+    print pairs
+}
