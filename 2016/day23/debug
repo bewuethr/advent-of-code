@@ -1,0 +1,2 @@
+        print "a:", regs["a"], "b:", regs["b"], "c:", regs["c"], "d:", regs["d"] "\n"
+        print i ": " instr[i]

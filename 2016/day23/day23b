@@ -1,0 +1,69 @@
+#!/usr/bin/awk -f
+
+{ instr[NR] = $0 }
+
+END {
+    regs["a"] = 12
+    i = 1
+    while (1) {
+        if (!(i in instr))
+            break
+        print "a:", regs["a"], "b:", regs["b"], "c:", regs["c"], "d:", regs["d"] "\n"
+        print i ": " instr[i]
+        split(instr[i], arr)
+
+        if (instr[i] ~ /cpy/) {
+            ++i
+            if (arr[3] !~ /[abcd]/)
+                continue
+            regs[arr[3]] = arr[2] ~ /[abcd]/ ? regs[arr[2]] : arr[2]
+        }
+
+        else if (instr[i] ~ /inc/) {
+            ++i
+            ++regs[arr[2]]
+        }
+
+        else if (instr[i] ~ /dec/) {
+            ++i
+            --regs[arr[2]]
+        }
+
+        else if (instr[i] ~ /jnz/) {
+            if ((arr[2] ~ /[abcd]/ && regs[arr[2]] != 0) || \
+                (arr[2] ~ /[0-9]/ && arr[2] != 0))
+            {
+                if (arr[3] ~ /[0-9]/)
+                    i += arr[3]
+                else
+                    i += regs[arr[3]]
+            }
+            else
+                ++i
+        }
+
+        else if (instr[i] ~ /tgl/) {
+            target = i + regs[arr[2]]
+
+            ++i
+            if (! (target in instr))
+                continue
+            split(instr[target], tarr)
+
+            if (length(tarr) == 2) {
+                if (tarr[1] == "inc")
+                    instr[target] = "dec " tarr[2]
+                else
+                    instr[target] = "inc " tarr[2]
+            }
+
+            else if (length(tarr) == 3) {
+                if (tarr[1] == "jnz")
+                    instr[target] = "cpy " tarr[2] " " tarr[3]
+                else
+                    instr[target] = "jnz " tarr[2] " " tarr[3]
+            }
+        }
+    }
+    print regs["a"]
+}
