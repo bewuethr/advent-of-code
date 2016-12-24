@@ -1,0 +1,104 @@
+#!/usr/bin/awk -f
+
+function flood(x, y, len, dist) {
+    if (dist[x, y] != "" || maze[x, y] == "#" || x < 1 || y < 1 || x > xmax || y > ymax)
+        return
+    dist[x, y] = len
+}
+
+function shortest_path(p1, p2,    x, y, p2x, p2y, len, dist, coords, coord) {
+    x = poi[p1]["x"]
+    y = poi[p1]["y"]
+    p2x = poi[p2]["x"]
+    p2y = poi[p2]["y"]
+
+    len = 0
+    delete dist
+    dist[x, y] = len
+
+    while (1) {
+        for (coords in dist) {
+            if (dist[coords] == len) {
+                split(coords, coord, SUBSEP)
+                x = coord[1]
+                y = coord[2]
+                if (x == p2x && y == p2y)
+                    return len
+                flood(x+1, y, len+1, dist)
+                flood(x-1, y, len+1, dist)
+                flood(x, y+1, len+1, dist)
+                flood(x, y-1, len+1, dist)
+            }
+        }
+        ++len
+    }
+}
+
+function totaldist(arr,    thisdist, i) {
+    thisdist = dist[0, arr[1]]
+
+    for (i = 1; i < length(arr); ++i) 
+        thisdist += dist[arr[i], arr[i+1]]
+
+    thisdist += dist[arr[i], 0]
+
+    return thisdist
+}
+
+function permute(n,    i, tmp) {
+    if (n == 1) {
+        thisdist = totaldist(a)
+        if (! mindist || thisdist < mindist) {
+            mindist = thisdist
+            print "New shortest distance: " mindist
+        }
+    }
+    else {
+        for (i = 0; i < n; i++) {
+            permute(n-1)
+            if (n % 2) {    # if n is odd
+                tmp = a[1]
+                a[1] = a[n]
+                a[n] = tmp
+            }
+            else {          # if n is even
+                tmp = a[i+1]
+                a[i+1] = a[n]
+                a[n] = tmp
+            }
+        }
+    }
+}
+
+BEGIN { FS = "" }
+
+{
+    for (i = 1; i <= NF; ++i) {
+        maze[i, NR] = $i
+        if ($i ~ /[0-9]/) {
+            maze[i, NR] = "."
+            poi[$i]["x"] = i
+            poi[$i]["y"] = NR
+        }
+    }
+}
+
+END {
+    xmax = NF
+    ymax = NR
+
+    # Build table of distances
+    for (i = 0; i < length(poi) - 1; ++i) {
+        for (j = i+1; j < length(poi); ++j) {
+            dist[i, j] = shortest_path(i, j)
+            dist[j, i] = dist[i, j]
+        }
+    }
+
+    # Get distances for all permutations that start with 0
+    n = length(poi) - 1
+    for (i = 1; i <= n; ++i)
+        a[i] = i
+
+    permute(length(a))
+}
