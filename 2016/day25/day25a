@@ -1,0 +1,72 @@
+#!/usr/bin/awk -f
+
+# Skip first 8 lines: they can be summarized in "d is 2538 + a_init"
+NR > 8 { instr[NR-8] = $0 }
+
+END {
+    for (aval = 1;; ++aval) {
+        print "a: " aval
+        delete regs
+        regs["a"] = aval
+
+        # Effect of first 8 lines
+        regs["d"] = 2538 + aval
+
+        expect = 0
+        i = 1
+
+        ctr = 0 # Length of correct sequence
+
+        while (1) {
+            if (!(i in instr))
+                break
+            split(instr[i], arr)
+
+            if (instr[i] ~ /cpy/) {
+                ++i
+                if (arr[3] !~ /[abcd]/)
+                    continue
+                regs[arr[3]] = arr[2] ~ /[abcd]/ ? regs[arr[2]] : arr[2]
+            }
+
+            else if (instr[i] ~ /inc/) {
+                ++i
+                ++regs[arr[2]]
+            }
+
+            else if (instr[i] ~ /dec/) {
+                ++i
+                --regs[arr[2]]
+            }
+
+            else if (instr[i] ~ /jnz/) {
+                if ((arr[2] ~ /[abcd]/ && regs[arr[2]] != 0) || \
+                    (arr[2] ~ /[0-9]/ && arr[2] != 0))
+                {
+                    if (arr[3] ~ /[0-9]/)
+                        i += arr[3]
+                    else
+                        i += regs[arr[3]]
+                }
+                else
+                    ++i
+            }
+
+            else if (instr[i] ~ /out/) {
+                if (arr[2] ~ /[0-9]/)
+                    val = arr[2]
+                else
+                    val = regs[arr[2]]
+                if (val != expect)
+                    break
+                expect = (expect == 0) ? 1 : 0
+                ++ctr
+
+                # Consider solved after 100 correct signal values
+                if (ctr >= 100)
+                    exit
+                ++i
+            }
+        }
+    }
+}
