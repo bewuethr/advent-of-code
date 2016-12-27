@@ -1,5 +1,4 @@
-# advent_of_code
-Advent of Code
+# Advent of Code
 
 My solutions to [Advent of Code](http://adventofcode.com/).
 
