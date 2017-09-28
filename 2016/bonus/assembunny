@@ -1,0 +1,52 @@
+#!/usr/bin/awk -f
+
+{ instr[NR] = $0 }
+
+END {
+    i = 1
+
+    while (1) {
+        if (!(i in instr))
+            break
+        split(instr[i], arr)
+
+        if (instr[i] ~ /cpy/) {
+            ++i
+            if (arr[3] !~ /[abcd]/)
+                continue
+            regs[arr[3]] = arr[2] ~ /[abcd]/ ? regs[arr[2]] : arr[2]
+        }
+
+        else if (instr[i] ~ /inc/) {
+            ++i
+            ++regs[arr[2]]
+        }
+
+        else if (instr[i] ~ /dec/) {
+            ++i
+            --regs[arr[2]]
+        }
+
+        else if (instr[i] ~ /jnz/) {
+            if ((arr[2] ~ /[abcd]/ && regs[arr[2]] != 0) || \
+                (arr[2] ~ /[0-9]/ && arr[2] != 0))
+            {
+                if (arr[3] ~ /[0-9]/)
+                    i += arr[3]
+                else
+                    i += regs[arr[3]]
+            }
+            else
+                ++i
+        }
+
+        else if (instr[i] ~ /out/) {
+            if (arr[2] ~ /[0-9]/)
+                val = arr[2]
+            else
+                val = regs[arr[2]]
+            print val
+            ++i
+        }
+    }
+}

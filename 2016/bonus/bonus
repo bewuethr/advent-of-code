@@ -1,0 +1,5 @@
+#!/bin/bash
+
+./assembunny < input | while read n; do
+    printf "\x$(printf '%x' "$n")";
+done | ./display
