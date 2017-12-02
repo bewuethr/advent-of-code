@@ -14,3 +14,9 @@ I tried sticking to pure Bash without too much reliance on command line tools (r
 Everything in awk, with the odd solution in Perl or Bash and utilities such as grep or `sort`.
 
 For MD5 hashing, I used [this awk extension](http://git.codu.in/sup/gawk-extensions) written in C.
+
+### 2017
+
+Perl for speed, Go to learn.
+
+Uploads are "polished", but the oldest commit per file is the honest version used to solve the puzzle.
