@@ -18,7 +18,7 @@ while (my $line = <$fh>) {
     my @arr = split "\t", $line;
     $sum += (
         map { $_->[0] / $_->[1] }
-        grep { $_->[0] % $_->[1] == 0 } (variations(\@arr, 2))
+        grep { $_->[0] % $_->[1] == 0 } variations(\@arr, 2)
     )[0];
 }
 say $sum;
