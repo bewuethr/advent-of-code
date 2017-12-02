@@ -5,17 +5,11 @@ use warnings;
 
 use feature 'say';
 
-use List::Util qw(max min);
+use List::Util qw(max min sum);
 
 my $fname = shift;
 
 open my $fh, "<", $fname
     or die "Can't open $fname: $!";
 
-my $sum = 0;
-while (my $line = <$fh>) {
-    chomp $line;
-    my @arr = split "\t", $line;
-    $sum += (max @arr) - (min @arr);
-}
-say $sum;
+ say sum map { chomp; my @arr = split "\t"; (max @arr) - (min @arr) } <$fh>;
