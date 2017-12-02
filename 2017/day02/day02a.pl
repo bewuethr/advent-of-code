@@ -5,12 +5,7 @@ use warnings;
 
 use feature 'say';
 
-use Data::Dumper;
-use Digest::MD5 qw(md5_hex);
-use File::Slurp;
-use Graph::Simple;
-use List::Util qw(max min product sum);
-use Math::Prime::Util qw(fordivisors);
+use List::Util qw(max min);
 
 my $fname = shift;
 
