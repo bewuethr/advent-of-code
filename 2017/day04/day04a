@@ -1,0 +1,3 @@
+#!/bin/bash
+
+grep -Pvc '(\b\w+\b).*\1' "$1"
