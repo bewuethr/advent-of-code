@@ -5,30 +5,35 @@ use warnings;
 
 use feature 'say';
 
-use Algorithm::Combinatorics qw(permutations combinations variations);
-use Data::Dumper;
-use Digest::MD5 qw(md5_hex);
-use File::Slurp;
-use Graph::Simple;
-use List::Util qw(max min product sum);
-use Math::Prime::Util qw(fordivisors);
+sub rot_left {
+    my $dir = shift;
+    @$dir = (-$dir->[1], $dir->[0]);
+}
 
 my $fname = shift;
 
 open my $fh, "<", $fname
     or die "Can't open $fname: $!";
 
-my $val = <$fh>;
-chomp $val;
+my $target = <$fh>;
+chomp $target;
 
-my $sqbase = 1;
-my $ctr = 1;
-my $ydist = 0;
+my ($x, $y) = (0, 0);
+my $val = 1;
 
-while (1) {
-    say "y-dist: $ydist; Side length: $sqbase, lower right corner: $ctr";
-    last if $ctr > $val;
-    $ydist++;
-    $sqbase += 2;
-    $ctr = $sqbase ** 2;
+my $dir = [1, 0];
+my $steps = 1;
+
+OUTER: while (1) {
+    foreach my $side (1..2) {
+        foreach my $step (1..$steps) {
+            ($x, $y) = ($x + $dir->[0], $y + $dir->[1]);
+            $val++;
+            last OUTER if $val == $target;
+        }
+        rot_left($dir);
+    }
+    $steps++;
 }
+
+say abs $x + abs $y;
