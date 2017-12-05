@@ -10,7 +10,7 @@ my $fname = shift;
 open my $fh, "<", $fname
     or die "Can't open $fname: $!";
 
-my @arr = <$fh>;
+chomp(my @arr = <$fh>);
 my $pos = 0;
 my $res = 0;
 
