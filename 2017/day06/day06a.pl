@@ -20,20 +20,20 @@ my @arr = split "\t", $line;
 my %seen;
 my $ctr = 0;
 
-$seen{ join ' ', @arr } = 1;
+$seen{"@arr"} = 1;
 
 while (1) {
     my $idx_max = firstidx { $_ == max @arr } @arr;
     my $tomove = $arr[$idx_max];
     $arr[$idx_max] = 0;
-    my $cur_idx = ($idx_max + 1) % scalar @arr;
+    my $cur_idx = ($idx_max + 1) % @arr;
     while ($tomove--) {
         $arr[$cur_idx]++;
-        $cur_idx = ($cur_idx + 1) % scalar @arr;
+        $cur_idx = ($cur_idx + 1) % @arr;
     }
     $ctr++;
-    last if $seen{ join ' ', @arr };
-    $seen{ join ' ', @arr } = 1;
+    last if $seen{"@arr"};
+    $seen{"@arr"} = 1;
 }
 
 say $ctr;
