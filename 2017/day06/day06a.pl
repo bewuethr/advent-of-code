@@ -5,32 +5,20 @@ use warnings;
 
 use feature 'say';
 
-use Algorithm::Combinatorics qw(permutations combinations variations);
-use Data::Dumper;
-use Digest::MD5 qw(md5_hex);
-use File::Slurp;
-use Graph::Simple;
 use List::MoreUtils qw(firstidx);
-use List::Util qw(max min product sum);
-use Math::Prime::Util qw(fordivisors);
+use List::Util qw(max);
 
 my $fname = shift;
 
 open my $fh, "<", $fname
     or die "Can't open $fname: $!";
 
-# chomp(my @arr = <$fh>);
-my $res = 0;
-
-#  while (1) {
-#
-#  }l
-
-my %seen;
-
 my $line = <$fh>;
 chomp $line;
 my @arr = split "\t", $line;
+
+my %seen;
+my $ctr = 0;
 
 $seen{ join ' ', @arr } = 1;
 
@@ -43,9 +31,9 @@ while (1) {
         $arr[$cur_idx]++;
         $cur_idx = ($cur_idx + 1) % scalar @arr;
     }
-    $res++;
+    $ctr++;
     last if $seen{ join ' ', @arr };
     $seen{ join ' ', @arr } = 1;
 }
 
-say $res;
+say $ctr;

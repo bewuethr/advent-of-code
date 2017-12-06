@@ -5,35 +5,22 @@ use warnings;
 
 use feature 'say';
 
-use Algorithm::Combinatorics qw(permutations combinations variations);
-use Data::Dumper;
-use Digest::MD5 qw(md5_hex);
-use File::Slurp;
-use Graph::Simple;
 use List::MoreUtils qw(firstidx);
-use List::Util qw(max min product sum);
-use Math::Prime::Util qw(fordivisors);
+use List::Util qw(max);
 
 my $fname = shift;
 
 open my $fh, "<", $fname
     or die "Can't open $fname: $!";
 
-# chomp(my @arr = <$fh>);
-my $res = 0;
-
-#  while (1) {
-#
-#  }l
-
-my %seen;
-
 my $line = <$fh>;
 chomp $line;
 my @arr = split "\t", $line;
 
-$seen{ join ' ', @arr }{flag} = 1;
-$seen{ join ' ', @arr }{idx} = $res;
+my %seen;
+my $ctr = 0;
+
+@{$seen{ join ' ', @arr }}{('flag', 1)} = (1, $ctr);
 
 while (1) {
     my $idx_max = firstidx { $_ == max @arr } @arr;
@@ -44,10 +31,10 @@ while (1) {
         $arr[$cur_idx]++;
         $cur_idx = ($cur_idx + 1) % scalar @arr;
     }
-    $res++;
+    $ctr++;
     last if $seen{ join ' ', @arr }{flag};
     $seen{ join ' ', @arr }{flag} = 1;
-    $seen{ join ' ', @arr }{idx} = $res;
+    $seen{ join ' ', @arr }{idx} = $ctr;
 }
 
-say $res - $seen{ join ' ', @arr }{idx};
+say $ctr - $seen{ join ' ', @arr }{idx};
