@@ -1,16 +1,5 @@
 #!/bin/bash
 
-# Transcript from my command line
-# Idea: the root is the only name appearing just in the first column
-
-# Get just the names of the bases
-cut -d ' ' -f 1 input > names
-
-# Skipping a few...
-
-# Get the names of the carried programs, sorted, unique
-grep -o -e '->.*' input | grep -o '[[:alpha:]]\+' | sort -u > carried
-
-# See what is unique in which file (inspect manually; our value is the only one
-# in the first column)
-comm <(sort -u names) carried | less
+comm -23 \
+    <(cut -d ' ' -f 1 "$1" | sort) \
+    <(grep -o -e '>.*' "$1" | grep -Eo '[[:alpha:]]+' | sort -u)
