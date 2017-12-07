@@ -1,5 +1,3 @@
 #!/bin/bash
 
-comm -23 \
-    <(cut -d ' ' -f 1 "$1" | sort) \
-    <(grep -o -e '>.*' "$1" | grep -Eo '[[:alpha:]]+' | sort -u)
+grep -o -E '[a-z]+' "$1" | sort | uniq -u
