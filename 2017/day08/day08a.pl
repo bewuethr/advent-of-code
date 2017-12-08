@@ -5,14 +5,7 @@ use warnings;
 
 use feature 'say';
 
-use Algorithm::Combinatorics qw(permutations combinations variations);
-use Data::Dumper;
-use Digest::MD5 qw(md5_hex);
-use File::Slurp;
-use Graph::Simple;
-use List::MoreUtils qw(mesh uniq frequency firstidx lastidx singleton);
-use List::Util qw(max min product sum);
-use Math::Prime::Util qw(fordivisors);
+use List::Util qw(max);
 
 my $fname = shift;
 
@@ -30,7 +23,7 @@ while (my $line = <$fh>) {
     }
     $arr[1] =~ s/inc/+=/;
     $arr[1] =~ s/dec/-=/;
-    eval join ' ', @arr;
+    eval "@arr";
 }
 
 say max values %vars;
