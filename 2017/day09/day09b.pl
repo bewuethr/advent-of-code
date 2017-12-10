@@ -5,15 +5,6 @@ use warnings;
 
 use feature 'say';
 
-use Algorithm::Combinatorics qw(permutations combinations variations);
-use Data::Dumper;
-use Digest::MD5 qw(md5_hex);
-use File::Slurp;
-use Graph::Simple;
-use List::MoreUtils qw(firstval mesh uniq frequency firstidx lastidx singleton);
-use List::Util qw(max min product sum);
-use Math::Prime::Util qw(fordivisors);
-
 my $fname = shift;
 
 open my $fh, "<", $fname
