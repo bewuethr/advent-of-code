@@ -18,10 +18,9 @@ my $skip = 0;
 my $cur = 0;
 
 my @list = (0..255);
-my @list2 = @list;
 
 foreach my $len (@lengths) {
-    my @longlist = (@list, @list2);
+    my @longlist = (@list, @list);
 
     my @sublist;
     if ($len == 0) {
@@ -45,8 +44,6 @@ foreach my $len (@lengths) {
     if ($cur+$len-1 > $#list) {
         @list[ 0 .. ($cur+$len-1) % @list ] = @mod_longlist[ scalar @list .. $cur+$len-1 ];
     }
-    @list2 = @list;
-
     $cur += $len + $skip;
     $cur %= @list;
     $skip++;
