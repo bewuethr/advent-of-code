@@ -27,7 +27,7 @@ foreach my $len (@lengths) {
         @sublist = ();
     }
     else {
-        @sublist = @longlist[$cur..$cur+$len-1];
+        @sublist = @longlist[ $cur .. $cur+$len-1 ];
     }
 
     my @head;
@@ -35,17 +35,16 @@ foreach my $len (@lengths) {
         @head = ();
     }
     else {
-        @head = @longlist[0..$cur-1];
+        @head = @longlist[ 0 .. $cur-1 ];
     }
 
-    my @mod_longlist = (@head, (reverse @sublist), @longlist[ $cur+$len .. $#longlist]);
+    my @mod_longlist = (@head, (reverse @sublist), @longlist[ $cur+$len .. $#longlist ]);
 
     @list = @mod_longlist[0..$#list];
     if ($cur+$len-1 > $#list) {
-        @list[ 0 .. ($cur+$len-1) % @list ] = @mod_longlist[ scalar @list .. $cur+$len-1 ];
+        @list[ 0 .. ($cur+$len-1) % @list ] = @mod_longlist[ @list .. $cur+$len-1 ];
     }
-    $cur += $len + $skip;
-    $cur %= @list;
+    $cur = ($cur + $len + $skip) % @list;
     $skip++;
 }
 
