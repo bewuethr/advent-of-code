@@ -5,14 +5,8 @@ use warnings;
 
 use feature 'say';
 
-use Algorithm::Combinatorics qw(permutations combinations variations);
-use Data::Dumper;
-use Digest::MD5 qw(md5_hex);
-use File::Slurp;
-use Graph::Simple;
-use List::MoreUtils qw(firstval pairwise mesh uniq frequency firstidx lastidx singleton);
-use List::Util qw(reduce max min product sum);
-use Math::Prime::Util qw(fordivisors);
+use List::MoreUtils qw(pairwise);
+use List::Util qw(sum);
 
 my $fname = shift;
 
@@ -28,15 +22,13 @@ my $dist = 0;
 
 foreach my $dir (@dirs) {
     my @vec = (0, 0, 0);
-    $vec[0] = 1 if $dir =~ /e/;
+    $vec[0] =  1 if $dir =~ /e/;
     $vec[0] = -1 if $dir =~ /w/;
-    $vec[1] = 1 if $dir =~ /\Anw?\z/;
+    $vec[1] =  1 if $dir =~ /\Anw?\z/;
     $vec[1] = -1 if $dir =~ /\Ase?\z/;
-    $vec[2] = 1 if $dir =~ /\Asw?\z/;
+    $vec[2] =  1 if $dir =~ /\Asw?\z/;
     $vec[2] = -1 if $dir =~ /\Ane?\z/;
     @coords = pairwise { $a + $b } @coords, @vec;
-    $dist = 0.5 * sum map { abs } @coords;
-    say "$dir: @coords, dist: $dist";
 }
 
-say $dist;
+say 0.5 * sum map { abs } @coords;
