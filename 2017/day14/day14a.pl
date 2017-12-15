@@ -5,14 +5,7 @@ use warnings;
 
 use feature 'say';
 
-use Algorithm::Combinatorics qw(permutations combinations variations);
-use Data::Dumper;
-use Digest::MD5 qw(md5_hex);
-use File::Slurp;
-use Graph::Simple;
-use List::MoreUtils qw(firstval mesh uniq frequency firstidx lastidx singleton);
-use List::Util qw(reduce max min product sum);
-use Math::Prime::Util qw(fordivisors);
+use List::Util qw(reduce sum);
 
 my $fname = shift;
 
@@ -36,32 +29,23 @@ foreach my $suffix (0..127) {
 
     foreach my $i (1..64) {
         foreach my $len (@lengths) {
-            my @longlist = (@list, @list);
-            my @sublist;
-            if ($len == 0) {
-                @sublist = ();
-            }
-            else {
-                @sublist = @longlist[ $cur .. $cur+$len-1 ];
-            }
-            my @head;
-            if ($cur == 0) {
-                @head = ();
-            }
-            else {
-                @head = @longlist[ 0 .. $cur-1 ];
-            }
+            my @longlist     = (@list, @list);
+            my @sublist      = $len ? @longlist[ $cur .. $cur+$len-1 ] : ();
+            my @head         = $cur ? @longlist[ 0 .. $cur-1 ] : ();
             my @mod_longlist = (@head, (reverse @sublist), @longlist[ $cur+$len .. $#longlist ]);
+
             @list = @mod_longlist[ 0 .. $#list ];
             if ($cur+$len-1 > $#list) {
                 @list[ 0 .. ($cur+$len-1) % @list ] = @mod_longlist[ @list .. $cur+$len-1 ];
             }
+
             $cur = ($cur + $len + $skip) % @list;
             $skip++;
         }
     }
 
     my @densehash = map { reduce { $a ^ $b } @list[$_*16..($_+1)*16-1] } (0..15);
-    my $hash =  join '', map { sprintf '%08b', $_ } @densehash;
-    say $hash;
+    $count += sum split '', join '', map { sprintf '%08b', $_ } @densehash;
 }
+
+say $count;

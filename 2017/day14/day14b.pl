@@ -14,6 +14,18 @@ use List::MoreUtils qw(firstval mesh uniq frequency firstidx lastidx singleton);
 use List::Util qw(reduce max min product sum);
 use Math::Prime::Util qw(fordivisors);
 
+sub visit {
+    my ($con, $seen, $el) = @_;
+
+    foreach my $val ( @{ $con->{$el} } ) {
+        # print Dumper($seen);
+        if (not $seen->{$val}++) {
+            visit($con, $seen, $val);
+        }
+    }
+    return;
+}
+
 my $fname = shift;
 
 open my $fh, "<", $fname
@@ -36,26 +48,16 @@ foreach my $suffix (0..127) {
 
     foreach my $i (1..64) {
         foreach my $len (@lengths) {
-            my @longlist = (@list, @list);
-            my @sublist;
-            if ($len == 0) {
-                @sublist = ();
-            }
-            else {
-                @sublist = @longlist[ $cur .. $cur+$len-1 ];
-            }
-            my @head;
-            if ($cur == 0) {
-                @head = ();
-            }
-            else {
-                @head = @longlist[ 0 .. $cur-1 ];
-            }
+            my @longlist     = (@list, @list);
+            my @sublist      = $len ? @longlist[ $cur .. $cur+$len-1 ] : ();
+            my @head         = $cur ? @longlist[ 0 .. $cur-1 ] : ();
             my @mod_longlist = (@head, (reverse @sublist), @longlist[ $cur+$len .. $#longlist ]);
+
             @list = @mod_longlist[ 0 .. $#list ];
             if ($cur+$len-1 > $#list) {
                 @list[ 0 .. ($cur+$len-1) % @list ] = @mod_longlist[ @list .. $cur+$len-1 ];
             }
+
             $cur = ($cur + $len + $skip) % @list;
             $skip++;
         }
@@ -64,6 +66,9 @@ foreach my $suffix (0..127) {
     my @densehash = map { reduce { $a ^ $b } @list[$_*16..($_+1)*16-1] } (0..15);
     push @matrix, [ split //, join '', map { sprintf '%08b', $_ } @densehash ];
 }
+
+my %con;
+my $progs = 0;
 
 foreach my $y ( 0 .. $#matrix ) {
     my $line = $matrix[$y];
@@ -74,7 +79,20 @@ foreach my $y ( 0 .. $#matrix ) {
         push @connected, ($x+1) . "/" . $y if $x < $#$line and $matrix[$y]->[$x+1];
         push @connected, $x . "/" . ($y-1) if $y > 0 and $matrix[$y-1]->[$x];
         push @connected, $x . "/" . ($y+1) if $y < $#matrix and $matrix[$y+1]->[$x];
-        say "$x/$y <-> " . join ", ", @connected if @connected;
-        say "$x/$y <-> $x/$y" if not @connected;
+        $con{"$x/$y"} = @connected ? \@connected : [ "$x/$y" ];
+        $progs++;
     }
 }
+
+my %seen;
+my $groups = 0;
+
+while (scalar keys %seen < $progs) {
+    my $el = firstval { not $seen{$_} } ( keys %con );
+    # say $el;
+    $seen{$el}++;
+    visit(\%con, \%seen, $el);
+    $groups++;
+}
+
+say $groups;
