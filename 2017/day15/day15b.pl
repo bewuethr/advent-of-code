@@ -23,7 +23,7 @@ my $count = 0;
 foreach my $i ( 1 .. 5_000_000 ) {
     do { $valA = $valA * $facA % $divi } while $valA % 4;
     do { $valB = $valB * $facB % $divi } while $valB % 8;
-    $count++ if (($valA & 0xffff) == ($valB & 0xffff));
+    $count++ if ($valA & 0xffff) == ($valB & 0xffff);
 }
 
 say $count;
