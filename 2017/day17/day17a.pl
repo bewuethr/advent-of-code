@@ -5,8 +5,6 @@ use warnings;
 
 use feature 'say';
 
-use List::MoreUtils qw(firstidx);
-
 my $fname = shift;
 
 open my $fh, "<", $fname
@@ -23,4 +21,4 @@ for my $num (1..2017) {
     $pos++;
 }
 
-say $buffer[ (firstidx { $_ == 2017 } @buffer) + 1 ];
+say $buffer[$pos+1];
