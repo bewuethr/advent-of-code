@@ -6,15 +6,6 @@ no warnings 'experimental';
 
 use v5.10.1;
 
-use Algorithm::Combinatorics qw(permutations combinations variations);
-use Data::Dumper;
-use Digest::MD5 qw(md5_hex);
-use File::Slurp;
-use Graph::Simple;
-use List::MoreUtils qw(firstval mesh uniq frequency firstidx lastidx singleton);
-use List::Util qw(reduce max min product sum);
-use Math::Prime::Util qw(fordivisors);
-
 my $fname = shift;
 
 open my $fh, "<", $fname
@@ -28,6 +19,7 @@ my %regs;
 
 while (1) {
     my @instr = split / /, $arr[$idx];
+    $regs{$instr[1]} //= 0 if not $instr[1] =~ /\d/;
     given ($instr[0]) {
         when (/snd/) {
             $freq = $instr[1] =~ /\d/ ? $instr[1] : $regs{$instr[1]};
