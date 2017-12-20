@@ -5,15 +5,7 @@ use warnings;
 
 use feature 'say';
 
-use Algorithm::Combinatorics qw(permutations combinations variations);
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
-use Digest::MD5 qw(md5_hex);
-use File::Slurp;
-use Graph::Simple;
-use List::MoreUtils qw(firstval mesh uniq frequency firstidx lastidx singleton);
-use List::Util qw(reduce max min product sum);
-use Math::Prime::Util qw(fordivisors);
+use List::Util qw(sum);
 
 my $fname = shift;
 
@@ -41,6 +33,3 @@ while (my $line = <$fh>) {
 }
 
 say $minacc{idx};
-
-print Dumper(\@particles);
-
