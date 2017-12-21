@@ -32,12 +32,25 @@ sub transform {
         
         # Rotations
         foreach my $i (1..4) {
+
+            # Vertical flip
+            $$square = join "/", reverse split /\//, $$square;
+            say "Vertically flipped: testing $$square" if $debug;
+            if ($pattern eq $$square) {
+                $$square = $rules->{$pattern};
+                say "Match: $pattern" if $debug;
+                return;
+            }
+
+            # Flip back
+            $$square = join "/", reverse split /\//, $$square;
             if (length $$square == 5) {
                 $$square =~ s{(.)(.)/(.)(.)}{$3$1/$4$2};
             }
             else {
                 $$square =~ s{(.)(.)(.)/(.)(.)(.)/(.)(.)(.)}{$7$4$1/$8$5$2/$9$6$3};
             }
+
             say "Rotated: testing $$square" if $debug;
             if ($pattern eq $$square) {
                 $$square = $rules->{$pattern};
@@ -46,31 +59,31 @@ sub transform {
             }
         }
 
-        # Vertical flip
-        $$square = join "/", reverse split /\//, $$square;
-        say "Vertically flipped: testing $$square" if $debug;
-        if ($pattern eq $$square) {
-            $$square = $rules->{$pattern};
-            say "Match: $pattern" if $debug;
-            return;
-        }
+        # # Vertical flip
+        # $$square = join "/", reverse split /\//, $$square;
+        # say "Vertically flipped: testing $$square" if $debug;
+        # if ($pattern eq $$square) {
+        #     $$square = $rules->{$pattern};
+        #     say "Match: $pattern" if $debug;
+        #     return;
+        # }
 
-        # Flip back
-        $$square = join "/", reverse split /\//, $$square;
+        # # Flip back
+        # $$square = join "/", reverse split /\//, $$square;
 
-        # Horizontal flip
-        if (length $$square == 5) {
-            $$square =~ s{(.)(.)/(.)(.)}{$2$1/$4$3};
-        }
-        else {
-            $$square =~ s{(.)(.)(.)/(.)(.)(.)/(.)(.)(.)}{$3$2$1/$6$5$4/$9$8$7};
-            say "Flipped: testing $$square" if $debug;
-        }
-        if ($pattern eq $$square) {
-            $$square = $rules->{$pattern};
-            say "Match: $pattern" if $debug;
-            return;
-        }
+        # # Horizontal flip
+        # if (length $$square == 5) {
+        #     $$square =~ s{(.)(.)/(.)(.)}{$2$1/$4$3};
+        # }
+        # else {
+        #     $$square =~ s{(.)(.)(.)/(.)(.)(.)/(.)(.)(.)}{$3$2$1/$6$5$4/$9$8$7};
+        #     say "Flipped: testing $$square" if $debug;
+        # }
+        # if ($pattern eq $$square) {
+        #     $$square = $rules->{$pattern};
+        #     say "Match: $pattern" if $debug;
+        #     return;
+        # }
         say "No match: $pattern" if $debug;
     }
     say "Could not find match for $$square";
