@@ -22,7 +22,7 @@ sub transform {
     say "Looking for match for $$square" if $debug;
 
     foreach my $pattern (keys %$rules) {
-        say "Now testing $pattern" if $debug;
+		# say "Now testing $pattern" if $debug;
 
         if ($pattern eq $$square) {
             $$square = $rules->{$pattern};
@@ -35,7 +35,7 @@ sub transform {
 
             # Vertical flip
             $$square = join "/", reverse split /\//, $$square;
-            say "Vertically flipped: testing $$square" if $debug;
+			# say "Vertically flipped: testing $$square" if $debug;
             if ($pattern eq $$square) {
                 $$square = $rules->{$pattern};
                 say "Match: $pattern" if $debug;
@@ -51,7 +51,7 @@ sub transform {
                 $$square =~ s{(.)(.)(.)/(.)(.)(.)/(.)(.)(.)}{$7$4$1/$8$5$2/$9$6$3};
             }
 
-            say "Rotated: testing $$square" if $debug;
+			# say "Rotated: testing $$square" if $debug;
             if ($pattern eq $$square) {
                 $$square = $rules->{$pattern};
                 say "Match: $pattern" if $debug;
@@ -84,7 +84,7 @@ sub transform {
         #     say "Match: $pattern" if $debug;
         #     return;
         # }
-        say "No match: $pattern" if $debug;
+		# say "No match: $pattern" if $debug;
     }
     say "Could not find match for $$square";
     exit;
@@ -92,7 +92,7 @@ sub transform {
 
 sub resquare {
     my $picture = shift;
-    print "Picture in resquare: ", Dumper($picture);
+	# print "Picture in resquare: ", Dumper($picture);
     my @joined;
     my $rowidx = 0;
     my $size = length $picture->[0][0] == 11 ? 3 : 4;
@@ -109,7 +109,7 @@ sub resquare {
 
     @$picture = ();
     my $row = 0;
-    $size = $size == 4 ? 2 : 3;
+    $size = (length $joined[0]) % 2 ? 3 : 2;
     while ($row < @joined) {
         my @squarerow = ( $joined[$row] =~ /(.{$size})/g );
         for (my $subrow = $row + 1; $subrow <= $row + $size - 1; $subrow++) {
@@ -147,7 +147,6 @@ while (my $line = <$fh>) {
 
 my @picture = ( [ '.#./..#/###' ] );
 
-# Odd i: multiple of 3, even i: multiple of 2
 foreach my $i (1..5) {
     foreach my $row (@picture) {
         foreach my $square (@$row) {
