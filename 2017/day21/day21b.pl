@@ -10,6 +10,7 @@ use List::Util qw(sum);
 
 sub transform {
     my ($square, $rules) = @_;
+
     foreach my $pattern (keys %$rules) {
         if ($pattern eq $$square) {
             $$square = $rules->{$pattern};
@@ -96,7 +97,7 @@ while (my $line = <$fh>) {
 
 my @picture = ( [ '.#./..#/###' ] );
 
-foreach my $i (1..5) {
+foreach my $i (1..18) {
     foreach my $row (@picture) {
         foreach my $square (@$row) {
             if (length $square == 5) {
