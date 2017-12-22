@@ -5,16 +5,6 @@ use warnings;
 
 use feature 'say';
 
-use Algorithm::Combinatorics qw(permutations combinations variations);
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
-use Digest::MD5 qw(md5_hex);
-use File::Slurp;
-use Graph::Simple;
-use List::MoreUtils qw(firstval mesh uniq frequency firstidx lastidx pairwise singleton);
-use List::Util qw(reduce max min product sum);
-use Math::Prime::Util qw(fordivisors);
-
 my $fname = shift;
 
 open my $fh, "<", $fname
@@ -22,7 +12,6 @@ open my $fh, "<", $fname
 
 my %grid;
 my ($x, $y) = (1, 1);
-
 
 while (my $line = <$fh>) {
     chomp $line;
@@ -34,18 +23,12 @@ while (my $line = <$fh>) {
     $y++;
 }
 
-print Dumper(\%grid);
-
 my $infect = 0;
 my ($xpos, $ypos) = (13, 13);
 my ($dx, $dy) = (0, -1);
 
-
 foreach my $i (1..10_000) {
-    say "Position is $xpos/$ypos";
-    say "Direction is $dx/$dy";
     $grid{"$xpos/$ypos"} //= '.';
-    say "Current node is ". $grid{"$xpos/$ypos"};
     if ($grid{"$xpos/$ypos"} eq '#') {
         # rotate right
         ($dx, $dy) = (-$dy, $dx);
@@ -56,7 +39,6 @@ foreach my $i (1..10_000) {
         ($dx, $dy) = ($dy, -$dx);
         $grid{"$xpos/$ypos"} = '#';
         $infect++;
-        say "Infecting...";
     }
     $xpos += $dx;
     $ypos += $dy;
