@@ -5,107 +5,45 @@ use warnings;
 
 use feature 'say';
 
-use Algorithm::Combinatorics qw(permutations combinations variations);
-use Data::Dumper;
-use Digest::MD5 qw(md5_hex);
-use File::Slurp;
-use Graph::Simple;
-use List::MoreUtils qw(firstval mesh uniq frequency firstidx lastidx pairwise singleton);
-use List::Util qw(reduce max min product sum);
-use Math::Prime::Util qw(fordivisors is_prime);
+use List::Util qw(sum);
 
-# my $fname = shift;
-# 
-# open my $fh, "<", $fname
-#     or die "Can't open $fname: $!";
+my $fname = shift;
 
-my $steps = 12134527;
+open my $fh, "<", $fname
+    or die "Can't open $fname: $!";
 
-my %states = (
-    A => {
-        0 => {
-            w => 1,
-            m => 1,
-            c => "B",
-        },
-        1 => {
-            w => 0,
-            m => -1,
-            c => "C",
-        },
-    },
-    B => {
-        0 => {
-            w => 1,
-            m => -1,
-            c => "A",
-        },
-        1 => {
-            w => 1,
-            m => 1,
-            c => "C",
-        },
-    },
-    C => {
-        0 => {
-            w => 1,
-            m => 1,
-            c => "A",
-        },
-        1 => {
-            w => 0,
-            m => -1,
-            c => "D",
-        },
-    },
-    D => {
-        0 => {
-            w => 1,
-            m => -1,
-            c => "E",
-        },
-        1 => {
-            w => 1,
-            m => -1,
-            c => "C",
-        },
-    },
-    E => {
-        0 => {
-            w => 1,
-            m => 1,
-            c => "F",
-        },
-        1 => {
-            w => 1,
-            m => 1,
-            c => "A",
-        },
-    },
-    F => {
-        0 => {
-            w => 1,
-            m => 1,
-            c => "A",
-        },
-        1 => {
-            w => 1,
-            m => 1,
-            c => "E",
-        },
-    },
-);
+my $line = <$fh>;
+my ($state) = $line =~ /state ([A-Z])/;
+$line = <$fh>;
+my ($steps) = $line =~ /(\d+)/;
+
+my %states;
+
+while ($line = <$fh>) {
+    chomp $line;
+    if ($line =~ /^In state/) {
+        my ($key) = $line =~ /^In state ([A-Z])/;
+        foreach my $curval (0, 1) {
+            <$fh>;
+            my ($w) = <$fh> =~ /(\d+)/;
+            my ($m) = <$fh> =~ /(left|right)/;
+            my ($c) = <$fh> =~ /state ([A-Z])/;
+            $states{$key}{$curval} = {
+                w => $w,
+                m => $m eq 'left' ? -1 : 1,
+                c => $c,
+            };
+        }
+    }
+}
 
 my @tape = (0);
 my $cursor = 0;
-my $state = "A";
 
 while ($steps--) {
-    # say "Tape: @tape";
-    # say "State: $state";
-    my %instrucs = %{ $states{$state}->{$tape[$cursor]} };
-    $tape[$cursor] = $instrucs{w};
-    $cursor += $instrucs{m};
+    my $instrucs = $states{$state}{$tape[$cursor]};
+    $tape[$cursor] = $instrucs->{w};
+    $cursor += $instrucs->{m};
     if ($cursor < 0) {
         unshift @tape, 0;
         $cursor++;
@@ -113,7 +51,7 @@ while ($steps--) {
     if ($cursor > $#tape) {
         push @tape, 0;
     }
-    $state = $instrucs{c};
+    $state = $instrucs->{c};
 }
 
 say sum @tape;
