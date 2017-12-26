@@ -1,6 +1,6 @@
 #!/bin/bash
 
-input=$(cat input)
+input=$(< "$1")
 
 # Santa's coordinates
 xs=0
