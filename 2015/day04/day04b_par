@@ -1,13 +1,13 @@
 #!/bin/bash
 
-input=$(cat input)
+input=$(< "$1")
 i=282749
 
 for subshell in {0..3}; do (
     (( i += subshell ))
     while true; do
-        md5=$(echo -n "$input$i"  | md5sum)
-        if [[ "${md5:0:6}" == '000000' ]]; then
+        md5=$(printf '%s' "$input$i"  | md5sum)
+        if [[ $md5 == 000000* ]]; then
             echo "$input with an attached $i has a hash starting with 000000"
             break
         fi

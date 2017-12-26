@@ -1,11 +1,11 @@
 #!/bin/bash
 
-input=$(cat input)
+input=$(< "$1")
 i=1
 
 while true; do
-    md5=$(echo -n "$input$i" | md5sum)
-    if [[ "${md5:0:5}" == '00000' ]]; then
+    md5=$(printf '%s' "$input$i" | md5sum)
+    if [[ $md5 == 00000* ]]; then
         echo "$input with an attached $i has a hash starting with 00000"
         break   # Happens at 282749
     fi

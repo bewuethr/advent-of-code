@@ -1,10 +1,18 @@
-#!/bin/perl
+#!/usr/bin/perl
 
-use 5.022;
+use strict;
 use warnings;
+
+use feature 'say';
+
 use Digest::MD5 qw(md5_hex);
 
-my $secret = `cat input`;
+my $fname = shift;
+
+open my $fh, "<", $fname
+    or die "Can't open $fname: $!";
+
+my $secret = <$fh>;
 chomp $secret;
 my $try = 282749;    # Answer from part 1
 
