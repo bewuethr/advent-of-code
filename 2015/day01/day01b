@@ -1,11 +1,11 @@
 #!/bin/bash
 
-input=$(cat "$1")
+input=$(< "$1")
 floor=0
 basement=0
 
 for (( i = 0; i < ${#input}; ++i )); do
-    char=${input:$i:1}
+    char=${input:i:1}
     if [[ $char == '(' ]]; then
         (( ++floor ))
     else
