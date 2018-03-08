@@ -5,20 +5,13 @@ use warnings;
 
 use feature 'say';
 
-use Algorithm::Combinatorics qw(permutations combinations variations);
-use Data::Dumper;
-use Digest::MD5 qw(md5_hex);
-use File::Slurp;
-use Graph::Simple;
-use List::MoreUtils qw(firstval mesh uniq frequency firstidx lastidx singleton);
-use List::Util qw(reduce max min product sum);
-use Math::Prime::Util qw(fordivisors);
+use List::MoreUtils qw(firstval);
+use List::Util qw(reduce);
 
 sub visit {
     my ($con, $seen, $el) = @_;
 
     foreach my $val ( @{ $con->{$el} } ) {
-        # print Dumper($seen);
         if (not $seen->{$val}++) {
             visit($con, $seen, $val);
         }
