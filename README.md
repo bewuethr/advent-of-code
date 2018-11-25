@@ -2,6 +2,9 @@
 
 My solutions to [Advent of Code](http://adventofcode.com/).
 
+See the [aoc-stats](https://github.com/bewuethr/aoc-stats) repo for a static
+site generator with extended statistics.
+
 ### 2015
 
 I started out with Bash, but added some Perl to the mix when Bash just took too
