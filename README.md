@@ -1,6 +1,6 @@
 # Advent of Code
 
-My solutions to [Advent of Code](http://adventofcode.com/).
+My solutions to [Advent of Code](https://adventofcode.com/).
 
 See the [aoc-stats](https://github.com/bewuethr/aoc-stats) repo for a static
 site generator with extended statistics.
