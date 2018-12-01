@@ -12,4 +12,4 @@ my $fname = shift;
 open my $fh, "<", $fname
     or die "Can't open $fname: $!";
 
- say sum map { chomp; my @arr = split "\t"; (max @arr) - (min @arr) } <$fh>;
+say sum map { chomp; my @arr = split "\t"; (max @arr) - (min @arr) } <$fh>;
