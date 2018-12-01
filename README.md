@@ -29,3 +29,9 @@ Perl for speed, Go to learn.
 
 Uploads are "polished", but the oldest commit per file is the honest version
 used to solve the puzzle.
+
+### 2018
+
+Probably default to Perl, but use something else (like Bash and CLI utilities)
+if I think it might be faster to write. First commits per day are the honest
+truth, afterwards I clean up.
