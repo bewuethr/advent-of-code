@@ -23,8 +23,7 @@ say $twos * $threes;
 
 sub hasrepeated {
 	my ($str, $n) = @_;
-	my @arr = split //, $str;
-	foreach my $l (@arr) {
+	foreach my $l (split //, $str) {
 		if ((() = $str =~ /$l/g) == $n) {
 			return 1;
 		}
