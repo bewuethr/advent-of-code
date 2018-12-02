@@ -20,16 +20,14 @@ foreach my $idx1 (0 .. $#lines-1) {
 
 sub compare {
 	my ($l1, $l2) = @_;
-	my @arr1 = split //, $l1;
-	my @arr2 = split //, $l2;
 	my $count = 0;
 	my $common;
-	foreach my $idx (0 .. $#arr1) {
-		if ($arr1[$idx] ne $arr2[$idx]) {
+	foreach my $idx (0 .. length($l1)-1) {
+		if (substr($l1, $idx, 1) ne substr($l2, $idx, 1)) {
 			++$count;
 		}
 		else {
-			$common .= $arr1[$idx];
+			$common .= substr($l1, $idx, 1);
 		}
 	}
 	if ($count == 1) {
