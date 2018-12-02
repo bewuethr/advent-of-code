@@ -5,11 +5,6 @@ use strict;
 
 use feature 'say';
 
-use List::Util qw(max min reduce sum);
-use List::MoreUtils qw(firstidx firstval pairwise singleton);
-use Algorithm::Combinatorics qw(variations);
-use Math::Prime::Util qw(is_prime);
-
 my $fname = shift;
 
 open my $fh, "<", $fname
@@ -20,25 +15,19 @@ my ($twos, $threes);
 chomp(my @lines = <$fh>);
 
 foreach my $line (@lines) {
-	my @arr = split //, $line;
-	foreach my $l (@arr) {
-		my $count = () = $line =~ /$l/g;
-		if ($count == 2) {
-			++$twos;
-			last;
-		}
-	}
-}
-
-foreach my $line (@lines) {
-	my @arr = split //, $line;
-	foreach my $l (@arr) {
-		my $count = () = $line =~ /$l/g;
-		if ($count == 3) {
-			++$threes;
-			last;
-		}
-	}
+	++$twos   if (hasrepeated($line, 2));
+	++$threes if (hasrepeated($line, 3));
 }
 
 say $twos * $threes;
+
+sub hasrepeated {
+	my ($str, $n) = @_;
+	my @arr = split //, $str;
+	foreach my $l (@arr) {
+		if ((() = $str =~ /$l/g) == $n) {
+			return 1;
+		}
+	}
+	return 0;
+}
