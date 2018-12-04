@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+sort -tn -k1,1 -k2,2 input > input_sorted
