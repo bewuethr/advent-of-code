@@ -5,14 +5,6 @@ use strict;
 
 use feature 'say';
 
-use List::Util qw(max min reduce sum);
-use List::MoreUtils qw(firstidx firstval pairwise singleton);
-use Algorithm::Combinatorics qw(variations);
-use Math::Prime::Util qw(is_prime);
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
-
-
 my $fname = shift;
 
 open my $fh, "<", $fname
@@ -36,7 +28,6 @@ while (1) {
 		if ($arr[$cur] =~ /[[:lower:]]/ and $arr[$next] =~ /[[:upper:]]/ or
 			$arr[$cur] =~ /[[:upper:]]/ and $arr[$next] =~ /[[:lower:]]/) {
 			if (lc $arr[$cur] eq lc $arr[$next]) {
-				# say "cur: $cur - $arr[$cur], next: $next - $arr[$next]";
 				$cur = $next + 1;
 				$next = $cur + 1;
 				next;
@@ -51,8 +42,6 @@ while (1) {
 	@arr = @new;
 	@new = ();
 	$before = @arr;
-	# say "@arr";
-	# say $before;
 }
 
 say scalar @new;

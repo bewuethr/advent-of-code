@@ -5,14 +5,6 @@ use strict;
 
 use feature 'say';
 
-use List::Util qw(max min reduce sum);
-use List::MoreUtils qw(firstidx firstval pairwise singleton);
-use Algorithm::Combinatorics qw(variations);
-use Math::Prime::Util qw(is_prime);
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
-
-
 my $fname = shift;
 
 open my $fh, "<", $fname
@@ -24,7 +16,6 @@ my $shortest = length $line;
 
 foreach my $remove ('a' .. 'z') {
 	my $input = $line =~ s/$remove//gir;
-	# say $input;
 
 	my @arr = split //, $input;
 	my @new;
@@ -32,38 +23,30 @@ foreach my $remove ('a' .. 'z') {
 	my $before = @arr;
 
 	while (1) {
-		my ($cur, $next) = (0, 1);
+		my $cur = 0;
 		while (1) {
-			if ($next > $#arr) {
-				push @new, $arr[$cur];
+			if ($cur >= $#arr) {
+				push @new, $arr[$cur] if defined $arr[$cur];
 				last;
 			}
-			if ($arr[$cur] =~ /[[:lower:]]/ and $arr[$next] =~ /[[:upper:]]/ or
-				$arr[$cur] =~ /[[:upper:]]/ and $arr[$next] =~ /[[:lower:]]/) {
-				if (lc $arr[$cur] eq lc $arr[$next]) {
-					# say "cur: $cur - $arr[$cur], next: $next - $arr[$next]";
-					$cur = $next + 1;
-					$next = $cur + 1;
+			if ($arr[$cur] =~ /[[:lower:]]/ and $arr[$cur+1] =~ /[[:upper:]]/ or
+				$arr[$cur] =~ /[[:upper:]]/ and $arr[$cur+1] =~ /[[:lower:]]/) {
+				if (lc $arr[$cur] eq lc $arr[$cur+1]) {
+					$cur += 2;
 					next;
 				}
 			}
 			push @new, $arr[$cur];
 			$cur++;
-			$next++;
 		}
 		last if @new == $before;
 		@arr = ();
 		@arr = @new;
 		@new = ();
 		$before = @arr;
-		# say "@arr";
-		# say $before;
 	}
 
-	if (@new < $shortest) {
-		$shortest = @new;
-		say "New shortest: $shortest";
-	}
+	$shortest = @new if @new < $shortest;
 }
 
 say $shortest;
