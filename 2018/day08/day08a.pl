@@ -5,23 +5,13 @@ use strict;
 
 use feature 'say';
 
-use List::Util qw(max min reduce sum);
-use List::MoreUtils qw(firstidx firstval pairwise singleton);
-use Algorithm::Combinatorics qw(variations);
-use Math::Prime::Util qw(is_prime);
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
+use List::Util qw(sum);
 
 sub makenode {
 	my ($arr, $idx, $metasum) = @_;
 	my ($childCount, $metaCount) = ($arr->[$$idx], $arr->[$$idx+1]);
 	$$idx += 2;
-	my $node = {
-		header => {
-			childCount => $childCount,
-			metaCount  => $metaCount,
-		}
-	};
+	my $node = {};
 	push @{ $node->{children} }, makenode($arr, $idx, $metasum) while $childCount--;
 	push @{ $node->{meta} }, $arr->[$$idx++] while $metaCount--;
 	$$metasum += sum @{ $node->{meta} };
@@ -41,7 +31,5 @@ my $idx = 0;
 my $metasum = 0;
 
 my $tree = makenode(\@arr, \$idx, \$metasum);
-
-say Dumper($tree);
 
 say $metasum;

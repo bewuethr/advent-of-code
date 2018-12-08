@@ -5,12 +5,7 @@ use strict;
 
 use feature 'say';
 
-use List::Util qw(max min reduce sum);
-use List::MoreUtils qw(firstidx firstval pairwise singleton);
-use Algorithm::Combinatorics qw(variations);
-use Math::Prime::Util qw(is_prime);
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
+use List::Util qw(sum);
 
 sub makenode {
 	my ($arr, $idx) = @_;
@@ -46,5 +41,4 @@ my $idx = 0;
 
 my $tree = makenode(\@arr, \$idx);
 
-say Dumper($tree);
 say $tree->{value};
