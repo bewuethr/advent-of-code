@@ -5,12 +5,7 @@ use strict;
 
 use feature 'say';
 
-use List::Util qw(max min reduce sum);
-use List::MoreUtils qw(firstidx firstval pairwise singleton);
-use Algorithm::Combinatorics qw(variations);
-use Math::Prime::Util qw(is_prime);
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
+use List::Util qw(max);
 
 my $fname = shift;
 
@@ -21,7 +16,6 @@ my $line = <$fh>;
 chomp $line;
 $line =~ /(\d+).* (\d+)/;
 my ($players, $last) = ($1, $2);
-# my ($players, $last) = (9, 25);
 
 my @circle = ( 0 );
 my @scores;
@@ -45,7 +39,6 @@ foreach my $val (1 .. $last) {
 			splice @circle, $insertIdx, 0, $val;
 		}
 		$current = $insertIdx;
-		# say "@circle";
 	}
 	$player = ($player + 1) % $players;
 }

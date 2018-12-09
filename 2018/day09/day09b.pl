@@ -5,12 +5,7 @@ use strict;
 
 use feature 'say';
 
-use List::Util qw(max min reduce sum);
-use List::MoreUtils qw(firstidx firstval mesh pairwise singleton);
-use Algorithm::Combinatorics qw(variations);
-use Math::Prime::Util qw(is_prime);
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
+use List::Util qw(max);
 
 my $fname = shift;
 
@@ -21,14 +16,12 @@ my $line = <$fh>;
 chomp $line;
 $line =~ /(\d+).* (\d+)/;
 my ($players, $last) = ($1, 100 * $2);
-# my ($players, $last) = (9, 25);
 
 my $node = { val => 0 };
 $node->{next} = $node;
 $node->{prev} = $node;
-# say Dumper($node);
 
-my @scores = (0) x $players;
+my @scores;
 my $current = $node;
 
 my $player = 0;
@@ -54,8 +47,6 @@ foreach my $val (1 .. $last) {
 		$current = $newNode;
 	}
 	$player = ($player + 1) % $players;
-	# say Dumper($node);
 }
 
-# say "@scores";
 say max @scores;
