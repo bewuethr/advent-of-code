@@ -5,18 +5,11 @@ use strict;
 
 use feature 'say';
 
-use List::Util qw(max min reduce sum);
-use List::MoreUtils qw(firstidx firstval pairwise singleton);
-use Algorithm::Combinatorics qw(variations);
-use Math::Prime::Util qw(is_prime);
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
-$Data::Dumper::Indent = 2;
+use List::Util qw(sum);
 
 sub duration {
 	my $letter = shift;
 	return ord($letter) - ord("A") + 61;
-	# return ord($letter) - ord("A") + 1;
 }
 
 sub getnext {
@@ -42,9 +35,6 @@ while (my $line = <$fh>) {
 	$degrees{$from} //= 0;
 	$degrees{$to}++;
 }
-
-# say Dumper(\%steps);
-# say Dumper(\%degrees);
 
 my $seconds = 0;
 
@@ -75,12 +65,6 @@ while (1) {
 			}
 		}
 	}
-	say "Time: $seconds";
-	say Dumper(\@workers);
-	$Data::Dumper::Indent = 0;
-	say Dumper(\%steps);
-	$Data::Dumper::Indent = 2;
-	say Dumper(\%degrees);
 	last if (sum map { $_->[1] } @workers) == 0 and (keys %degrees) == 0;
 
 	foreach my $i (0 .. $#workers) {
