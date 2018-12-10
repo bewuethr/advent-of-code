@@ -30,25 +30,7 @@ while (1) {
 	my $ymax = max map { $_->{y} } @lights;
 	$bbSize = ($xmax - $xmin + 1) * ($ymax - $ymin + 1);
 	if ($t > 0 and $bbSize > $prevBBSize) {
-		my %map;
-		foreach my $light (@lights) {
-			# Go back one step
-			$light->{x} -= $light->{vx};
-			$light->{y} -= $light->{vy};
-			$map{$light->{x},$light->{y}} = 1;
-		}
-		
-		foreach my $y ($ymin .. $ymax) {
-			foreach my $x ($xmin .. $xmax) {
-				if (exists $map{$x,$y}) {
-					print "#";
-				}
-				else {
-					print ".";
-				}
-			}
-			say "";
-		}
+		say $t - 1;
 		exit;
 	}
 
