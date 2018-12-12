@@ -35,22 +35,27 @@ say "000: $state";
 my $newState = '.' x length($state);
 
 my $gen = 1;
+my $step = 0;
 
 while (1) {
 	printf "%03d: ", $gen;
 	foreach my $idx (2 .. length($state)-3) {
 		substr($newState, $idx, 1, $rules{ substr($state, $idx-int($pl/2), $pl) });
 	}
+
+	say $newState;
+	my ($off, $statePtrn) = $state =~ /(\.*)(#.*#)/;
+	my ($newOff, $newStatePtrn) = $newState =~ /(\.*)(#.*#)/;
+	$step = length($newOff) - length($off);
+	$state = $newState;
+
+	last if $statePtrn eq $newStatePtrn;
+
 	$newState .= '.' if substr($newState, -$pl) =~ /#/;
 	if (substr($newState, 0, $pl) =~ /#/) {
 		$newState = '.' . $newState;
 		$offset++;
 	}
-	say $newState;
-	my ($statePtrn) = $state =~ /(#.*#)/;
-	my ($newStatePtrn) = $newState =~ /(#.*#)/;
-	$state = $newState;
-	last if $statePtrn eq $newStatePtrn;
 	$gen++;
 }
 
@@ -60,4 +65,4 @@ my $sum = sum
 
 my $count = scalar grep { $_ eq '#' } split //, $state;
 
-say $sum + $count * (5_000_000_000 - $gen);
+say $sum + $step * $count * (5_000_000_000 - $gen);
