@@ -34,9 +34,9 @@ $state = '.' x $offset . $state . '.' x $pl;
 say "000: $state";
 my $newState = '.' x length($state);
 
-my $maxGen = 100;
+my $gen = 1;
 
-foreach my $gen (1 .. $maxGen) {
+while (1) {
 	printf "%03d: ", $gen;
 	foreach my $idx (2 .. length($state)-3) {
 		substr($newState, $idx, 1, $rules{ substr($state, $idx-int($pl/2), $pl) });
@@ -47,7 +47,11 @@ foreach my $gen (1 .. $maxGen) {
 		$offset++;
 	}
 	say $newState;
+	my ($statePtrn) = $state =~ /(#.*#)/;
+	my ($newStatePtrn) = $newState =~ /(#.*#)/;
 	$state = $newState;
+	last if $statePtrn eq $newStatePtrn;
+	$gen++;
 }
 
 my $sum = sum
@@ -56,4 +60,4 @@ my $sum = sum
 
 my $count = scalar grep { $_ eq '#' } split //, $state;
 
-say $sum + $count * (5_000_000_000 - $maxGen);
+say $sum + $count * (5_000_000_000 - $gen);
