@@ -26,15 +26,17 @@ while (my $line = <$fh>) {
 	$rules{$arr[0]} = $arr[1];
 }
 
-my $offset = 5;
-
 my $pl = 5;	# length of a pattern
+
+my $offset = $pl;
 
 $state = '.' x $offset . $state . '.' x $pl;
 say "000: $state";
 my $newState = '.' x length($state);
 
-foreach my $gen (1 .. 20) {
+my $maxGen = 100;
+
+foreach my $gen (1 .. $maxGen) {
 	printf "%03d: ", $gen;
 	foreach my $idx (2 .. length($state)-3) {
 		substr($newState, $idx, 1, $rules{ substr($state, $idx-int($pl/2), $pl) });
@@ -48,6 +50,10 @@ foreach my $gen (1 .. 20) {
 	$state = $newState;
 }
 
-say sum
+my $sum = sum
 	map { $_ - $offset }
 	grep { substr($state, $_, 1) eq '#' } (0 .. length($state)-1);
+
+my $count = scalar grep { $_ eq '#' } split //, $state;
+
+say $sum + $count * (5_000_000_000 - $maxGen);
