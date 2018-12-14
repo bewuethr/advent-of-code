@@ -6,12 +6,13 @@ use strict;
 use feature 'say';
 
 sub draw {
-	my ($map, $carts) = @_;
+	my ($map, $carts, $signs) = @_;
 	my @drawMap = map { [@$_] } @$map;
 	foreach my $cart (@$carts) {
-		$drawMap[$cart->{y}][$cart->{x}] = "o";
+		$drawMap[$cart->{y}][$cart->{x}] = $signs->{"$cart->{dx},$cart->{dy}"};
 	}
 	say join "\n", map { join '', @$_ } @drawMap;
+	<>;
 }
 
 sub moveCart {
@@ -98,6 +99,13 @@ while (my $line = <$fh>) {
 	push @map, [ split //, $line ];
 }
 
+my %signs = (
+	'0,1'  => 'v',
+	'0,-1' => '^',
+	'-1,0' => '<',
+	'1,0'  => '>',
+);
+
 my %dirs = (
 	'v' => { dx => 0,  dy => 1 },
 	'^' => { dx => 0,  dy => -1 },
@@ -125,7 +133,7 @@ foreach my $y (0 .. $#map) {
 }
 
 while (1) {
-	draw(\@map, \@carts);
+	# draw(\@map, \@carts, \%signs);
 	@carts = sort { $a->{y} <=> $b->{y} or $a->{x} <=> $b->{x} } @carts;
 	foreach my $idx (0 .. $#carts) {
 		moveCart(\@map, $carts[$idx]);
