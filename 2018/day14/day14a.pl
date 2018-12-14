@@ -5,12 +5,7 @@ use strict;
 
 use feature 'say';
 
-use List::Util qw(max min reduce sum);
-use List::MoreUtils qw(firstidx firstval pairwise singleton);
-use Algorithm::Combinatorics qw(variations);
-use Math::Prime::Util qw(is_prime);
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
+use List::Util qw(sum);
 
 my $fname = shift;
 
@@ -28,7 +23,6 @@ while (@r < $num + 10) {
 	push @r, split( //, $sum);
 	$i = ($i + $r[$i] + 1) % @r;
 	$j = ($j + $r[$j] + 1) % @r;
-	# say "@r";
 }
 
 say join "", @r[$num .. $num+9];
