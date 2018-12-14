@@ -5,13 +5,6 @@ use strict;
 
 use feature 'say';
 
-use List::Util qw(max min reduce sum);
-use List::MoreUtils qw(firstidx firstval pairwise singleton);
-use Algorithm::Combinatorics qw(variations);
-use Math::Prime::Util qw(is_prime);
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
-
 sub draw {
 	my ($map, $carts) = @_;
 	my @drawMap = map { [@$_] } @$map;
@@ -27,7 +20,6 @@ sub moveCart {
 
 	$cart->{x} += $cart->{dx};
 	$cart->{y} += $cart->{dy};
-	# say Dumper($cart);
 	my ($x, $y) = @$cart{ qw(x y) };
 
 	if ($map->[$y][$x] =~ /[-|]/) {
@@ -139,13 +131,11 @@ foreach my $y (0 .. $#map) {
 
 while (1) {
 	@carts = sort { $a->{y} <=> $b->{y} or $a->{x} <=> $b->{x} } @carts;
+	# draw(\@map, \@carts);
 	foreach my $idx (0 .. $#carts) {
 		next if $carts[$idx]{deleted};
 		moveCart(\@map, $carts[$idx]);
-		# draw(\@map, \@carts);
 		checkCollisions(\@carts, $idx);
-		# draw(\@map, \@carts);
-		# say "-" x 15;
 	}
 	my @left = grep { not exists $_->{deleted} } @carts;
 	if (@left == 1) {
