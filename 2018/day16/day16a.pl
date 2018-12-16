@@ -45,8 +45,7 @@ while (1) {
 	my $blank = <$fh>;
 
 	my @rBefore = $before =~ /(\d+), (\d+), (\d+), (\d)/;
-	my ($opcode, $A, $B, $C) = split / /, $instr;
-	my @args = ($A, $B, $C);
+	my ($opcode, @args) = split / /, $instr;
 	my (@rExpect) = $after =~ /(\d+), (\d+), (\d+), (\d)/;
 
 	my $count = 0;

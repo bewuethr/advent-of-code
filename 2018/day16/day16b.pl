@@ -1,63 +1,31 @@
 #!/usr/bin/perl
 
-use 5.010;
 use warnings;
 no warnings 'experimental';
 use strict;
 
 use feature 'say';
 
-sub matches {
-	my ($rb, $i, $ra, $cands) = @_;
+our @r;
 
-	# addr
-	$cands->{$i->{op}}{addr} = 1 if $ra->[$i->{C}] == $rb->[$i->{A}] + $rb->[$i->{B}];
-
-	# addi
-	$cands->{$i->{op}}{addi} = 1 if $ra->[$i->{C}] == $rb->[$i->{A}] + $i->{B};
-
-	# mulr
-	$cands->{$i->{op}}{mulr} = 1 if $ra->[$i->{C}] == $rb->[$i->{A}] * $rb->[$i->{B}];
-
-	# muli
-	$cands->{$i->{op}}{muli} = 1 if $ra->[$i->{C}] == $rb->[$i->{A}] * $i->{B};
-
-	# banr
-	$cands->{$i->{op}}{banr} = 1 if $ra->[$i->{C}] == ($rb->[$i->{A}] & $rb->[$i->{B}]);
-
-	# bani
-	$cands->{$i->{op}}{bani} = 1 if $ra->[$i->{C}] == ($rb->[$i->{A}] & $i->{B});
-
-	# borr
-	$cands->{$i->{op}}{borr} = 1 if $ra->[$i->{C}] == ($rb->[$i->{A}] | $rb->[$i->{B}]);
-
-	# bori
-	$cands->{$i->{op}}{bori} = 1 if $ra->[$i->{C}] == ($rb->[$i->{A}] | $i->{B});
-
-	# setr
-	$cands->{$i->{op}}{setr} = 1 if $ra->[$i->{C}] == $rb->[$i->{A}];
-
-	# seti
-	$cands->{$i->{op}}{seti} = 1 if $ra->[$i->{C}] == $i->{A};
-
-	# gtir
-	$cands->{$i->{op}}{gtir} = 1 if $ra->[$i->{C}] == ($i->{A} > $rb->[$i->{B}]);
-
-	# gtri
-	$cands->{$i->{op}}{gtri} = 1 if $ra->[$i->{C}] == ($rb->[$i->{A}] > $i->{B});
-
-	# gtrr
-	$cands->{$i->{op}}{gtrr} = 1 if $ra->[$i->{C}] == ($rb->[$i->{A}] > $rb->[$i->{B}]);
-
-	# eqir
-	$cands->{$i->{op}}{eqir} = 1 if $ra->[$i->{C}] == ($i->{A} == $rb->[$i->{B}]);
-
-	# eqri
-	$cands->{$i->{op}}{eqri} = 1 if $ra->[$i->{C}] == ($rb->[$i->{A}] == $i->{B});
-
-	# eqrr
-	$cands->{$i->{op}}{eqrr} = 1 if $ra->[$i->{C}] == ($rb->[$i->{A}] == $rb->[$i->{B}]);
-}
+my %ops = (
+	addr => sub { $r[$_[2]] = $r[$_[0]] + $r[$_[1]] },
+	addi => sub { $r[$_[2]] = $r[$_[0]] + $_[1] },
+	mulr => sub { $r[$_[2]] = $r[$_[0]] * $r[$_[1]] },
+	muli => sub { $r[$_[2]] = $r[$_[0]] * $_[1] },
+	banr => sub { $r[$_[2]] = ($r[$_[0]] & $r[$_[1]]) },
+	bani => sub { $r[$_[2]] = ($r[$_[0]] & $_[1]) },
+	borr => sub { $r[$_[2]] = ($r[$_[0]] | $r[$_[1]]) },
+	bori => sub { $r[$_[2]] = ($r[$_[0]] | $_[1]) },
+	setr => sub { $r[$_[2]] = $r[$_[0]] },
+	seti => sub { $r[$_[2]] = $_[0] },
+	gtir => sub { $r[$_[2]] = $_[0] > $r[$_[1]] },
+	gtri => sub { $r[$_[2]] = $r[$_[0]] > $_[1] },
+	gtrr => sub { $r[$_[2]] = $r[$_[0]] > $r[$_[1]] },
+	eqir => sub { $r[$_[2]] = $_[0] == $r[$_[1]] },
+	eqri => sub { $r[$_[2]] = $r[$_[0]] == $_[1] },
+	eqrr => sub { $r[$_[2]] = $r[$_[0]] == $r[$_[1]] },
+);
 
 my $fname = shift;
 
@@ -76,17 +44,15 @@ while (1) {
 	chomp $after;
 	my $blank = <$fh>;
 
-	my (@rb) = $before =~ /(\d+), (\d+), (\d+), (\d)/;
-	my ($opcode, $A, $B, $C) = split / /, $instr;
-	my %i = (
-		op => $opcode,
-		A => $A,
-		B => $B,
-		C => $C,
-	);
-	my (@ra) = $after =~ /(\d+), (\d+), (\d+), (\d)/;
+	my @rBefore = $before =~ /(\d+), (\d+), (\d+), (\d)/;
+	my ($opcode, @args) = split / /, $instr;
+	my (@rExpect) = $after =~ /(\d+), (\d+), (\d+), (\d)/;
 
-	matches(\@rb, \%i, \@ra, \%cands);
+	foreach my $op (keys %ops) {
+		@r = @rBefore;
+		$ops{$op}(@args);
+		$cands{$opcode}{$op} = 1 if @r ~~ @rExpect;
+	}
 }
 
 my %opcodes;
@@ -104,33 +70,15 @@ while (1) {
 	}
 }
 
-my @r = (0, 0, 0, 0);
+@r = (0, 0, 0, 0);
 
 # Read and solve program
 while (my $line = <$fh>) {
 	chomp $line;
 	next if $line eq "";
-	my ($opcode, $A, $B, $C) = split / /, $line;
+	my ($opcode, @args) = split / /, $line;
 
-	given ($opcodes{$opcode}) {
-		when('addr') { $r[$C] = $r[$A] + $r[$B] }
-		when('addi') { $r[$C] = $r[$A] + $B }
-		when('mulr') { $r[$C] = $r[$A] * $r[$B] }
-		when('muli') { $r[$C] = $r[$A] * $B }
-		when('banr') { $r[$C] = $r[$A] & $r[$B] }
-		when('bani') { $r[$C] = $r[$A] & $B }
-		when('borr') { $r[$C] = $r[$A] | $r[$B] }
-		when('bori') { $r[$C] = $r[$A] | $B }
-		when('setr') { $r[$C] = $r[$A] }
-		when('seti') { $r[$C] = $A }
-		when('gtir') { $r[$C] = $A > $r[$B] }
-		when('gtri') { $r[$C] = $r[$A] > $B }
-		when('gtrr') { $r[$C] = $r[$A] > $r[$B] }
-		when('eqir') { $r[$C] = $A == $r[$B] }
-		when('eqri') { $r[$C] = $r[$A] == $B }
-		when('eqrr') { $r[$C] = $r[$A] == $r[$B] }
-		default      { die "unknown opcode $opcodes{$opcode}" }
-	}
+	$ops{$opcodes{$opcode}}(@args);
 }
 
 say $r[0];
