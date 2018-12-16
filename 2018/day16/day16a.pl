@@ -1,64 +1,31 @@
 #!/usr/bin/perl
 
 use warnings;
+no warnings 'experimental';
 use strict;
 
 use feature 'say';
 
-sub matches {
-	my ($rb, $i, $ra) = @_;
-	my $count = 0;
+our @r;
 
-	# addr
-	$count++ if $ra->[$i->{C}] == $rb->[$i->{A}] + $rb->[$i->{B}];
-
-	# addi
-	$count++ if $ra->[$i->{C}] == $rb->[$i->{A}] + $i->{B};
-
-	# mulr
-	$count++ if $ra->[$i->{C}] == $rb->[$i->{A}] * $rb->[$i->{B}];
-
-	# muli
-	$count++ if $ra->[$i->{C}] == $rb->[$i->{A}] * $i->{B};
-
-	# banr
-	$count++ if $ra->[$i->{C}] == ($rb->[$i->{A}] & $rb->[$i->{B}]);
-
-	# bani
-	$count++ if $ra->[$i->{C}] == ($rb->[$i->{A}] & $i->{B});
-
-	# borr
-	$count++ if $ra->[$i->{C}] == ($rb->[$i->{A}] | $rb->[$i->{B}]);
-
-	# bori
-	$count++ if $ra->[$i->{C}] == ($rb->[$i->{A}] | $i->{B});
-
-	# setr
-	$count++ if $ra->[$i->{C}] == $rb->[$i->{A}];
-
-	# seti
-	$count++ if $ra->[$i->{C}] == $i->{A};
-
-	# gtir
-	$count++ if $ra->[$i->{C}] == ($i->{A} > $rb->[$i->{B}]);
-
-	# gtri
-	$count++ if $ra->[$i->{C}] == ($rb->[$i->{A}] > $i->{B});
-
-	# gtrr
-	$count++ if $ra->[$i->{C}] == ($rb->[$i->{A}] > $rb->[$i->{B}]);
-
-	# eqir
-	$count++ if $ra->[$i->{C}] == ($i->{A} == $rb->[$i->{B}]);
-
-	# eqri
-	$count++ if $ra->[$i->{C}] == ($rb->[$i->{A}] == $i->{B});
-
-	# eqrr
-	$count++ if $ra->[$i->{C}] == ($rb->[$i->{A}] == $rb->[$i->{B}]);
-
-	return $count;
-}
+my %ops = (
+	addr => sub { $r[$_[2]] = $r[$_[0]] + $r[$_[1]] },
+	addi => sub { $r[$_[2]] = $r[$_[0]] + $_[1] },
+	mulr => sub { $r[$_[2]] = $r[$_[0]] * $r[$_[1]] },
+	muli => sub { $r[$_[2]] = $r[$_[0]] * $_[1] },
+	banr => sub { $r[$_[2]] = ($r[$_[0]] & $r[$_[1]]) },
+	bani => sub { $r[$_[2]] = ($r[$_[0]] & $_[1]) },
+	borr => sub { $r[$_[2]] = ($r[$_[0]] | $r[$_[1]]) },
+	bori => sub { $r[$_[2]] = ($r[$_[0]] | $_[1]) },
+	setr => sub { $r[$_[2]] = $r[$_[0]] },
+	seti => sub { $r[$_[2]] = $_[0] },
+	gtir => sub { $r[$_[2]] = $_[0] > $r[$_[1]] },
+	gtri => sub { $r[$_[2]] = $r[$_[0]] > $_[1] },
+	gtrr => sub { $r[$_[2]] = $r[$_[0]] > $r[$_[1]] },
+	eqir => sub { $r[$_[2]] = $_[0] == $r[$_[1]] },
+	eqri => sub { $r[$_[2]] = $r[$_[0]] == $_[1] },
+	eqrr => sub { $r[$_[2]] = $r[$_[0]] == $r[$_[1]] },
+);
 
 my $fname = shift;
 
@@ -77,17 +44,18 @@ while (1) {
 	chomp $after;
 	my $blank = <$fh>;
 
-	my (@rb) = $before =~ /(\d+), (\d+), (\d+), (\d)/;
+	my @rBefore = $before =~ /(\d+), (\d+), (\d+), (\d)/;
 	my ($opcode, $A, $B, $C) = split / /, $instr;
-	my %i = (
-		op => $opcode,
-		A => $A,
-		B => $B,
-		C => $C,
-	);
-	my (@ra) = $after =~ /(\d+), (\d+), (\d+), (\d)/;
+	my @args = ($A, $B, $C);
+	my (@rExpect) = $after =~ /(\d+), (\d+), (\d+), (\d)/;
 
-	my $count = matches(\@rb, \%i, \@ra);
+	my $count = 0;
+	foreach my $op (keys %ops) {
+		@r = @rBefore;
+		$ops{$op}(@args);
+		$count++ if @r ~~ @rExpect;
+	}
+
 	$total++ if $count >= 3;
 }
 
