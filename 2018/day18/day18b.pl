@@ -5,12 +5,7 @@ use strict;
 
 use feature 'say';
 
-use List::Util qw(max min reduce sum);
-use List::MoreUtils qw(firstidx firstval pairwise singleton);
-use Algorithm::Combinatorics qw(variations);
-use Math::Prime::Util qw(is_prime);
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
+use List::Util qw(sum);
 
 sub draw {
 	my $map = shift;
@@ -18,47 +13,20 @@ sub draw {
 	return;
 }
 
-sub trees {
-	my ($x, $y, $grid) = @_;
+sub neighbours {
+	my ($x, $y, $grid, $type, $min) = @_;
 	my $count = 0;
 	foreach my $dx (-1 .. 1) {
 		foreach my $dy (-1 .. 1) {
 			next if $dx == 0 and $dy == 0;
-			next if $x + $dx < 0 or $x + $dx > $#{ $grid->[$y] };
-			next if $y + $dy < 0 or $y + $dy > $#$grid;
-			$count++ if $grid->[$y+$dy][$x+$dx] eq '|';
+			next if $x + $dx < 0
+				or $x + $dx > $#{ $grid->[$y] }
+				or $y + $dy < 0
+				or $y + $dy > $#$grid;
+			$count++ if $grid->[$y+$dy][$x+$dx] eq $type;
 		}
 	}
-	return $count;
-}
-
-sub yards {
-	my ($x, $y, $grid) = @_;
-	my $count = 0;
-	foreach my $dx (-1 .. 1) {
-		foreach my $dy (-1 .. 1) {
-			next if $dx == 0 and $dy == 0;
-			next if $x + $dx < 0 or $x + $dx > $#{ $grid->[$y] };
-			next if $y + $dy < 0 or $y + $dy > $#$grid;
-			$count++ if $grid->[$y+$dy][$x+$dx] eq '#';
-		}
-	}
-	return $count;
-}
-
-sub oneyardonetree {
-	my ($x, $y, $grid) = @_;
-	my ($yard, $tree) = (0, 0);
-	foreach my $dx (-1 .. 1) {
-		foreach my $dy (-1 .. 1) {
-			next if $dx == 0 and $dy == 0;
-			next if $x + $dx < 0 or $x + $dx > $#{ $grid->[$y] };
-			next if $y + $dy < 0 or $y + $dy > $#$grid;
-			$yard++ if $grid->[$y+$dy][$x+$dx] eq '#';
-			$tree++ if $grid->[$y+$dy][$x+$dx] eq '|';
-		}
-	}
-	return ($yard >= 1 and $tree >=1);
+	return $count >= $min;
 }
 
 my $fname = shift;
@@ -73,35 +41,46 @@ while (my $line = <$fh>) {
 	push @grid, [ split //, $line ];
 }
 
-draw(\@grid);
-my %values;
+my (%minToValue, %valueToMin);
 
-foreach my $m (1 .. 580) {
-	my $trees = sum map { scalar grep { $_ eq '|' } @$_ } @grid;
-	my $yards = sum map { scalar grep { $_ eq '#' } @$_ } @grid;
-	my $value = $trees * $yards;
-	push @{$values{$value}}, $m;
+my $m = 0;
+OUTER: while (1) {
 	my @newGrid = map { [@$_] } @grid;
+	my $value = (sum map { scalar grep { $_ eq '|' } @$_ } @grid)
+		* (sum map { scalar grep { $_ eq '#' } @$_ } @grid);
+	$minToValue{$m} = $value;
+	push @{ $valueToMin{$value} }, $m;
+	
 	foreach my $y (0 .. $#grid) {
 		foreach my $x (0 .. $#{ $grid[$y] }) {
 			my $acre = $grid[$y][$x];
 			if ($acre eq '.') {
-				$newGrid[$y][$x] = trees($x, $y, \@grid) >= 3 ? '|' : '.';
+				$newGrid[$y][$x] = neighbours($x, $y, \@grid, '|', 3) ? '|' : '.';
 			}
 			elsif ($acre eq '|') {
-				$newGrid[$y][$x] = yards($x, $y, \@grid) >= 3 ? '#' : '|';
+				$newGrid[$y][$x] = neighbours($x, $y, \@grid, '#', 3) ? '#' : '|';
 			}
 			else {
-				$newGrid[$y][$x] = oneyardonetree($x, $y, \@grid) ? '#' : '.';
+				$newGrid[$y][$x] = (neighbours($x, $y, \@grid, '|', 1)
+					and neighbours($x, $y, \@grid, '#', 1))
+					? '#'
+					: '.';
 			}
 		}
 	}
-	@grid = map { [@$_] } @newGrid;
+	@grid = @newGrid;
+	$m++;
+
 	if ($m % 1000 == 0) {
-		say Dumper(\%values);
+		my @repeated = grep { @$_ > 5 } values %valueToMin;
+		next unless @repeated;
+		my $period = $repeated[0][1] - $repeated[0][0];
+		say $period;
+		for (my $minute = 1000000000 % $period; $minute < $m; $minute += $period) {
+			if ($minute > $repeated[0][0] and defined $minToValue{$minute}) {
+				say $minToValue{$minute};
+				last OUTER;
+			}
+		}
 	}
 }
-
-my $trees = sum map { scalar grep { $_ eq '|' } @$_ } @grid;
-my $yards = sum map { scalar grep { $_ eq '#' } @$_ } @grid;
-say $trees * $yards;
