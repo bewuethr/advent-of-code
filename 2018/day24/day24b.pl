@@ -5,12 +5,8 @@ use strict;
 
 use feature 'say';
 
-use List::Util qw(max min reduce sum);
-use List::MoreUtils qw(firstidx firstval pairwise singleton);
-use Algorithm::Combinatorics qw(variations);
-use Math::Prime::Util qw(factor is_prime);
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
+use List::Util qw(sum);
+use List::MoreUtils qw(firstidx);
 
 sub selectTarget {
 	my ($group, $groups) = @_;
@@ -28,7 +24,6 @@ sub selectTarget {
 			push @{ $damageHash{$group->{effPower}} }, $target;
 		}
 	}
-	# say Dumper(\%damageHash);
 
 	# Get group of weakest enemies
 	return unless scalar keys %damageHash;
@@ -40,7 +35,6 @@ sub selectTarget {
 			$b->{initiative} <=> $a->{initiative}
 		} @{ $damageHash{ ( sort { $b+0 <=> $a+0 } keys %damageHash )[0] } }
 	)[0];
-	# say Dumper($target);
 	
 	$group->{target} = firstidx { $_ == $target } @$groups;
 	$target->{targeted} = 1;
@@ -55,9 +49,7 @@ sub attack {
 	my $multiplier = exists $target->{weak}{$group->{attackType}} ? 2 : 1;
 
 	use integer;
-	# say "Before: ", Dumper($group, $target);
 	$target->{units} -= $group->{effPower} * $multiplier /  $target->{hitPoints};
-	# say "After: ", Dumper($target);
 
 	# Recalculate effective power of target
 	$target->{effPower} = $target->{units} * $target->{attackDamage};
@@ -68,7 +60,6 @@ my $fname = shift;
 my $boost = 1;
 
 while (1) {
-
 	open my $fh, "<", $fname
 		or die "Can't open $fname: $!";
 
@@ -114,7 +105,7 @@ while (1) {
 		push @groups, $group;
 	}
 
-	# say Dumper(\@groups);
+	my $units = sum map { $_->{units} } @groups;
 
 	while (1) {
 		# Remove groups with no units left
@@ -129,30 +120,26 @@ while (1) {
 		# Reset all target tags
 		@groups = map { delete @{$_}{qw(targeted target)}; $_ } @groups;
 
-		# say Dumper(\@groups);
-		# <>;
-
 		# Sort by effective power, then initiative
 		@groups = sort {
 			$b->{effPower} <=> $a->{effPower} or
 			$b->{initiative} <=> $a->{initiative}
 		} grep { $_->{units} > 0 } @groups;
 
-		# say Dumper(\@groups);
-
 		# Target selection
 		selectTarget($_, \@groups) for @groups;
 
-		# say Dumper(\@groups);
-		# <>;
-
 		# Attacking phase
 		attack($_, \@groups) for sort { $b->{initiative} <=> $a->{initiative} } @groups;
+
+		my $newUnits = sum map { $_->{units} } @groups;
+		last if $newUnits == $units;	# Fight will never end
+		$units = $newUnits;
 	}
 
-	my $winner = $groups[0]{army};
-	my $units = sum map { $_->{units} } @groups;
-	say "$boost: $winner, $units units";
-	last if $winner eq "immune";
+	say "$boost: $units units";
+	last if ( scalar grep { $_->{army} eq "infection" } @groups ) == 0;
 	$boost++;
 }
+
+say "Immune system won last round";
