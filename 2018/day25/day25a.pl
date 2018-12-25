@@ -1,16 +1,13 @@
 #!/usr/bin/perl
 
 use warnings;
+no warnings 'recursion';
 use strict;
 
 use feature 'say';
 
-use List::Util qw(first max min reduce sum);
-use List::MoreUtils qw(firstidx firstval pairwise singleton);
-use Algorithm::Combinatorics qw(variations);
-use Math::Prime::Util qw(factor is_prime);
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
+use List::Util qw(sum);
+use List::MoreUtils qw(pairwise);
 
 sub dist {
 	my ($p1, $p2) = @_;
