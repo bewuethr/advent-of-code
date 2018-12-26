@@ -50,25 +50,21 @@ my ($relIdx) = grep {
 my @relInstr = split / /, $instr[$relIdx];
 my $relReg = $relInstr[1] == 0 ? $relInstr[2] : $relInstr[1];
 
+@r = (0, 0, 0, 0, 0, 0);
+my $ip = $r[$ipIdx];
 
 while (1) {
-	@r = (0, 0, 0, 0, 0, 0);
-	my $ip = $r[$ipIdx];
+	my ($opcode, @args) = split / /, $instr[$ip];
 
-	while (1) {
-		my ($opcode, @args) = split / /, $instr[$ip];
+	# Make sure that arguments are not treated as strings
+	@args = map { $_ + 0 } @args;
 
-		# Make sure that arguments are not treated as strings
-		@args = map { $_ + 0 } @args;
+	$r[$ipIdx] = $ip;
+	$ops{$opcode}(@args);
 
-		$r[$ipIdx] = $ip;
-		$ops{$opcode}(@args);
-
-		if ($ip == $relIdx) {
-			say "Register $relReg: $r[$relReg]";
-			exit;
-		}
-		$ip = $r[$ipIdx] + 1;
-		last if $ip > $#instr or $ip < 0;
+	if ($ip == $relIdx) {
+		say "Register $relReg: $r[$relReg]";
+		exit;
 	}
+	$ip = $r[$ipIdx] + 1;
 }
