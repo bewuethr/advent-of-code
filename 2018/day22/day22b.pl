@@ -5,14 +5,6 @@ use strict;
 
 use feature 'say';
 
-use List::Util qw(first max min reduce sum);
-use List::MoreUtils qw(firstidx firstval pairwise singleton);
-use Algorithm::Combinatorics qw(variations);
-use Math::Prime::Util qw(factor is_prime);
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
-
-
 my $fname = shift;
 
 open my $fh, "<", $fname
@@ -60,7 +52,6 @@ sub populate {
 }
 
 sub addrow {
-	# say "Adding a row...";
 	my ($map, $ymax) = @_;
 	my $y = @$map;
 	foreach my $x (0 .. $#{$map->[0]}) {
@@ -70,7 +61,6 @@ sub addrow {
 }
 
 sub addcolumn {
-	# say "Adding a column...";
 	my ($map, $xmax) = @_;
 	foreach my $y (0 .. $#$map) {
 		my $x = @{$map->[$y]};
@@ -81,26 +71,11 @@ sub addcolumn {
 
 sub equipmentWorks {
 	my ($map, $x, $y, $equipped) = @_;
-	return 0 if $map->[$y][$x]{type} eq "rocky"  and $equipped eq "neither";
-	return 0 if $map->[$y][$x]{type} eq "wet"    and $equipped eq "torch";
-	return 0 if $map->[$y][$x]{type} eq "narrow" and $equipped eq "climbing";
+	return 0 if
+		$map->[$y][$x]{type} eq "rocky"  and $equipped eq "neither" or
+		$map->[$y][$x]{type} eq "wet"    and $equipped eq "torch"   or
+		$map->[$y][$x]{type} eq "narrow" and $equipped eq "climbing";
 	return 1;
-}
-
-sub serialize {
-	my $state = shift;
-	return join ",", @$state{qw(time equipped x y)};
-}
-
-sub deserialize {
-	my $s = shift;
-	my ($time, $equipped, $x, $y) = split ',', $s;
-	return {
-		time     => $time,
-		equipped => $equipped,
-		x        => $x,
-		y        => $y,
-	};
 }
 
 my @map;
@@ -124,32 +99,23 @@ my $state = {
 };
 
 my @queue;
-# push @queue, serialize($state);
 push @queue, $state;
 my $fastest;
 my $counter = 0;
 
 while (1) {
 	$counter++;
-	# my $state = deserialize(shift @queue);
 	my $state = shift @queue;
-	if ($counter % 100000 == 0) {
-		# say "$counter: ", scalar @queue;
-		@queue = sort {
-			# (split /,/, $a)[0] <=> (split /,/, $b)[0];
-			$a->{time} <=> $b->{time}
-		} @queue;
-		# say Dumper($state);
-	}
-	# say Dumper($state);
-	$visited{$state->{x},$state->{y}}{$state->{equipped}} = $state->{time};
-	# say  Dumper(\%visited);
+
+	# Every 500 rounds, sort queue
+	@queue = sort { $a->{time} <=> $b->{time} } @queue if $counter % 500 == 0;
 
 	# Are we done?
 	if ($state->{x} == $tx and $state->{y} == $ty and $state->{equipped} eq "torch") {
 		if (not defined $fastest or $state->{time} < $fastest) {
 			say "Saved in $state->{time}";
 			$fastest = $state->{time};
+			last;
 		}
 		next;
 	}
@@ -168,6 +134,7 @@ while (1) {
 			my $prevTime = $visited{$newx,$newy}{$state->{equipped}};
 			next if defined $prevTime and $prevTime <= $state->{time} + 1;
 			next unless equipmentWorks(\@map, $newx, $newy, $state->{equipped});
+
 			$visited{$newx,$newy}{$state->{equipped}} = $state->{time} + 1;
 			push @queue, {
 				x        => $newx,
@@ -184,6 +151,7 @@ while (1) {
 		my $prevTime = $visited{$state->{x},$state->{y}}{$equipment};
 		next if defined $prevTime and $prevTime <= $state->{time} + 7;
 		next unless equipmentWorks(\@map, $state->{x}, $state->{y}, $equipment);
+
 		my $newstate = { %$state };
 		$newstate->{equipped} = $equipment;
 		$newstate->{time} += 7;

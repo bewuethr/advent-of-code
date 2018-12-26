@@ -5,12 +5,7 @@ use strict;
 
 use feature 'say';
 
-use List::Util qw(first max min reduce sum);
-use List::MoreUtils qw(firstidx firstval pairwise singleton);
-use Algorithm::Combinatorics qw(variations);
-use Math::Prime::Util qw(factor is_prime);
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
+use List::Util qw(sum);
 
 my $fname = shift;
 
@@ -20,7 +15,7 @@ open my $fh, "<", $fname
 my $line = <$fh>;
 chomp $line;
 my ($depth) = ($line =~ /(\d+)/);
- $line = <$fh>;
+$line = <$fh>;
 chomp $line;
 my ($tx, $ty) = ($line =~ /(\d+)/g);
 
