@@ -5,7 +5,7 @@ use strict;
 
 use feature 'say';
 
-our @r;
+my @r;
 
 my %ops = (
 	addr => sub { $r[$_[2]] = $r[$_[0]] + $r[$_[1]] },

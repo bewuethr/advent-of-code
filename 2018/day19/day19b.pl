@@ -8,7 +8,7 @@ use feature 'say';
 use List::Util qw(max sum);
 use Math::Prime::Util qw(factor);
 
-our @r;
+my @r;
 
 my %ops = (
 	addr => sub { $r[$_[2]] = $r[$_[0]] + $r[$_[1]] },
