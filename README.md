@@ -5,7 +5,7 @@ My solutions to [Advent of Code](https://adventofcode.com/).
 See the [aoc-stats](https://github.com/bewuethr/aoc-stats) repo for a static
 site generator with extended statistics.
 
-### 2015
+## 2015
 
 I started out with Bash, but added some Perl to the mix when Bash just took too
 long.
@@ -15,7 +15,7 @@ I tried sticking to pure Bash without too much reliance on command line tools
 slow or cumbersome (day 10, second part for example), I gladly took the
 multiple orders of improved performance.
 
-### 2016
+## 2016
 
 Everything in awk, with the odd solution in Perl or Bash and utilities such as
 grep or `sort`.
@@ -23,15 +23,13 @@ grep or `sort`.
 For MD5 hashing, I used [this awk
 extension](http://git.codu.in/sup/gawk-extensions) written in C.
 
-### 2017
+## 2017
 
 Perl for speed, Go to learn.
 
 Uploads are "polished", but the oldest commit per file is the honest version
 used to solve the puzzle.
 
-### 2018
+## 2018
 
-Probably default to Perl, but use something else (like Bash and CLI utilities)
-if I think it might be faster to write. First commits per day are the honest
-truth, afterwards I clean up.
+Perl. First commits per day are the honest truth, afterwards I clean up.
