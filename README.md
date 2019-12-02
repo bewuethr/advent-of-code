@@ -1,6 +1,6 @@
 # Advent of Code
 
-My solutions to [Advent of Code](https://adventofcode.com/).
+My solutions to [Advent of Code](https://adventofcode.com).
 
 See the [aoc-stats](https://github.com/bewuethr/aoc-stats) repo for a static
 site generator with extended statistics.
@@ -33,3 +33,7 @@ used to solve the puzzle.
 ## 2018
 
 Perl. First commits per day are the honest truth, afterwards I clean up.
+
+## 2019
+
+I thought "probably Go", but ended up with Perl again for day 1.
