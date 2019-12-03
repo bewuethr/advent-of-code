@@ -5,7 +5,7 @@ use strict;
 
 use feature 'say';
 
-use List::Util qw(min sum);
+use List::Util qw(min max sum);
 
 sub move {
     my ( $x, $y, $dir ) = @_;
@@ -45,7 +45,7 @@ foreach my $edge (@path1) {
     my $dist = substr( $edge, 1 );
     while ( $dist-- ) {
         ( $x, $y ) = move( $x, $y, $dir );
-        $visited1{"$x,$y"} = 1;
+        $visited1{$x}{$y} = 1;
     }
 }
 
@@ -57,10 +57,10 @@ foreach my $edge (@path2) {
     my $dist = substr( $edge, 1 );
     while ( $dist-- ) {
         ( $x, $y ) = move( $x, $y, $dir );
-        $both{"$x,$y"} = 1 if defined $visited1{"$x,$y"};
+        $both{$x}{$y} = 1 if defined $visited1{$x}{$y};
     }
 }
 
 say min map {
-    sum map { abs $_ } split /,/, $_
+    ( abs $_ ) + min map { abs $_ } keys %{ $both{$_} }
 } keys %both;
