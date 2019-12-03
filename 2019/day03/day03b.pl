@@ -46,7 +46,7 @@ foreach my $edge (@path1) {
     while ( $dist-- ) {
         ( $x, $y ) = move( $x, $y, $dir );
         ++$l;
-        $visited1{"$x,$y"} //= $l;
+        $visited1{$x}{$y} //= $l;
     }
 }
 
@@ -59,11 +59,11 @@ foreach my $edge (@path2) {
     while ( $dist-- ) {
         ( $x, $y ) = move( $x, $y, $dir );
         ++$l;
-        next if defined $both{"$x,$y"};
-        if ( defined $visited1{"$x,$y"} ) {
-            $both{"$x,$y"} = $visited1{"$x,$y"} + $l;
+        next if defined $both{$x} and defined $both{$x}{$y};
+        if ( defined $visited1{$x} and defined $visited1{$x}{$y} ) {
+            $both{$x}{$y} = $visited1{$x}{$y} + $l;
         }
     }
 }
 
-say min values %both;
+say min map { values %$_ } values %both;
