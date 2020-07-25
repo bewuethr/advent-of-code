@@ -51,6 +51,6 @@ func getInputScanner() (*bufio.Scanner, error) {
 }
 
 func die(msg string, err error) {
-	fmt.Fprintf(os.Stderr, "%s: %v", msg, err)
+	fmt.Fprintf(os.Stderr, "%s: %v\n", msg, err)
 	os.Exit(1)
 }
