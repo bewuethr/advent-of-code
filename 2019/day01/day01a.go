@@ -8,27 +8,40 @@ import (
 )
 
 func main() {
-	input, err := os.Open(os.Args[1])
+	scanner, err := getInputScanner()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "opening file:", err)
-		os.Exit(1)
+		die("getting scanner", err)
 	}
-	scanner := bufio.NewScanner(input)
 
 	fuel := 0
 	for scanner.Scan() {
 		module, err := strconv.Atoi(scanner.Text())
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "converting to int:", err)
-			os.Exit(1)
+			die("converting to int", err)
 		}
 
 		fuel += module/3 - 2
 	}
 	if err := scanner.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, "reading input:", err)
-		os.Exit(1)
+		die("reading input", err)
 	}
 
 	fmt.Println(fuel)
+}
+
+func getInputScanner() (*bufio.Scanner, error) {
+	if len(os.Args) == 1 {
+		os.Args = append(os.Args, "input")
+	}
+	input, err := os.Open(os.Args[1])
+	if err != nil {
+		return nil, err
+	}
+
+	return bufio.NewScanner(input), nil
+}
+
+func die(msg string, err error) {
+	fmt.Fprintf(os.Stderr, "%s: %v", msg, err)
+	os.Exit(1)
 }
