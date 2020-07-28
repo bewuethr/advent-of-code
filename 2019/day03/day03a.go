@@ -2,36 +2,13 @@ package main
 
 import (
 	"fmt"
-	"sort"
 	"strconv"
 	"strings"
 
+	"github.com/bewuethr/advent-of-code/go/grid"
 	"github.com/bewuethr/advent-of-code/go/ioutil"
 	"github.com/bewuethr/advent-of-code/go/log"
 )
-
-type point struct {
-	x, y int
-}
-
-func (p *point) move(dir string, dist int) error {
-	switch dir {
-	case "U":
-		p.y -= dist
-	case "R":
-		p.x += dist
-	case "D":
-		p.y += dist
-	case "L":
-		p.x -= dist
-	default:
-		return fmt.Errorf("move: illegal direction %v", dir)
-	}
-
-	return nil
-}
-
-type path []point
 
 func main() {
 	scanner, err := ioutil.GetInputScanner()
@@ -49,61 +26,31 @@ func main() {
 		log.Die("reading input", err)
 	}
 
-	path1, err := makePath(wire1)
+	locs1, err := locations(wire1)
 	if err != nil {
-		log.Die("making first path", err)
+		log.Die("making first location map", err)
 	}
 
-	path2, err := makePath(wire2)
+	locs2, err := locations(wire2)
 	if err != nil {
-		log.Die("making second path", err)
+		log.Die("making second location map", err)
 	}
 
-	intersections := getIntersections(path1, path2)
-	sort.Slice(intersections, func(i, j int) bool {
-		return manhattanDistance(intersections[i]) < manhattanDistance(intersections[j])
-	})
-
-	fmt.Println(manhattanDistance(intersections[0]))
+	intersections := getIntersections(locs1, locs2)
+	nearest := getNearest(intersections)
+	fmt.Println(nearest.ManhattanDistance())
 }
 
-func getIntersections(p1, p2 path) path {
-	intersectMap := make(map[point]bool)
-
-	for _, p := range p1[1:] {
-		if contains(p2, p) {
-			intersectMap[p] = true
-		}
-	}
-
-	for _, p := range p2[1:] {
-		if contains(p1, p) {
-			intersectMap[p] = true
-		}
-	}
-
-	var intersectPath path
-	for p := range intersectMap {
-		intersectPath = append(intersectPath, p)
-	}
-
-	return intersectPath
+var directions = map[string]grid.Direction{
+	"U": grid.Up,
+	"R": grid.Right,
+	"D": grid.Down,
+	"L": grid.Left,
 }
 
-func contains(points []point, p point) bool {
-	for _, pp := range points {
-		if pp == p {
-			return true
-		}
-	}
-
-	return false
-}
-
-func makePath(wireStr []string) (path, error) {
-	var wire path
-	pos := point{0, 0}
-	wire = append(wire, pos)
+func locations(wireStr []string) (map[grid.Point]bool, error) {
+	locations := make(map[grid.Point]bool)
+	pos := grid.NewPoint(0, 0)
 
 	for _, instr := range wireStr {
 		dir := instr[:1]
@@ -114,36 +61,38 @@ func makePath(wireStr []string) (path, error) {
 		}
 
 		for i := 0; i < dist; i++ {
-			if err := pos.move(dir, 1); err != nil {
+			if err := pos.Move(directions[dir], 1); err != nil {
 				return nil, err
 			}
-			wire = append(wire, pos)
+
+			locations[*pos.Copy()] = true
 		}
 	}
 
-	return wire, nil
+	return locations, nil
 }
 
-func manhattanDistance(p point) int {
-	return abs(p.x) + abs(p.y)
-}
+func getIntersections(locs1, locs2 map[grid.Point]bool) map[grid.Point]bool {
+	intersections := make(map[grid.Point]bool)
 
-func abs(n int) int {
-	if n < 0 {
-		return -n
-	}
-	return n
-}
-
-func strSliceToInt(strSlice []string) ([]int, error) {
-	intSlice := make([]int, len(strSlice))
-	for i, s := range strSlice {
-		val, err := strconv.Atoi(s)
-		if err != nil {
-			return nil, err
+	for p := range locs1 {
+		if _, ok := locs2[p]; ok {
+			intersections[p] = true
 		}
-		intSlice[i] = val
 	}
 
-	return intSlice, nil
+	return intersections
+}
+
+func getNearest(points map[grid.Point]bool) *grid.Point {
+	var nearest *grid.Point
+
+	for p := range points {
+		p := p
+		if nearest == nil || p.ManhattanDistance() < nearest.ManhattanDistance() {
+			nearest = &p
+		}
+	}
+
+	return nearest
 }
