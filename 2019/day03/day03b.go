@@ -7,6 +7,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/bewuethr/advent-of-code/go/log"
 )
 
 type point struct {
@@ -41,7 +43,7 @@ type path []stepPoint
 func main() {
 	scanner, err := getInputScanner()
 	if err != nil {
-		die("getting scanner", err)
+		log.Die("getting scanner", err)
 	}
 
 	scanner.Scan()
@@ -51,17 +53,17 @@ func main() {
 	wire2 := strings.Split(scanner.Text(), ",")
 
 	if err := scanner.Err(); err != nil {
-		die("reading input", err)
+		log.Die("reading input", err)
 	}
 
 	path1, err := makePath(wire1)
 	if err != nil {
-		die("making first path", err)
+		log.Die("making first path", err)
 	}
 
 	path2, err := makePath(wire2)
 	if err != nil {
-		die("making second path", err)
+		log.Die("making second path", err)
 	}
 
 	intersections := getIntersections(path1, path2)
@@ -171,9 +173,4 @@ func getInputScanner() (*bufio.Scanner, error) {
 	}
 
 	return bufio.NewScanner(input), nil
-}
-
-func die(msg string, err error) {
-	fmt.Fprintf(os.Stderr, "%s: %v\n", msg, err)
-	os.Exit(1)
 }

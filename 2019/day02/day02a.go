@@ -6,29 +6,31 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/bewuethr/advent-of-code/go/log"
 )
 
 func main() {
 	scanner, err := getInputScanner()
 	if err != nil {
-		die("getting scanner", err)
+		log.Die("getting scanner", err)
 	}
 
 	scanner.Scan()
 	opCodesStr := strings.Split(scanner.Text(), ",")
 	if err := scanner.Err(); err != nil {
-		die("reading input", err)
+		log.Die("reading input", err)
 	}
 
 	opCodes, err := strSliceToInt(opCodesStr)
 	if err != nil {
-		die("converting string slice to int", err)
+		log.Die("converting string slice to int", err)
 	}
 
 	opCodes[1], opCodes[2] = 12, 2
 	opCodes, err = runProgram(opCodes)
 	if err != nil {
-		die("running op codes", err)
+		log.Die("running op codes", err)
 	}
 
 	fmt.Println(opCodes[0])
@@ -84,9 +86,4 @@ func getInputScanner() (*bufio.Scanner, error) {
 	}
 
 	return bufio.NewScanner(input), nil
-}
-
-func die(msg string, err error) {
-	fmt.Fprintf(os.Stderr, "%s: %v\n", msg, err)
-	os.Exit(1)
 }

@@ -5,25 +5,27 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+
+	"github.com/bewuethr/advent-of-code/go/log"
 )
 
 func main() {
 	scanner, err := getInputScanner()
 	if err != nil {
-		die("getting scanner", err)
+		log.Die("getting scanner", err)
 	}
 
 	fuel := 0
 	for scanner.Scan() {
 		module, err := strconv.Atoi(scanner.Text())
 		if err != nil {
-			die("converting to int", err)
+			log.Die("converting to int", err)
 		}
 
 		fuel += getFuel(module)
 	}
 	if err := scanner.Err(); err != nil {
-		die("reading input", err)
+		log.Die("reading input", err)
 	}
 
 	fmt.Println(fuel)
@@ -48,9 +50,4 @@ func getInputScanner() (*bufio.Scanner, error) {
 	}
 
 	return bufio.NewScanner(input), nil
-}
-
-func die(msg string, err error) {
-	fmt.Fprintf(os.Stderr, "%s: %v\n", msg, err)
-	os.Exit(1)
 }
