@@ -26,12 +26,12 @@ func main() {
 		log.Die("reading input", err)
 	}
 
-	locs1, err := locations(wire1)
+	locs1, err := getLocations(wire1)
 	if err != nil {
 		log.Die("making first location map", err)
 	}
 
-	locs2, err := locations(wire2)
+	locs2, err := getLocations(wire2)
 	if err != nil {
 		log.Die("making second location map", err)
 	}
@@ -48,7 +48,7 @@ var directions = map[string]grid.Direction{
 	"L": grid.Left,
 }
 
-func locations(wireStr []string) (map[grid.Point]bool, error) {
+func getLocations(wireStr []string) (map[grid.Point]bool, error) {
 	locations := make(map[grid.Point]bool)
 	pos := grid.NewPoint(0, 0)
 
