@@ -1,16 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"strconv"
 
+	"github.com/bewuethr/advent-of-code/go/ioutil"
 	"github.com/bewuethr/advent-of-code/go/log"
 )
 
 func main() {
-	scanner, err := getInputScanner()
+	scanner, err := ioutil.GetInputScanner()
 	if err != nil {
 		log.Die("getting scanner", err)
 	}
@@ -29,16 +28,4 @@ func main() {
 	}
 
 	fmt.Println(fuel)
-}
-
-func getInputScanner() (*bufio.Scanner, error) {
-	if len(os.Args) == 1 {
-		os.Args = append(os.Args, "input")
-	}
-	input, err := os.Open(os.Args[1])
-	if err != nil {
-		return nil, err
-	}
-
-	return bufio.NewScanner(input), nil
 }
