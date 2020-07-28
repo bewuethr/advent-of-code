@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
+	"github.com/bewuethr/advent-of-code/go/convert"
 	"github.com/bewuethr/advent-of-code/go/ioutil"
 	"github.com/bewuethr/advent-of-code/go/log"
 )
@@ -21,7 +21,7 @@ func main() {
 		log.Die("reading input", err)
 	}
 
-	opCodes, err := strSliceToInt(opCodesStr)
+	opCodes, err := convert.StrSliceToInt(opCodesStr)
 	if err != nil {
 		log.Die("converting string slice to int", err)
 	}
@@ -60,17 +60,4 @@ func runProgram(codes []int) ([]int, error) {
 
 		idx += 4
 	}
-}
-
-func strSliceToInt(strSlice []string) ([]int, error) {
-	intSlice := make([]int, len(strSlice))
-	for i, s := range strSlice {
-		val, err := strconv.Atoi(s)
-		if err != nil {
-			return nil, err
-		}
-		intSlice[i] = val
-	}
-
-	return intSlice, nil
 }
