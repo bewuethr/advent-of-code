@@ -1,3 +1,4 @@
+// Package grid provides helpers to operate on a grid.
 package grid
 
 import (

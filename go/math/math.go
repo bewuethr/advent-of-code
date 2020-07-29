@@ -1,3 +1,4 @@
+// Package math provides math helper functions.
 package math
 
 // IntAbs returns the absolute value of n.

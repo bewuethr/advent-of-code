@@ -1,3 +1,4 @@
+// Package convert provides conversion helpers.
 package convert
 
 import "strconv"

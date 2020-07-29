@@ -1,3 +1,4 @@
+// Package ioutil provides functionality to read input files.
 package ioutil
 
 import (
