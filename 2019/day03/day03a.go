@@ -38,19 +38,19 @@ func main() {
 
 	intersections := getIntersections(locs1, locs2)
 	nearest := getNearest(intersections)
-	fmt.Println(nearest.ManhattanDistance())
+	fmt.Println(nearest.ManhattanDistanceOrigin())
 }
 
-var directions = map[string]grid.Direction{
-	"U": grid.Up,
-	"R": grid.Right,
-	"D": grid.Down,
-	"L": grid.Left,
+var directions = map[string]grid.Vec2{
+	"U": grid.Uy.ScalarMult(-1),
+	"R": grid.Ux,
+	"D": grid.Uy,
+	"L": grid.Ux.ScalarMult(-1),
 }
 
-func getLocations(wireStr []string) (map[grid.Point]bool, error) {
-	locations := make(map[grid.Point]bool)
-	pos := grid.NewPoint(0, 0)
+func getLocations(wireStr []string) (map[grid.Vec2]bool, error) {
+	locations := make(map[grid.Vec2]bool)
+	pos := grid.Origin
 
 	for _, instr := range wireStr {
 		dir := instr[:1]
@@ -61,36 +61,33 @@ func getLocations(wireStr []string) (map[grid.Point]bool, error) {
 		}
 
 		for i := 0; i < dist; i++ {
-			if err := pos.Move(directions[dir], 1); err != nil {
-				return nil, err
-			}
-
-			locations[*pos.Copy()] = true
+			pos = pos.Add(directions[dir])
+			locations[pos] = true
 		}
 	}
 
 	return locations, nil
 }
 
-func getIntersections(locs1, locs2 map[grid.Point]bool) map[grid.Point]bool {
-	intersections := make(map[grid.Point]bool)
+func getIntersections(locs1, locs2 map[grid.Vec2]bool) map[grid.Vec2]bool {
+	intersections := make(map[grid.Vec2]bool)
 
-	for p := range locs1 {
-		if _, ok := locs2[p]; ok {
-			intersections[p] = true
+	for loc := range locs1 {
+		if _, ok := locs2[loc]; ok {
+			intersections[loc] = true
 		}
 	}
 
 	return intersections
 }
 
-func getNearest(points map[grid.Point]bool) *grid.Point {
-	var nearest *grid.Point
+func getNearest(vecs map[grid.Vec2]bool) grid.Vec2 {
+	var nearest grid.Vec2
 
-	for p := range points {
-		p := p
-		if nearest == nil || p.ManhattanDistance() < nearest.ManhattanDistance() {
-			nearest = &p
+	for v := range vecs {
+		v := v
+		if nearest == grid.Origin || v.ManhattanDistanceOrigin() < nearest.ManhattanDistanceOrigin() {
+			nearest = v
 		}
 	}
 
