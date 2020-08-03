@@ -78,8 +78,6 @@ func runProgram(codes []int, phase int, in <-chan int, out chan<- int) {
 		code, modes := parseValue(codes[idx])
 		params := getParams(codes, idx, modes)
 
-		// 	fmt.Printf("codes: %v\nopcode: %d\ncode(idx): %d(%d)\nparams: %v\n\n", codes, codes[idx], code, idx, params)
-
 		switch code {
 		case halt:
 			close(out)
