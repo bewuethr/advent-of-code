@@ -8,3 +8,11 @@ func IntAbs(n int) int {
 	}
 	return n
 }
+
+// IntMax returns the larger of a and b.
+func IntMax(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
