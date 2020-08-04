@@ -1,3 +1,4 @@
+// Package intcode implements an intocde computer.
 package intcode
 
 import (
@@ -5,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/bewuethr/advent-of-code/go/convert"
-	"github.com/bewuethr/advent-of-code/go/log"
 )
 
 const (
@@ -69,7 +69,10 @@ func NewComputer(opcodes []int) *Computer {
 func (c *Computer) RunProgram(inputVals ...int) error {
 	c.inputVals = inputVals
 	for {
-		code, params := c.parseInstruction(c.opcodes[c.instrPtr])
+		code, params, err := c.parseInstruction(c.opcodes[c.instrPtr])
+		if err != nil {
+			return err
+		}
 
 		if code == halt {
 			return nil
@@ -137,7 +140,7 @@ func (c *Computer) equals(params []int) {
 // parseInstruction reads a value  from memory and extracts the opcode as well
 // as the parameter values for the instruction, taking the parameter mode into
 // account.
-func (c *Computer) parseInstruction(val int) (code int, params []int) {
+func (c *Computer) parseInstruction(val int) (code int, params []int, err error) {
 	code = val % 100
 	var modes []int
 	if valStr := strconv.Itoa(val); len(valStr) > 2 {
@@ -151,7 +154,7 @@ func (c *Computer) parseInstruction(val int) (code int, params []int) {
 		var err error
 		modes, err = convert.StrSliceToInt(modesStr)
 		if err != nil {
-			log.Die("converting modes to int", err)
+			return 0, nil, fmt.Errorf("converting modes %v to int: %w", modesStr, err)
 		}
 	}
 
@@ -159,7 +162,7 @@ func (c *Computer) parseInstruction(val int) (code int, params []int) {
 		modes = append(modes, 0)
 	}
 
-	return code, c.getParams(modes)
+	return code, c.getParams(modes), nil
 }
 
 // getParams takes a slice of parameter modes and returns the corresponding
