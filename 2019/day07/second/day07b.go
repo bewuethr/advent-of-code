@@ -11,16 +11,11 @@ import (
 	"github.com/bewuethr/advent-of-code/go/math"
 )
 
-type channelParams struct {
-	in  <-chan int
-	out chan<- int
-}
-
-const numAmps = 5
-
 var finalSignal = make(chan int)
 
 func main() {
+	const numAmps = 5
+
 	scanner, err := ioutil.GetInputScanner()
 	if err != nil {
 		log.Die("getting scanner", err)
@@ -39,7 +34,6 @@ func main() {
 
 	var max int
 	for _, phases := range math.IntPermutations([]int{5, 6, 7, 8, 9}) {
-		// for _, phases := range [][]int{{9, 7, 8, 5, 6}} {
 		var channels []chan int
 		for i := 0; i < numAmps; i++ {
 			channels = append(channels, make(chan int))
@@ -47,19 +41,12 @@ func main() {
 		for i := 0; i < numAmps; i++ {
 			codesCopy := make([]int, len(opCodes))
 			copy(codesCopy, opCodes)
-			params := channelParams{
-				in:  channels[(i+numAmps-1)%numAmps],
-				out: channels[i],
-			}
-			go runProgram(codesCopy, i, phases[i], params)
+			inIdx := (i + numAmps - 1) % numAmps
+			go runProgram(codesCopy, i, phases[i], channels[inIdx], channels[i])
 		}
 
 		channels[numAmps-1] <- 0
-		final := <-finalSignal
-		if math.IntMax(max, final) != max {
-			fmt.Println(phases)
-			max = math.IntMax(max, final)
-		}
+		max = math.IntMax(max, <-finalSignal)
 	}
 	fmt.Println(max)
 }
@@ -91,7 +78,7 @@ var nargs = map[int]int{
 	halt:        0,
 }
 
-func runProgram(codes []int, id, phase int, c channelParams) {
+func runProgram(codes []int, id, phase int, in <-chan int, out chan<- int) {
 	const ampA = 0
 	firstInput := true
 	idx := 0
@@ -103,10 +90,9 @@ func runProgram(codes []int, id, phase int, c channelParams) {
 
 		switch code {
 		case halt:
-			fmt.Printf("amp %d halting\n", id)
-			close(c.out)
+			close(out)
 			if id == ampA {
-				finalSignal <- <-c.in
+				finalSignal <- <-in
 			}
 			return
 
@@ -120,22 +106,16 @@ func runProgram(codes []int, id, phase int, c channelParams) {
 
 		case input:
 			if firstInput {
-				fmt.Printf("amp %d reading input, phase: %d\n", id, phase)
 				codes[codes[idx+1]] = phase
 				firstInput = false
 			} else {
-				fmt.Printf("amp %d waiting for input\n", id)
-				signal := <-c.in
-				fmt.Printf("amp %d received signal %d\n", id, signal)
-				codes[codes[idx+1]] = signal
+				codes[codes[idx+1]] = <-in
 			}
 			idx += nargs[input] + 1
 
 		case output:
 			lastSignal = params[0]
-			fmt.Printf("amp %d, idx: %d, code: %d\n%v\n", id, idx, codes[idx], codes)
-			fmt.Printf("amp %d sending signal %d\n", id, lastSignal)
-			c.out <- lastSignal
+			out <- lastSignal
 			idx += nargs[output] + 1
 
 		case jumpIfTrue:
