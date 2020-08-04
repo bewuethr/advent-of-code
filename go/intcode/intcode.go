@@ -82,6 +82,11 @@ func (c *Computer) RunProgram(inputVals ...int) error {
 	}
 }
 
+// Value returns the value at position idx.
+func (c *Computer) Value(idx int) int {
+	return c.opcodes[idx]
+}
+
 func (c *Computer) add(params []int) {
 	c.opcodes[c.opcodes[c.instrPtr+3]] = params[0] + params[1]
 	c.instrPtr += nargs[add] + 1

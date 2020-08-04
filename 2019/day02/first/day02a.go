@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/bewuethr/advent-of-code/go/convert"
+	"github.com/bewuethr/advent-of-code/go/intcode"
 	"github.com/bewuethr/advent-of-code/go/ioutil"
 	"github.com/bewuethr/advent-of-code/go/log"
 )
@@ -27,37 +28,9 @@ func main() {
 	}
 
 	opCodes[1], opCodes[2] = 12, 2
-	opCodes, err = runProgram(opCodes)
-	if err != nil {
+	comp := intcode.NewComputer(opCodes)
+	if err := comp.RunProgram(); err != nil {
 		log.Die("running op codes", err)
 	}
-
-	fmt.Println(opCodes[0])
-}
-
-func runProgram(codes []int) ([]int, error) {
-	const (
-		add  = 1
-		mult = 2
-		halt = 99
-	)
-
-	idx := 0
-	for {
-		switch codes[idx] {
-		case halt:
-			return codes, nil
-
-		case add:
-			codes[codes[idx+3]] = codes[codes[idx+1]] + codes[codes[idx+2]]
-
-		case mult:
-			codes[codes[idx+3]] = codes[codes[idx+1]] * codes[codes[idx+2]]
-
-		default:
-			return nil, fmt.Errorf("illegal opcode %d", codes[idx])
-		}
-
-		idx += 4
-	}
+	fmt.Println(comp.Value(0))
 }
