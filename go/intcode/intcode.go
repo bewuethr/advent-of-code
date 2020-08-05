@@ -51,6 +51,7 @@ var methodMap = map[int]func(*Computer, []int){
 	jumpIfFalse: (*Computer).jumpIfFalse,
 	lessThan:    (*Computer).lessThan,
 	equals:      (*Computer).equals,
+	adjustBase:  (*Computer).adjustBase,
 }
 
 // Computer is an opcode computer.
@@ -87,22 +88,45 @@ func (c *Computer) RunProgram(inputVals ...int) error {
 	}
 }
 
-// Value returns the value at position idx.
+// Value returns the value at position idx; if the index is out of range, extra
+// memory is appended.
 func (c *Computer) Value(idx int) int {
+	if idx < len(c.opcodes) {
+		return c.opcodes[idx]
+	}
+
+	if idx < cap(c.opcodes) {
+		c.opcodes = c.opcodes[:cap(c.opcodes)]
+		return c.opcodes[idx]
+	}
+
+	newOpcodes := make([]int, idx+1, (2*idx)+1)
+	copy(newOpcodes, c.opcodes)
+	c.opcodes = newOpcodes
 	return c.opcodes[idx]
 }
 
+// memCheck makes sure all values can be used as a memory address.
+func (c *Computer) memCheck(vals ...int) {
+	for _, v := range vals {
+		c.Value(v)
+	}
+}
+
 func (c *Computer) add(params []int) {
+	c.memCheck(c.instrPtr+3, c.Value(c.instrPtr+3))
 	c.opcodes[c.opcodes[c.instrPtr+3]] = params[0] + params[1]
 	c.instrPtr += nargs[add] + 1
 }
 
 func (c *Computer) mult(params []int) {
+	c.memCheck(c.instrPtr+3, c.Value(c.instrPtr+3))
 	c.opcodes[c.opcodes[c.instrPtr+3]] = params[0] * params[1]
 	c.instrPtr += nargs[mult] + 1
 }
 
 func (c *Computer) input(params []int) {
+	c.memCheck(c.instrPtr+1, c.Value(c.instrPtr+1))
 	c.opcodes[c.opcodes[c.instrPtr+1]] = c.inputVals[0]
 	c.inputVals = c.inputVals[1:]
 	c.instrPtr += nargs[input] + 1
@@ -130,6 +154,7 @@ func (c *Computer) jumpIfFalse(params []int) {
 }
 
 func (c *Computer) lessThan(params []int) {
+	c.memCheck(c.instrPtr+3, c.Value(c.instrPtr+3))
 	if params[0] < params[1] {
 		c.opcodes[c.opcodes[c.instrPtr+3]] = 1
 	} else {
@@ -139,6 +164,7 @@ func (c *Computer) lessThan(params []int) {
 }
 
 func (c *Computer) equals(params []int) {
+	c.memCheck(c.instrPtr+3, c.Value(c.instrPtr+3))
 	if params[0] == params[1] {
 		c.opcodes[c.opcodes[c.instrPtr+3]] = 1
 	} else {
@@ -190,11 +216,11 @@ func (c *Computer) getParams(modes []int) ([]int, error) {
 		var param int
 		switch modes[i] {
 		case positionMode:
-			param = c.opcodes[c.opcodes[c.instrPtr+i+1]]
+			param = c.Value(c.Value(c.instrPtr + i + 1))
 		case immediateMode:
-			param = c.opcodes[c.instrPtr+i+1]
+			param = c.Value(c.instrPtr + i + 1)
 		case relativeMode:
-			param = c.opcodes[c.opcodes[c.instrPtr+i+1]+c.relOffset]
+			param = c.Value(c.Value(c.instrPtr+i+1) + c.relOffset)
 		default:
 			return nil, fmt.Errorf("unknown parameter mode %q", modes[i])
 		}
