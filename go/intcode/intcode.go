@@ -18,11 +18,13 @@ const (
 	jumpIfFalse = 6
 	lessThan    = 7
 	equals      = 8
+	adjustBase  = 9
 	halt        = 99
 
 	// Modes
 	positionMode  = 0
 	immediateMode = 1
+	relativeMode  = 2
 )
 
 // nargs maps instructions to the number of arguments they use.
@@ -35,6 +37,7 @@ var nargs = map[int]int{
 	jumpIfFalse: 2,
 	lessThan:    3,
 	equals:      3,
+	adjustBase:  1,
 	halt:        0,
 }
 
@@ -55,13 +58,15 @@ type Computer struct {
 	opcodes   []int
 	inputVals []int
 	instrPtr  int
+	relOffset int
 }
 
 // NewComputer returns an opcode computer with its memory initalized to opcodes.
 func NewComputer(opcodes []int) *Computer {
 	return &Computer{
-		opcodes:  opcodes,
-		instrPtr: 0,
+		opcodes:   opcodes,
+		instrPtr:  0,
+		relOffset: 0,
 	}
 }
 
@@ -142,6 +147,11 @@ func (c *Computer) equals(params []int) {
 	c.instrPtr += nargs[equals] + 1
 }
 
+func (c *Computer) adjustBase(params []int) {
+	c.relOffset += params[0]
+	c.instrPtr += nargs[adjustBase] + 1
+}
+
 // parseInstruction reads a value  from memory and extracts the opcode as well
 // as the parameter values for the instruction, taking the parameter mode into
 // account.
@@ -167,23 +177,29 @@ func (c *Computer) parseInstruction(val int) (code int, params []int, err error)
 		modes = append(modes, 0)
 	}
 
-	return code, c.getParams(modes), nil
+	params, err = c.getParams(modes)
+	return code, params, err
 }
 
 // getParams takes a slice of parameter modes and returns the corresponding
 // parameter values based on the current value of the instruction pointer.
-func (c *Computer) getParams(modes []int) []int {
+func (c *Computer) getParams(modes []int) ([]int, error) {
 	var params []int
 
 	for i := 0; i < len(modes); i++ {
 		var param int
-		if modes[i] == immediateMode {
-			param = c.opcodes[c.instrPtr+i+1]
-		} else {
+		switch modes[i] {
+		case positionMode:
 			param = c.opcodes[c.opcodes[c.instrPtr+i+1]]
+		case immediateMode:
+			param = c.opcodes[c.instrPtr+i+1]
+		case relativeMode:
+			param = c.opcodes[c.opcodes[c.instrPtr+i+1]+c.relOffset]
+		default:
+			return nil, fmt.Errorf("unknown parameter mode %q", modes[i])
 		}
 		params = append(params, param)
 	}
 
-	return params
+	return params, nil
 }
