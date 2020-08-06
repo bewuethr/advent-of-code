@@ -41,8 +41,15 @@ var nargs = map[int]int{
 	halt:        0,
 }
 
+// param is a type for values in memory, where index is the optional location
+// of the value; it is nil for immediate mode parameters.
+type param struct {
+	value int
+	index *int
+}
+
 // methodMap is a map from instructions to the corresponding Computer methods.
-var methodMap = map[int]func(*Computer, []int){
+var methodMap = map[int]func(*Computer, []param){
 	add:         (*Computer).add,
 	mult:        (*Computer).mult,
 	input:       (*Computer).input,
@@ -100,88 +107,77 @@ func (c *Computer) Value(idx int) int {
 		return c.opcodes[idx]
 	}
 
+	// Index larger than even backing array, allocate new slice
 	newOpcodes := make([]int, idx+1, (2*idx)+1)
 	copy(newOpcodes, c.opcodes)
 	c.opcodes = newOpcodes
 	return c.opcodes[idx]
 }
 
-// memCheck makes sure all values can be used as a memory address.
-func (c *Computer) memCheck(vals ...int) {
-	for _, v := range vals {
-		c.Value(v)
-	}
-}
-
-func (c *Computer) add(params []int) {
-	c.memCheck(c.instrPtr+3, c.Value(c.instrPtr+3))
-	c.opcodes[c.opcodes[c.instrPtr+3]] = params[0] + params[1]
+func (c *Computer) add(params []param) {
+	c.opcodes[*params[2].index] = params[0].value + params[1].value
 	c.instrPtr += nargs[add] + 1
 }
 
-func (c *Computer) mult(params []int) {
-	c.memCheck(c.instrPtr+3, c.Value(c.instrPtr+3))
-	c.opcodes[c.opcodes[c.instrPtr+3]] = params[0] * params[1]
+func (c *Computer) mult(params []param) {
+	c.opcodes[*params[2].index] = params[0].value * params[1].value
 	c.instrPtr += nargs[mult] + 1
 }
 
-func (c *Computer) input(params []int) {
-	c.memCheck(c.instrPtr+1, c.Value(c.instrPtr+1))
-	c.opcodes[c.opcodes[c.instrPtr+1]] = c.inputVals[0]
+func (c *Computer) input(params []param) {
+	c.opcodes[*params[0].index] = c.inputVals[0]
 	c.inputVals = c.inputVals[1:]
 	c.instrPtr += nargs[input] + 1
 }
 
-func (c *Computer) output(params []int) {
-	fmt.Println(params[0])
+func (c *Computer) output(params []param) {
+	fmt.Println(params[0].value)
 	c.instrPtr += nargs[output] + 1
 }
 
-func (c *Computer) jumpIfTrue(params []int) {
-	if params[0] != 0 {
-		c.instrPtr = params[1]
+func (c *Computer) jumpIfTrue(params []param) {
+	if params[0].value != 0 {
+		c.instrPtr = params[1].value
 	} else {
 		c.instrPtr += nargs[jumpIfTrue] + 1
 	}
 }
 
-func (c *Computer) jumpIfFalse(params []int) {
-	if params[0] == 0 {
-		c.instrPtr = params[1]
+func (c *Computer) jumpIfFalse(params []param) {
+	if params[0].value == 0 {
+		c.instrPtr = params[1].value
 	} else {
 		c.instrPtr += nargs[jumpIfFalse] + 1
 	}
 }
 
-func (c *Computer) lessThan(params []int) {
-	c.memCheck(c.instrPtr+3, c.Value(c.instrPtr+3))
-	if params[0] < params[1] {
-		c.opcodes[c.opcodes[c.instrPtr+3]] = 1
+func (c *Computer) lessThan(params []param) {
+	if params[0].value < params[1].value {
+		c.opcodes[*params[2].index] = 1
 	} else {
-		c.opcodes[c.opcodes[c.instrPtr+3]] = 0
+		c.opcodes[*params[2].index] = 0
 	}
 	c.instrPtr += nargs[lessThan] + 1
 }
 
-func (c *Computer) equals(params []int) {
-	c.memCheck(c.instrPtr+3, c.Value(c.instrPtr+3))
-	if params[0] == params[1] {
-		c.opcodes[c.opcodes[c.instrPtr+3]] = 1
+func (c *Computer) equals(params []param) {
+	if params[0].value == params[1].value {
+		c.opcodes[*params[2].index] = 1
 	} else {
-		c.opcodes[c.opcodes[c.instrPtr+3]] = 0
+		c.opcodes[*params[2].index] = 0
 	}
 	c.instrPtr += nargs[equals] + 1
 }
 
-func (c *Computer) adjustBase(params []int) {
-	c.relOffset += params[0]
+func (c *Computer) adjustBase(params []param) {
+	c.relOffset += params[0].value
 	c.instrPtr += nargs[adjustBase] + 1
 }
 
-// parseInstruction reads a value  from memory and extracts the opcode as well
-// as the parameter values for the instruction, taking the parameter mode into
+// parseInstruction reads a value from memory and extracts the opcode as well as
+// the parameter values for the instruction, taking the parameter mode into
 // account.
-func (c *Computer) parseInstruction(val int) (code int, params []int, err error) {
+func (c *Computer) parseInstruction(val int) (code int, params []param, err error) {
 	code = val % 100
 	var modes []int
 	if valStr := strconv.Itoa(val); len(valStr) > 2 {
@@ -209,22 +205,34 @@ func (c *Computer) parseInstruction(val int) (code int, params []int, err error)
 
 // getParams takes a slice of parameter modes and returns the corresponding
 // parameter values based on the current value of the instruction pointer.
-func (c *Computer) getParams(modes []int) ([]int, error) {
-	var params []int
+func (c *Computer) getParams(modes []int) ([]param, error) {
+	var params []param
 
 	for i := 0; i < len(modes); i++ {
-		var param int
+		var p param
 		switch modes[i] {
 		case positionMode:
-			param = c.Value(c.Value(c.instrPtr + i + 1))
+			idx := c.Value(c.instrPtr + i + 1)
+			p = param{
+				value: c.Value(idx),
+				index: &idx,
+			}
+
 		case immediateMode:
-			param = c.Value(c.instrPtr + i + 1)
+			p.value = c.Value(c.instrPtr + i + 1)
+
 		case relativeMode:
-			param = c.Value(c.Value(c.instrPtr+i+1) + c.relOffset)
+			idx := c.Value(c.instrPtr+i+1) + c.relOffset
+			p = param{
+				value: c.Value(idx),
+				index: &idx,
+			}
+
 		default:
 			return nil, fmt.Errorf("unknown parameter mode %q", modes[i])
 		}
-		params = append(params, param)
+
+		params = append(params, p)
 	}
 
 	return params, nil
