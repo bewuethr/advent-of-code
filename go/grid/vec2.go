@@ -50,6 +50,11 @@ func (v Vec2) ScalarMult(n int) Vec2 {
 	return NewVec2(v.x*n, v.y*n)
 }
 
+// ScalarDiv reuturns a Vec2 with compoments of v divided by n.
+func (v Vec2) ScalarDiv(n int) Vec2 {
+	return NewVec2(v.x/n, v.y/n)
+}
+
 // ManhattanDistance is the Manhattan distance between v and w.
 func (v Vec2) ManhattanDistance(w Vec2) int {
 	return math.IntAbs(v.x-w.x) + math.IntAbs(v.y-w.y)
