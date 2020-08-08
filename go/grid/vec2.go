@@ -25,6 +25,16 @@ func NewVec2(x, y int) Vec2 {
 	}
 }
 
+// X returns the x component of v.
+func (v Vec2) X() int {
+	return v.x
+}
+
+// Y returns the y component of v.
+func (v Vec2) Y() int {
+	return v.y
+}
+
 // Add returns the sum of vectors v and w.
 func (v Vec2) Add(w Vec2) Vec2 {
 	return NewVec2(v.x+w.x, v.y+w.y)
