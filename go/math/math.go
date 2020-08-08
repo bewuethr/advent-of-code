@@ -65,3 +65,17 @@ func generateIntPermutation(n int, s []int, out chan<- []int) {
 		}
 	}
 }
+
+// GCD returns the greatest common divisor of a and b. It panics if both are
+// zero. The return value is always positive.
+func GCD(a, b int) int {
+	if a == 0 && b == 0 {
+		panic("gcd(0, 0) is not defined")
+	}
+
+	a, b = IntAbs(a), IntAbs(b)
+	for b != 0 {
+		a, b = b, a%b
+	}
+	return a
+}

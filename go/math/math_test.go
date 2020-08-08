@@ -58,3 +58,34 @@ func TestIntPermutations(t *testing.T) {
 		}
 	}
 }
+
+func TestGCD(t *testing.T) {
+	var tests = []struct {
+		a, b int
+		want int
+	}{
+		{60, 24, 12},
+		{24, 60, 12},
+		{60, -24, 12},
+		{-60, -24, 12},
+		{3, 0, 3},
+		{0, 3, 3},
+		{-3, 0, 3},
+	}
+
+	for _, test := range tests {
+		if got := GCD(test.a, test.b); got != test.want {
+			t.Errorf("GCD(%d, %d) = %d, want %d\n", test.a, test.b, got, test.want)
+		}
+	}
+}
+
+func TestGCDPanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("expected panic, did not get one")
+		}
+	}()
+
+	GCD(0, 0)
+}
