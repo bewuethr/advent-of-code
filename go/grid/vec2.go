@@ -30,6 +30,11 @@ func (v Vec2) Add(w Vec2) Vec2 {
 	return NewVec2(v.x+w.x, v.y+w.y)
 }
 
+// Subtract returns the difference of vectors v and w.
+func (v Vec2) Subtract(w Vec2) Vec2 {
+	return NewVec2(v.x-w.x, v.y-w.y)
+}
+
 // ScalarMult is the result of multiplying v by n.
 func (v Vec2) ScalarMult(n int) Vec2 {
 	return NewVec2(v.x*n, v.y*n)
