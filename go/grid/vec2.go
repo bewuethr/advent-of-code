@@ -2,7 +2,9 @@
 package grid
 
 import (
-	"github.com/bewuethr/advent-of-code/go/math"
+	"math"
+
+	aocmath "github.com/bewuethr/advent-of-code/go/math"
 )
 
 // Vec2 represents a 2d vector with integer components.
@@ -35,6 +37,16 @@ func (v Vec2) Y() int {
 	return v.y
 }
 
+// Norm returns the length of v.
+func (v Vec2) Norm() float64 {
+	return math.Sqrt(math.Pow(float64(v.x), 2) + math.Pow(float64(v.y), 2))
+}
+
+// Azimuth returns the polar angle of v, normalized to the range [0, 2π).
+func (v Vec2) Azimuth() float64 {
+	return math.Mod(math.Atan2(float64(v.y), float64(v.x))+math.Pi*2, math.Pi*2)
+}
+
 // Add returns the sum of vectors v and w.
 func (v Vec2) Add(w Vec2) Vec2 {
 	return NewVec2(v.x+w.x, v.y+w.y)
@@ -57,7 +69,7 @@ func (v Vec2) ScalarDiv(n int) Vec2 {
 
 // ManhattanDistance is the Manhattan distance between v and w.
 func (v Vec2) ManhattanDistance(w Vec2) int {
-	return math.IntAbs(v.x-w.x) + math.IntAbs(v.y-w.y)
+	return aocmath.IntAbs(v.x-w.x) + aocmath.IntAbs(v.y-w.y)
 }
 
 // ManhattanDistanceOrigin is the Manhattan distance from v to the origin.
