@@ -29,8 +29,11 @@ func main() {
 
 	opCodes[1], opCodes[2] = 12, 2
 	comp := intcode.NewComputer(opCodes)
-	if err := comp.RunProgram(); err != nil {
+	comp.RunProgram()
+	select {
+	case err := <-comp.Err:
 		log.Die("running op codes", err)
+	case <-comp.Done:
+		fmt.Println(comp.Value(0))
 	}
-	fmt.Println(comp.Value(0))
 }
