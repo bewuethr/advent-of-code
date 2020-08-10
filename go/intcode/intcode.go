@@ -114,7 +114,6 @@ func (c *Computer) RunProgram() {
 	go func() {
 		for {
 			code, params, err := c.parseInstruction(c.opcodes[c.instrPtr])
-			fmt.Printf("code %v, params %v\n", code, params)
 			if err != nil {
 				c.Err <- err
 				return
