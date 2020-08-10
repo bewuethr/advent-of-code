@@ -37,14 +37,17 @@ func main() {
 			opCodes[1], opCodes[2] = noun, verb
 
 			comp := intcode.NewComputer(opCodes)
-			if err := comp.RunProgram(); err != nil {
+			comp.RunProgram()
+			select {
+			case err := <-comp.Err:
 				log.Die("running op codes", err)
+			case <-comp.Done:
+				if comp.Value(0) == target {
+					fmt.Println(100*noun + verb)
+					os.Exit(0)
+				}
 			}
 
-			if comp.Value(0) == target {
-				fmt.Println(100*noun + verb)
-				os.Exit(0)
-			}
 		}
 	}
 }
