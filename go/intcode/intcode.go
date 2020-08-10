@@ -1,4 +1,4 @@
-// Package intcode implements an intocde computer.
+// Package intcode implements an intcode computer.
 package intcode
 
 import (
@@ -61,38 +61,73 @@ var methodMap = map[int]func(*Computer, []param){
 	adjustBase:  (*Computer).adjustBase,
 }
 
-// Computer is an opcode computer.
+// Computer is an opcode computer. Input is read through the Input channel,
+// output from the Output channel; the "halt" instruction closes the Done
+// channel, and any errors can be read from the Err channel.
 type Computer struct {
 	opcodes   []int
-	inputVals []int
 	instrPtr  int
 	relOffset int
+	Done      chan struct{}
+	Input     chan int
+	Output    chan int
+	Err       chan error
 }
 
 // NewComputer returns an opcode computer with its memory initalized to opcodes.
 func NewComputer(opcodes []int) *Computer {
+	var (
+		done   = make(chan struct{})
+		input  = make(chan int)
+		output = make(chan int)
+		err    = make(chan error)
+	)
+
 	return &Computer{
 		opcodes:   opcodes,
 		instrPtr:  0,
 		relOffset: 0,
+		Done:      done,
+		Input:     input,
+		Output:    output,
+		Err:       err,
 	}
 }
 
-// RunProgram executes the program in the memory of the computer.
-func (c *Computer) RunProgram(inputVals ...int) error {
-	c.inputVals = inputVals
-	for {
-		code, params, err := c.parseInstruction(c.opcodes[c.instrPtr])
-		if err != nil {
-			return err
-		}
+// RunProgram starts a goroutine that executes the program in the memory of the
+// computer. It is typically used like this:
+//
+//     Loop:
+//         for {
+//             select {
+//             case v := <-c.Output:
+//                 // Do something with output.
+//             case <-c.Done:
+//                 break Loop
+//             case err := <-c.Err:
+//                 // Handle error.
+//             }
+//         }
+//
+// TODO Rename StartProgram
+func (c *Computer) RunProgram() {
+	go func() {
+		for {
+			code, params, err := c.parseInstruction(c.opcodes[c.instrPtr])
+			fmt.Printf("code %v, params %v\n", code, params)
+			if err != nil {
+				c.Err <- err
+				return
+			}
 
-		if code == halt {
-			return nil
-		}
+			if code == halt {
+				close(c.Done)
+				return
+			}
 
-		methodMap[code](c, params)
-	}
+			methodMap[code](c, params)
+		}
+	}()
 }
 
 // Value returns the value at position idx; if the index is out of range, extra
@@ -125,13 +160,12 @@ func (c *Computer) mult(params []param) {
 }
 
 func (c *Computer) input(params []param) {
-	c.opcodes[*params[0].index] = c.inputVals[0]
-	c.inputVals = c.inputVals[1:]
+	c.opcodes[*params[0].index] = <-c.Input
 	c.instrPtr += nargs[input] + 1
 }
 
 func (c *Computer) output(params []param) {
-	fmt.Println(params[0].value)
+	c.Output <- params[0].value
 	c.instrPtr += nargs[output] + 1
 }
 
