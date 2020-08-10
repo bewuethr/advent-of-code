@@ -1,7 +1,6 @@
 package intcode
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -91,7 +90,6 @@ func TestComputerDay05(t *testing.T) {
 		for {
 			select {
 			case v := <-c.Output:
-				fmt.Println(v)
 				got = v
 			case <-c.Done:
 				break Loop
