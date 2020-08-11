@@ -76,3 +76,15 @@ func (v Vec2) ManhattanDistance(w Vec2) int {
 func (v Vec2) ManhattanDistanceOrigin() int {
 	return v.ManhattanDistance(Origin)
 }
+
+// RotCCW returns v rotated counterclockwise by 90 degrees (assuming the y axis
+// pointing down).
+func (v Vec2) RotCCW() Vec2 {
+	return NewVec2(v.y, -v.x)
+}
+
+// RotCW returns v rotated clockwise by 90 degrees (assuming the y axis pointing
+// down).
+func (v Vec2) RotCW() Vec2 {
+	return NewVec2(-v.y, v.x)
+}
