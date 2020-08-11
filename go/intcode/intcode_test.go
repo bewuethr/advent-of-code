@@ -1,6 +1,7 @@
 package intcode
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -98,9 +99,54 @@ func TestComputerDay05(t *testing.T) {
 			}
 		}
 
-		if !reflect.DeepEqual(got, test.want) {
+		if got != test.want {
 			t.Errorf("program %v, input %v, got %v, want %v",
 				test.program, test.input, got, test.want)
+		}
+	}
+}
+
+func TestComputerDay09(t *testing.T) {
+	quine := "109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99"
+	expected, err := convert.StrSliceToInt(strings.Split(quine, ","))
+	if err != nil {
+		t.Fatalf("converting strings to ints: %v", err)
+	}
+
+	var tests = []struct {
+		program string
+		want    []int
+	}{
+		{quine, expected}, // program prints itself
+		{"1102,34915192,34915192,7,4,7,99,0", []int{1219070632396864}}, // 16 digit number
+		{"104,1125899906842624,99", []int{1125899906842624}},           // print large middle number
+	}
+
+	for _, test := range tests {
+		opcodesStr := strings.Split(test.program, ",")
+		opcodes, err := convert.StrSliceToInt(opcodesStr)
+		if err != nil {
+			t.Fatalf("unable to convert string slice: %v\n", err)
+		}
+
+		c := NewComputer(opcodes)
+		c.RunProgram()
+		var got []int
+	Loop:
+		for {
+			select {
+			case v := <-c.Output:
+				got = append(got, v)
+				fmt.Println(v)
+			case <-c.Done:
+				break Loop
+			case err := <-c.Err:
+				t.Fatalf("input %v caused %v, want nil", test.program, err)
+			}
+		}
+
+		if !reflect.DeepEqual(got, test.want) {
+			t.Errorf("program %v, got %v, want %v", test.program, got, test.want)
 		}
 	}
 }
