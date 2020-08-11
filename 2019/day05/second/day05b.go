@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/bewuethr/advent-of-code/go/convert"
@@ -27,7 +28,17 @@ func main() {
 	}
 
 	comp := intcode.NewComputer(opCodes)
-	if err := comp.RunProgram(5); err != nil {
-		log.Die("running op codes", err)
+	comp.RunProgram()
+	comp.Input <- 5
+Loop:
+	for {
+		select {
+		case err := <-comp.Err:
+			log.Die("running op codes", err)
+		case <-comp.Done:
+			break Loop
+		case output := <-comp.Output:
+			fmt.Println(output)
+		}
 	}
 }
