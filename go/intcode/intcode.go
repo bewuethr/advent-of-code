@@ -94,7 +94,7 @@ func NewComputer(opcodes []int) *Computer {
 	}
 }
 
-// RunProgram starts a goroutine that executes the program in the memory of the
+// StartProgram starts a goroutine that executes the program in the memory of the
 // computer. It is typically used like this:
 //
 //     Loop:
@@ -108,9 +108,7 @@ func NewComputer(opcodes []int) *Computer {
 //                 // Handle error.
 //             }
 //         }
-//
-// TODO Rename StartProgram
-func (c *Computer) RunProgram() {
+func (c *Computer) StartProgram() {
 	go func() {
 		for {
 			code, params, err := c.parseInstruction(c.opcodes[c.instrPtr])

@@ -31,7 +31,7 @@ func TestComputerDay02(t *testing.T) {
 		}
 
 		c := NewComputer(opcodes)
-		c.RunProgram()
+		c.StartProgram()
 		select {
 		case err := <-c.Err:
 			t.Fatalf("got %v, want nil\n", err)
@@ -84,7 +84,7 @@ func TestComputerDay05(t *testing.T) {
 		}
 
 		c := NewComputer(opcodes)
-		c.RunProgram()
+		c.StartProgram()
 		c.Input <- test.input
 		var got int
 	Loop:
@@ -130,7 +130,7 @@ func TestComputerDay09(t *testing.T) {
 		}
 
 		c := NewComputer(opcodes)
-		c.RunProgram()
+		c.StartProgram()
 		var got []int
 	Loop:
 		for {

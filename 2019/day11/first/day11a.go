@@ -53,7 +53,7 @@ func main() {
 	panels := make(map[grid.Vec2]int)
 
 	comp := intcode.NewComputer(opCodes)
-	comp.RunProgram()
+	comp.StartProgram()
 Loop:
 	for {
 		select {

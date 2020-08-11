@@ -28,7 +28,7 @@ func main() {
 	}
 
 	comp := intcode.NewComputer(opCodes)
-	comp.RunProgram()
+	comp.StartProgram()
 	comp.Input <- 2
 Loop:
 	for {
