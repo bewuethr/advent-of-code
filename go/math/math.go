@@ -70,7 +70,7 @@ func generateIntPermutation(n int, s []int, out chan<- []int) {
 // zero. The return value is always positive.
 func GCD(a, b int) int {
 	if a == 0 && b == 0 {
-		panic("gcd(0, 0) is not defined")
+		panic("GCD(0, 0) is not defined")
 	}
 
 	a, b = IntAbs(a), IntAbs(b)
@@ -78,4 +78,28 @@ func GCD(a, b int) int {
 		a, b = b, a%b
 	}
 	return a
+}
+
+// LCM returns the least common multiple of its parameters. It panics if there
+// are fewer than two parameters.
+func LCM(n ...int) int {
+	if len(n) <= 1 {
+		panic("at least to arguments required for LCM")
+	}
+
+	res := lcm(n[0], n[1])
+	for i := 2; i < len(n); i++ {
+		res = lcm(res, n[i])
+	}
+
+	return res
+}
+
+// lcam returns the least common multiple of a and b.
+func lcm(a, b int) int {
+	if a == 0 && b == 0 {
+		return 0
+	}
+
+	return IntAbs(a) / GCD(a, b) * IntAbs(b)
 }
