@@ -7,7 +7,7 @@ import (
 )
 
 // GetInputScanner returns a scanner for newline separated input in a file
-// specified as a command line argument, or "input" if none is specified.
+// specified as a command line argument, or "../input" if none is specified.
 func GetInputScanner() (*bufio.Scanner, error) {
 	if len(os.Args) == 1 {
 		os.Args = append(os.Args, "../input")
