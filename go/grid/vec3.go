@@ -5,7 +5,7 @@ type Vec3 struct {
 	x, y, z int
 }
 
-// Special vectors
+// Special 3d vectors
 var (
 	Origin3 = Vec3{0, 0, 0} // Origin of the grid
 	Ux3     = Vec3{1, 0, 0} // x unit vector

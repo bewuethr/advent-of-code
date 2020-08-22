@@ -12,7 +12,7 @@ type Vec2 struct {
 	x, y int
 }
 
-// Special vectors
+// Special 2d vectors
 var (
 	Origin = Vec2{0, 0} // Origin of the grid
 	Ux     = Vec2{1, 0} // Horizontal unit vector
@@ -62,7 +62,7 @@ func (v Vec2) ScalarMult(n int) Vec2 {
 	return NewVec2(v.x*n, v.y*n)
 }
 
-// ScalarDiv reuturns a Vec2 with compoments of v divided by n.
+// ScalarDiv reuturns a Vec2 with components of v divided by n.
 func (v Vec2) ScalarDiv(n int) Vec2 {
 	return NewVec2(v.x/n, v.y/n)
 }
