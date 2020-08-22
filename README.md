@@ -36,4 +36,5 @@ Perl. First commits per day are the honest truth, afterwards I clean up.
 
 ## 2019
 
-I thought "probably Go", but ended up with Perl again for day 1.
+I thought "probably Go", but ended up with Perl again for day 1. Then gave up,
+then came back and did everything in Go.
