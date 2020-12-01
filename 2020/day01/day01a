@@ -1,0 +1,16 @@
+#!/usr/bin/awk -f
+
+{
+	entries[NR] = $1
+}
+
+END {
+	for (i = 1; i <= NR-1; ++i) {
+		for (j = i+1; j <= NR; ++j) {
+			if (entries[i] + entries[j] == 2020) {
+				print entries[i] * entries[j]
+				exit
+			}
+		}
+	}
+}
