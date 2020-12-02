@@ -3,7 +3,7 @@
 BEGIN {	FS = "[ :-]+" }
 
 {
-	if (xor(substr($4, $1, 1) == $3, substr($4, $2, 1) == $3))
+	if ((substr($4, $1, 1) == $3) != (substr($4, $2, 1) == $3))
 		++count
 }
 
