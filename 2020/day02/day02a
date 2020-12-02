@@ -1,0 +1,11 @@
+#!/usr/bin/awk -f
+
+BEGIN {	FS = "[ :-]+" }
+
+{
+	gsub("[^" $3 "]", "", $4)
+	if (length($4) >= $1 && length($4) <= $2)
+		++count
+}
+
+END { print count }
