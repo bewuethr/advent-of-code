@@ -1,0 +1,17 @@
+#!/usr/bin/awk -f
+
+BEGIN {
+	x = 0
+}
+
+NR == 1 { xmax = length() }
+
+{
+	xpos = x % xmax + 1
+	if (substr($0, xpos, 1) == "#") {
+		++trees
+	}
+	x += 3
+}
+
+END { print trees }
