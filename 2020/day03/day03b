@@ -1,0 +1,30 @@
+#!/usr/bin/awk -f
+
+{ map[NR] = $0 }
+
+END {
+	dx[1] = 1; dy[1] = 1
+	dx[2] = 3; dy[2] = 1
+	dx[3] = 5; dy[3] = 1
+	dx[4] = 7; dy[4] = 1
+	dx[5] = 1; dy[5] = 2
+
+	xmax = length(map[1])
+
+	total = 1
+
+	for (i = 1; i <= 5; ++i) {
+		x = 0
+		trees = 0
+		for (y = 1; y <= NR; y += dy[i]) {
+			xpos = x % xmax + 1
+			if (substr(map[y], xpos, 1) == "#") {
+				++trees
+			}
+			x += dx[i]
+		}
+		total *= trees
+	}
+
+	print total
+}
