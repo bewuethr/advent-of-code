@@ -1,0 +1,31 @@
+#!/usr/bin/awk -f
+
+function bin2dec(n,   l, i, d, fac) {
+	l = length(n)
+	fac = 1
+	for (i = l; i >= 1; --i) {
+		d += substr(n, i, 1) * fac
+		fac *= 2
+	}
+
+	return d
+}
+
+{
+	gsub(/F/, 0)
+	gsub(/B/, 1)
+	gsub(/L/, 0)
+	gsub(/R/, 1)
+
+	seats[NR] = bin2dec($0)
+}
+
+END {
+	asort(seats)
+	for (i = 1; i < length(seats); ++i) {
+		if (seats[i+1] - seats[i] != 1) {
+			print seats[i] + 1
+			exit
+		}
+	}
+}
