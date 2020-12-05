@@ -1,0 +1,58 @@
+#!/usr/bin/awk -f
+
+function valid(key, val) {
+	switch (key) {
+	case "byr":
+		return val ~ /^[[:digit:]]{4}$/ && val >= 1920 && val <= 2002
+	case "iyr":
+		return val ~ /^[[:digit:]]{4}$/ && val >= 2010 && val <= 2020
+	case "eyr":
+		return val ~ /^[[:digit:]]{4}$/ && val >= 2020 && val <= 2030
+	case "hgt":
+		return val ~ /^[[:digit:]]{3}cm$/ \
+			&& substr(val, 1, 3) >= 150 \
+			&& substr(val,1,3) <= 193 \
+			|| \
+			val ~ /^[[:digit:]]{2}in$/ \
+			&& substr(val, 1, 2) >= 59 \
+			&& substr(val,1,2) <= 76
+	case "hcl":
+		return val ~ /^#[[:xdigit:]]{6}$/
+	case "ecl":
+		return val ~ /^(amb|blu|brn|gry|grn|hzl|oth)$/
+	case "pid":
+		return val ~ /^[[:digit:]]{9}$/
+	case "cid":
+		return 1
+	default:
+		printf "Record %d invalid key: %s\n", NR, key
+		return 0
+	}
+}
+
+BEGIN { RS = "" }
+
+NF <= 6 { next }
+
+# If the cid field is present here, a mandatory field must be missing
+NF == 7 {
+	for (i = 1; i <= NF; ++i) {
+		if (substr($i, 1, 3) == "cid") {
+			next
+		}
+	}
+}
+
+{
+	for (i = 1; i <= NF; ++i) {
+		split($i, a, /:/)
+		key = a[1]
+		val = a[2]
+		if (! valid(key, val)) {
+			next
+		}
+	}
+	++validcount
+}
+
+END { print validcount }
