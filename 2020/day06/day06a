@@ -1,0 +1,16 @@
+#!/usr/bin/awk -f
+
+BEGIN {	RS = "" }
+
+{
+	delete counts
+	gsub(/[^[:lower:]]/, "")
+	split($0, arr, "")
+	for (i in arr) {
+		++counts[arr[i]]
+	}
+
+	total += length(counts)
+}
+
+END { print total }

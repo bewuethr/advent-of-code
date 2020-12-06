@@ -1,0 +1,21 @@
+#!/usr/bin/awk -f
+
+BEGIN {	RS = "" }
+
+{
+	delete counts
+	for (i = 1; i <= NF; ++i) {
+		split($i, arr, "")
+		for (j in arr) {
+			++counts[arr[j]]
+		}
+	}
+
+	for (i in counts) {
+		if (counts[i] == NF) {
+			++total
+		}
+	}
+}
+
+END { print total }
