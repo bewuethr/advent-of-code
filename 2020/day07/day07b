@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+contents() {
+	grep "^$1" "$infile" \
+		| grep -Po '\d \w+ \w+' \
+		| awk -v mult="$2" '{$1 *= mult}1'
+}
+
+infile=$1
+
+readarray -t arr < <(contents 'shiny gold' 1)
+
+i=0
+while true; do
+	read -r n color <<< "${arr[i]}"
+	((total += n))
+	readarray -t arr2 < <(contents "$color" "$n")
+	arr+=("${arr2[@]}")
+	((++i))
+	((i == ${#arr[@]})) && break
+done
+
+echo "$total"

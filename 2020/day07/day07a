@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+iscontained() {
+	grep -P "\d $1" "$infile" \
+		| cut -d ' ' -f -2
+}
+
+infile=$1
+
+readarray -t arr < <(iscontained 'shiny gold')
+
+count=${#arr[@]}
+
+while ((${#arr[@]} > 0)); do
+	for i in "${!arr[@]}"; do
+		echo "${arr[i]}"
+		readarray -t arr2 < <(iscontained "${arr[i]}")
+		((count += ${#arr2[@]}))
+		arr+=("${arr2[@]}")
+		unset "arr[i]"
+	done
+done | sort -u | wc -l
