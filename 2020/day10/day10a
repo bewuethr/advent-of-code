@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+sort -n "$1" \
+	| awk '
+		{
+			++jolts[$1-prev]
+			prev = $1
+		}
+
+		END { print jolts[1] * (jolts[3]+1) }
+	'
