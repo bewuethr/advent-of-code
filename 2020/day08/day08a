@@ -1,0 +1,30 @@
+#!/usr/bin/awk -f
+
+{ instr[NR] = $0 }
+
+END {
+	idx = 1
+
+	while (1) {
+		if (seen[idx]++) {
+			print accumulator
+			exit
+		}
+
+		split(instr[idx], a)
+		if (a[1] == "acc") {
+			accumulator += a[2]
+			++idx
+		}
+		else if (a[1] == "jmp") {
+			idx += a[2]
+		}
+		else if (a[1] == "nop") {
+			++idx
+		}
+		else {
+			print "unknown instruction", a[1]
+			exit
+		}
+	}
+}

@@ -1,0 +1,46 @@
+#!/usr/bin/awk -f
+
+function swap(op) {
+	return op == "nop" ? "jmp" : "nop"
+}
+
+$1 == "nop" || $1 == "jmp" { nopsjmps[++njidx] = NR }
+
+{ instr[NR] = $0 }
+
+END {
+	for (chgidx in nopsjmps) {
+		idx = 1
+		accumulator = 0
+		delete seen
+		while (1) {
+			if (seen[idx]++) {
+				break
+			}
+			if (idx == NR + 1) {
+				print accumulator
+				exit
+			}
+
+			split(instr[idx], a)
+			if (idx == nopsjmps[chgidx]) {
+				a[1] = swap(a[1])
+			}
+
+			if (a[1] == "acc") {
+				accumulator += a[2]
+				++idx
+			}
+			else if (a[1] == "jmp") {
+				idx += a[2]
+			}
+			else if (a[1] == "nop") {
+				++idx
+			}
+			else {
+				print "unknown instruction", a[1]
+				exit
+			}
+		}
+	}
+}
