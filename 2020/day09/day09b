@@ -1,0 +1,37 @@
+#!/usr/bin/awk -f
+
+function extremes(idxmin, idxmax,   i, min, max) {
+	min = nums[idxmin]
+	max = nums[idxmin]
+	for (i = idxmin+1; i <= idxmax; ++i) {
+		min = nums[i] < min ? nums[i] : min
+		max = nums[i] > max ? nums[i] : max
+	}
+	
+	return min + max
+}
+
+BEGIN { val = 22477624 }
+# BEGIN { val = 127 }
+
+{ nums[NR] = $1 }
+
+END {
+	for (i = 1; i <= NR - 1; ++i ) {
+		sum = nums[i]
+		offset = 1
+		while (1) {
+			sum += nums[i+offset]
+			if (sum == val) {
+				print extremes(i, i+offset)
+				exit
+			}
+
+			if (sum > val) {
+				break
+			}
+
+			++offset
+		}
+	}
+}
