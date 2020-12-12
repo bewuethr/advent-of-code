@@ -1,0 +1,44 @@
+#!/usr/bin/awk -f
+
+function abs(n) {
+	return n > 0 ? n : -n
+}
+
+BEGIN {
+	dx = 1
+	dy = 0
+}
+
+/^N/ { y += substr($1, 2) }
+/^S/ { y -= substr($1, 2) }
+/^E/ { x += substr($1, 2) }
+/^W/ { x -= substr($1, 2) }
+
+/^F/ {
+	x += dx * substr($1, 2)
+	y += dy * substr($1, 2)
+}
+
+/^[LR]/ {
+	dir = substr($1, 1, 1)
+	deg = substr($1, 2)
+
+	if (deg == 180) {
+		dx *= -1
+		dy *= -1
+		next
+	}
+
+	if (deg == 90 && dir == "R" || deg == 270 && dir == "L") {
+		dx_new = dy
+		dy = -dx
+		dx = dx_new
+	}
+	else if (deg == 270 && dir == "R" || deg == 90 && dir == "L") {
+		dx_new = -dy
+		dy = dx
+		dx = dx_new
+	}
+}
+
+END { print abs(x) + abs(y) }
