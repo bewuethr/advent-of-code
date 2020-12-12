@@ -1,0 +1,71 @@
+#!/usr/bin/awk -f
+
+function count_occ_near(x, y,   i, j, n) {
+	for (i = y - 1; i <= y + 1; ++i) {
+		for (j = x - 1; j <= x + 1; ++j) {
+			if (i == y && j == x) {
+				continue
+			}
+			
+			if (i in seats && j in seats[i]) {
+				n += seats[i][j] == "#"
+			}
+		}
+	}
+
+	return n
+}
+
+function count_occ_total(   i, j, n) {
+	for (i in seats) {
+		for (j in seats[i]) {
+			n += seats[i][j] == "#"
+		}
+	}
+
+	return n
+}
+
+function array_copy(arr1, arr2,   i, j) {
+	for (i in arr1) {
+		for (j in arr1[i]) {
+			arr2[i][j] =  arr1[i][j]
+		}
+	}
+}
+
+{
+	seats[NR][1] = ""
+	split($0, seats[NR], //)
+}
+
+END {
+	while (1) {
+		changed = 0
+		for (y = 1; y <= NR; ++y) {
+			for (x = 1; x <= length(seats[1]); ++x) {
+				occ_count = count_occ_near(x, y)
+
+				if (seats[y][x] == "L" && occ_count == 0) {
+					new = "#"
+					changed = 1
+				}
+				else if (seats[y][x] == "#" && occ_count >= 4) {
+					new = "L"
+					changed = 1
+				}
+				else {
+					new = seats[y][x]
+				}
+
+				seats_new[y][x] = new
+			}
+		}
+
+		array_copy(seats_new, seats)
+		if (! changed) {
+			print count_occ_total()
+			exit
+		}
+	}
+}
