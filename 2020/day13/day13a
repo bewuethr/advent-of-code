@@ -1,0 +1,29 @@
+#!/usr/bin/awk -f
+
+BEGIN { FS = "," }
+
+NR == 1 { earliest = $1 }
+
+NR == 2 {
+	for (i = 1; i <= NF; ++i) {
+		if ($i == "x") {
+			continue
+		}
+		
+		t_wait = $i - (earliest % $i)
+		wait[$i] = t_wait
+		max = t_wait > max ? t_wait : max
+	}
+
+	min = max
+	for (i in wait) {
+		if (wait[i] < min) {
+			min = wait[i]
+			id = i
+		}
+	}
+
+	printf "min: %d, ID: %d\n", min, id
+	print min * id
+}
+
