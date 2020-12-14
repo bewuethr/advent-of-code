@@ -1,0 +1,68 @@
+#!/usr/bin/awk -f
+
+function dec_2_bin(n,   b) {
+	while (n) {
+		b = n % 2b
+		n = int(n / 2)
+	}
+
+	return b
+}
+
+function bin_2_dec(b,   n, i) {
+	for (i = 0; i < length(b); ++i) {
+		n += 2^i * substr(b, length(b) - i, 1)
+	}
+
+	return n
+}
+
+function join(arr,   i, result) {
+	for (i in arr) {
+		result = result arr[i]
+	}
+
+	return result
+}
+
+function apply(mask, val,   bin, len_ba, maskbit, i) {
+	bin = dec_2_bin(val)
+	while (length(bin) < 36) {
+		bin = "0" bin
+	}
+
+	split(bin, bin_arr, //)
+	len_ba = length(bin_arr)
+
+	for (i = 0; i < len_ba; ++i) {
+		maskbit = substr(mask, length(mask) - i, 1)
+		if (maskbit == "X") {
+			continue
+		}
+
+		bin_arr[len_ba - i] = maskbit
+	}
+		
+	return bin_2_dec(join(bin_arr))
+}
+
+BEGIN {
+	PROCINFO["sorted_in"] ="@ind_num_asc"
+	FS = "[][ =]+"
+}
+
+/mask/ { mask = $2 }
+
+/mem/ {
+	addr = $2
+	val = $3
+	mem[addr] = apply(mask, val)
+}
+
+END {
+	for (addr in mem) {
+		sum += mem[addr]
+	}
+	
+	print sum
+}

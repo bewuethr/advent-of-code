@@ -1,0 +1,95 @@
+#!/usr/bin/awk -f
+
+function dec_2_bin(n, len,   b) {
+	while (n) {
+		b = n % 2b
+		n = int(n / 2)
+	}
+
+	while (length(b) < len) {
+		b = "0" b
+	}
+
+	return b
+}
+
+function bin_2_dec(b,   n, i) {
+	for (i = 0; i < length(b); ++i) {
+		n += 2^i * substr(b, length(b) - i, 1)
+	}
+
+	return n
+}
+
+function join(arr,   i, result) {
+	for (i in arr) {
+		result = result arr[i]
+	}
+
+	return result
+}
+
+function apply(mask, val,   bin, len_ba, maskbit, i) {
+	bin = dec_2_bin(val, 36)
+
+	split(bin, bin_arr, //)
+	len_ba = length(bin_arr)
+
+	for (i = 0; i < len_ba; ++i) {
+		maskbit = substr(mask, length(mask) - i, 1)
+		if (maskbit == "0") {
+			continue
+		}
+
+		bin_arr[len_ba - i] = maskbit
+	}
+
+	return join(bin_arr)
+}
+
+BEGIN {
+	PROCINFO["sorted_in"] ="@ind_num_asc"
+	FS = "[][ =]+"
+}
+
+/mask/ { mask = $2 }
+
+/mem/ {
+	addr = $2
+	val = $3
+	new_addr = apply(mask, addr)
+
+	# Count number of "X" in new_addr
+	n = gsub(/X/, "X", new_addr)
+
+	delete bin_addresses
+	idx = 1
+
+	# Loop from 0 to that number - 1, take binary representation and replace
+	# "X" with digits of that representation, append to array of binary
+	# addresses
+	for (i = 0; i < 2^n; ++i) {
+		new_addr_copy = new_addr
+		bin_rep = dec_2_bin(i, n)
+
+		split(bin_rep, bin_rep_arr, //)
+		for (j in bin_rep_arr) {
+			sub(/X/, bin_rep_arr[j], new_addr_copy)
+		}
+
+		bin_addresses[idx++] = new_addr_copy
+	}
+
+	# Loop over that array, convert to decimal and set value at address
+	for (i in bin_addresses) {
+		mem[bin_2_dec(bin_addresses[i])] = val
+	}
+}
+
+END {
+	for (addr in mem) {
+		sum += mem[addr]
+	}
+	
+	print sum
+}
