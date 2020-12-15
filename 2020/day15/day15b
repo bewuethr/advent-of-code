@@ -1,0 +1,32 @@
+#!/usr/bin/awk -f
+
+BEGIN { FS = "," }
+
+{
+	for (i = 1; i <= NF; ++i) {
+		last_seen[$i] = i
+	}
+
+	n = $i
+}
+
+END {
+	while (i <= 30000000) {
+		if (!(n in before_seen)) {
+			nxt = 0
+		}
+		else {
+			nxt = last_seen[n] - before_seen[n]
+		}
+
+		if (nxt in last_seen) {
+			before_seen[nxt] = last_seen[nxt]
+		}
+		last_seen[nxt] = i
+
+		n = nxt
+		++i
+	}
+
+	print n
+}
