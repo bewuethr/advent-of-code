@@ -1,0 +1,36 @@
+#!/usr/bin/awk -f
+
+BEGIN { part = 1  }
+
+/^$/ {
+	++part
+	if (part == 2) {
+		FS = ","
+	}
+}
+
+part == 1 {
+	ranges[++i][1] = ""
+	split($(NF-2), ranges[i], /-/)
+
+	ranges[++i][1] = ""
+	split($NF, ranges[i], /-/)
+}
+
+part == 3 && /,/ {
+	for (i = 1; i <= NF; ++i) {
+		valid = 0
+		for (j in ranges) {
+			if ($i >= ranges[j][1] && $i <= ranges[j][2]) {
+				valid = 1
+				break
+			}
+		}
+
+		if (!valid) {
+			rate += $i
+		}
+	}
+}
+
+END { print rate }
