@@ -1,0 +1,142 @@
+#!/usr/bin/awk -f
+
+function active_count(dim,   z, y, x, c) {
+	for (z in dim) {
+		for (y in dim[z]) {
+			for (x in dim[z][y]) {
+				if (dim[z][y][x] == "#") {
+					++c
+				}
+			}
+		}
+	}
+
+	return c
+}
+
+function copy(dim, dim_cpy,   z, y, x) {
+	for (z in dim) {
+		for (y in dim[z]) {
+			for (x in dim[z][y]) {
+				dim_cpy[z][y][x] = dim[z][y][x]
+			}
+		}
+	}
+}
+
+function dump(dim,   z, y, x) {
+	for (z in dim) {
+		printf "z = %d:\n", z
+		for (y in dim[z]) {
+			for (x in dim[z][y]) {
+				printf dim[z][y][x]
+			}
+			print ""
+		}
+		print ""
+	}
+}
+
+function active_neighbours(dim, z, y, x,   c) {
+	for (dz = -1; dz <= 1; ++dz) {
+		for (dy = -1; dy <= 1; ++dy) {
+			for (dx = -1; dx <= 1; ++dx) {
+				if (dx == 0 && dy == 0 && dz == 0) {
+					continue
+				}
+
+				if (z+dz in dim && y+dy in dim[z+dz] && x+dx in dim[z+dz][y+dy]) {
+					if (dim[z+dz][y+dy][x+dx] == "#") {
+						++c
+					}
+				}
+			}
+		}
+	}
+
+	return c
+}
+
+function update(dim,   z, y, x, dim_next, c) {
+	copy(dim, dim_next)
+	for (z in dim) {
+		for (y in dim[z]) {
+			for (x in dim[z][y]) {
+				el = dim[z][y][x]
+				c = active_neighbours(dim, z, y, x)
+				if (c == 3 || (c == 2 && el == "#")) {
+					dim_next[z][y][x] = "#"
+				}
+				else {
+					dim_next[z][y][x] = "."
+				}
+			}
+		}
+	}
+
+	copy(dim_next, dim)
+}
+
+function pad(dim,   z, y, x, dim_cpy) {
+	--x_min
+	++x_max
+	--y_min
+	++y_max
+	--z_min
+	++z_max
+	copy(dim, dim_cpy)
+
+	for (y = y_min; y <= y_max; ++y) {
+		for (x = x_min; x <= x_max; ++x) {
+			dim_cpy[z_min][y][x] = "."
+			dim_cpy[z_max][y][x] = "."
+		}
+	}
+
+	for (z = z_min; z <= z_max; ++z) {
+		for (x = x_min; x <= x_max; ++x) {
+			dim_cpy[z][y_min][x] = "."
+			dim_cpy[z][y_max][x] = "."
+		}
+	}
+
+	for (z = z_min; z <= z_max; ++z) {
+		for (y = y_min; y <= y_max; ++y) {
+			dim_cpy[z][y][x_min] = "."
+			dim_cpy[z][y][x_max] = "."
+		}
+	}
+
+	copy(dim_cpy, dim)
+}
+
+BEGIN {
+	FS = ""
+	PROCINFO["sorted_in"] = "@ind_num_asc"
+}
+
+{
+	for (i = 1; i <= NF; ++i) {
+		dim[1][NR][i] = $i
+	}
+}
+
+END {
+	x_min = 1
+	x_max = NF
+	y_min = 1
+	y_max = NR
+	z_min = 1
+	z_max = 1
+
+
+	for (i = 1; i <= 6; ++i) {
+		print "before cycle", i
+		pad(dim)
+		printf "x-range: %d-%d, y-range: %d-%d, z-range: %d-%d\n", x_min, x_max, y_min, y_max, z_min, z_max
+		dump(dim)
+		update(dim)
+	}
+
+	print active_count(dim)
+}
