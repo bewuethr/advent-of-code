@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 
-function active_count(dim,   z, y, x, c) {
+function active_total(dim,   z, y, x, c) {
 	for (z in dim) {
 		for (y in dim[z]) {
 			for (x in dim[z][y]) {
@@ -21,19 +21,6 @@ function copy(dim, dim_cpy,   z, y, x) {
 				dim_cpy[z][y][x] = dim[z][y][x]
 			}
 		}
-	}
-}
-
-function dump(dim,   z, y, x) {
-	for (z in dim) {
-		printf "z = %d:\n", z
-		for (y in dim[z]) {
-			for (x in dim[z][y]) {
-				printf dim[z][y][x]
-			}
-			print ""
-		}
-		print ""
 	}
 }
 
@@ -131,12 +118,9 @@ END {
 
 
 	for (i = 1; i <= 6; ++i) {
-		print "before cycle", i
 		pad(dim)
-		printf "x-range: %d-%d, y-range: %d-%d, z-range: %d-%d\n", x_min, x_max, y_min, y_max, z_min, z_max
-		dump(dim)
 		update(dim)
 	}
 
-	print active_count(dim)
+	print active_total(dim)
 }
