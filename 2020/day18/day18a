@@ -1,0 +1,58 @@
+#!/usr/bin/awk -f
+
+function peek(stack) {
+	return stack[length(stack)]
+}
+
+function pop(stack,   val) {
+	val = peek(stack)
+	delete stack[length(stack)]
+	return val
+}
+
+function eval_term(   nxt, ret) {
+	nxt = pop(tokens)
+	if (nxt ~ /[[:digit:]]/) {
+		ret = nxt
+	}
+	else if (nxt == ")") {
+		ret = eval_expression()
+		nxt = pop(tokens)
+		if (nxt != "(") {
+			print "syntax error"
+			exit 1
+		}
+	}
+
+	return ret
+}
+
+function eval_expression(   ret, pk) {
+	if (! length(tokens)) {
+		return 0
+	}
+
+	ret = eval_term()
+
+	if (length(tokens)) {
+		pk = peek(tokens)
+		if (pk == "+") {
+			pop(tokens)
+			ret += eval_expression()
+		}
+		else if (pk == "*") {
+			pop(tokens)
+			ret *= eval_expression()
+		}
+	}
+
+	return ret
+}
+
+{
+	gsub(/ /, "")
+	split($0, tokens, //)
+	sum += eval_expression()
+}
+
+END { print sum }
