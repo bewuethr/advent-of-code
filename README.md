@@ -38,3 +38,7 @@ Perl. First commits per day are the honest truth, afterwards I clean up.
 
 I thought "probably Go", but ended up with Perl again for day 1. Then gave up,
 then came back and did everything in Go.
+
+## 2020
+
+Awk or shell.
