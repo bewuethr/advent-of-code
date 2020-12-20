@@ -1,0 +1,76 @@
+#!/usr/bin/awk -f
+
+function join(arr,   i, res, notfirst) {
+	for (i in arr) {
+			res = res arr[i]
+		}
+
+	return res
+}
+
+BEGIN {
+	FS = "[ \":]+"
+	PROCINFO["sorted_in"] = "@ind_num_asc"
+}
+
+! msg {
+	if ($0 ~ /"/) {
+		known[$1] = $2
+	}
+	else if ($1 != 11) {
+		for (i = 2; i <= NF; ++i) {
+			rules[$1][i-1] = $i
+		}
+	}
+	else {
+		# Unroll rule 11: "42 31 | 42 11 31" to "42 31 | 42 42 31 31 | ..."
+		reps = 5
+		for (i = 1; i <= reps; ++i) {
+			for (j = 1; j <= i; ++j) {
+				rules[$1][++idx] = 42
+			}
+			for (j = 1; j <= i; ++j) {
+				rules[$1][++idx] = 31
+			}
+			if (i < reps) {
+				rules[$1][++idx] = "|"
+			}
+		}
+	}
+}
+
+msg && $0 ~ "^" known[0] "$" { ++count }
+
+/^$/ {
+	msg = 1
+
+	while (length(rules)) {
+		for (i in rules) {
+			for (j in rules[i]) {
+				# Substitute known rules
+				if (rules[i][j] in known) {
+					rules[i][j] = known[rules[i][j]]
+				}
+			}
+
+			# Check if this one is now known
+			newrule = join(rules[i])
+			if (newrule !~ /[[:digit:]]/) {
+				if (newrule ~ /\|/) {
+					known[i] = "(" newrule ")"
+				}
+				else {
+					known[i] = newrule
+				}
+				delete rules[i]
+
+				# Special case rule 8
+				if (i == 8) {
+					known[i] = known[i] "+"
+				}
+			}
+		}
+	}
+}
+
+END { print count }

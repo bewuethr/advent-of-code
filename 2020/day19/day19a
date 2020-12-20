@@ -1,0 +1,56 @@
+#!/usr/bin/awk -f
+
+function join(arr,   i, res) {
+	for (i in arr) {
+		res = res arr[i]
+	}
+
+	return res
+}
+
+BEGIN {
+	FS = "[ \":]+"
+	PROCINFO["sorted_in"] = "@ind_num_asc"
+}
+
+! msg {
+	if ($0 ~ /"/) {
+		known[$1] = $2
+	}
+	else {
+		for (i = 2; i <= NF; ++i) {
+			rules[$1][i-1] = $i
+		}
+	}
+}
+
+msg && $0 ~ "^" known[0] "$" { ++count }
+
+/^$/ {
+	msg = 1
+
+	while (length(rules)) {
+		for (i in rules) {
+			for (j in rules[i]) {
+				# Substitute known rules
+				if (rules[i][j] in known) {
+					rules[i][j] = known[rules[i][j]]
+				}
+			}
+
+			# Check if this one is now known
+			newrule = join(rules[i])
+			if (newrule !~ /[[:digit:]]/) {
+				if (newrule ~ /\|/) {
+					known[i] = "(" newrule ")"
+				}
+				else {
+					known[i] = newrule
+				}
+				delete rules[i]
+			}
+		}
+	}
+}
+
+END { print count }
