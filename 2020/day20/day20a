@@ -1,0 +1,69 @@
+#!/usr/bin/awk -f
+
+function rev(str) {
+	if (str == "") {
+		return ""
+	}
+
+	return (rev(substr(str, 2)) substr(str, 1, 1))
+}
+
+BEGIN {
+	FS = "\n"
+	RS = ""
+	PROCINFO["sorted_in"] = "@ind_num_asc"
+
+	top = 1
+	bottom = 2
+	left = 3
+	right = 4
+}
+
+{
+	split($1, arr, /[ :]/)
+	id = arr[2]
+
+	tiles[id][top] = $2
+	tiles[id][bottom] = $NF
+
+	for (i = 2; i <= NF; ++i) {
+		tiles[id][left] = tiles[id][left] substr($i, 1, 1)
+		tiles[id][right] = tiles[id][right] substr($i, length($i), 1)
+	}
+}
+
+END {
+	for (id1 in tiles) {
+		# print "checking", id1
+		matches = 0
+
+		for (id2 in tiles) {
+			if (id1 == id2) {
+				continue
+			}
+
+			for (side1 in tiles[id1]) {
+				for (side2 in tiles[id2]) {
+					if (tiles[id1][side1] == tiles[id2][side2] \
+						|| tiles[id1][side1] == rev(tiles[id2][side2]))
+					{
+						# printf "tile %d/%s matches tile %d/%s\n", id1, side1, id2, side2
+						++matches
+					}
+				}
+			}
+		}
+
+		if (matches == 2) {
+			# print "found corner tile:", id1
+			corners[id1] = 1
+		}
+	}
+
+	res = 1
+	for (id in corners) {
+		res *= id
+	}
+
+	print res
+}
