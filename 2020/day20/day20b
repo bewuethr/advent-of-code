@@ -1,0 +1,338 @@
+#!/usr/bin/awk -f
+
+function rev(str) {
+	if (str == "") {
+		return ""
+	}
+
+	return (rev(substr(str, 2)) substr(str, 1, 1))
+}
+
+function get_top(tile) {
+	return tile[1]
+}
+
+function get_bottom(tile) {
+	return tile[length(tile)]
+}
+
+function get_left(tile,   i, res) {
+	for (i in tile) {
+		res = res substr(tile[i], 1, 1)
+	}
+
+	return res
+}
+
+function get_right(tile,   i, res) {
+	for (i in tile) {
+		res = res substr(tile[i], length(tile[i]), 1)
+	}
+
+	return res
+}
+
+function find_corner(tiles,   id1, sides1, id2, sides2, i, j, matches) {
+	for (id1 in tiles) {
+		matches = 0
+
+		sides1[1] = get_top(tiles[id1])
+		sides1[2] = get_right(tiles[id1])
+		sides1[3] = get_bottom(tiles[id1])
+		sides1[4] = get_left(tiles[id1])
+
+		for (id2 in tiles) {
+			if (id1 == id2) {
+				continue
+			}
+
+			sides2[1] = get_top(tiles[id2])
+			sides2[2] = get_right(tiles[id2])
+			sides2[3] = get_bottom(tiles[id2])
+			sides2[4] = get_left(tiles[id2])
+
+			for (i in sides1) {
+				for (j in sides2) {
+					if (sides1[i] == sides2[j] || sides1[i] == rev(sides2[j])) {
+						++matches
+						connected[id1][i] = 1
+					}
+				}
+			}
+		}
+
+		if (matches == 2) {
+			return id1
+		}
+	}
+}
+
+function rot_right(tile,   new, i, j) {
+	for (i = 1; i <= length(tile[1]); ++i) {
+		for (j = length(tile); j >= 1; --j) {
+			new[i] = new[i] substr(tile[j], i, 1)
+		}
+	}
+
+	for (i in new) {
+		tile[i] = new[i]
+	}
+}
+
+function rot_left(tile,   new, i, j, idx) {
+	for (i = length(tile[1]); i >= 1; --i) {
+		++idx
+		for (j = 1; j <= length(tile); ++j) {
+			new[idx] = new[idx] substr(tile[j], i, 1)
+		}
+	}
+
+	for (i in new) {
+		tile[i] = new[i]
+	}
+}
+
+function flip_vert(tile,   l, i, t) {
+	l = length(tile)
+	for (i = 1; i <= int(l/2); ++i) {
+		t = tile[i]
+		tile[i] = tile[l-i+1]
+		tile[l-i+1] = t
+	}
+}
+
+function dump(tile,   i) {
+	for (i in tile) {
+		printf "%02d: %s\n", i, tile[i]
+	}
+}
+
+function make_top_left(tile, id) {
+	# Determine how much we have to rotate the tile by looking at which sides
+	# match other tiles
+	if (right in connected[id] && bottom in connected[id]) {
+		return
+	}
+
+	if (left in connected[id] && bottom in connected[id]) {
+		rot_left(tile)
+		return
+	}
+
+	if (top in connected[id] && left in connected[id]) {
+		rot_left(tile)
+		rot_left(tile)
+		return
+	}
+
+	if (top in connected[id] && right in connected[id]) {
+		rot_right(tile)
+		return
+	}
+
+	print "tile does not seem to be a corner tile"
+	exit 1
+}
+
+function find_right_neighbour(tile,   matches, id, i, found) {
+	matches = 0
+	cur_right = get_right(tile)
+
+	for (id in tiles) {
+		if (id in done) {
+			continue
+		}
+
+		for (i = 1; i <= 4; ++i) {
+			if (cur_right == get_left(tiles[id])) {
+				matches = 1
+				break
+			}
+			rot_right(tiles[id])
+		}
+
+		if (matches) {
+			found = 1
+			break
+		}
+
+		flip_vert(tiles[id])
+
+		for (i = 1; i <= 4; ++i) {
+			if (cur_right == get_left(tiles[id])) {
+				matches = 1
+				break
+			}
+			rot_right(tiles[id])
+		}
+
+		if (matches) {
+			found = 1
+			break
+		}
+	}
+
+	if (! found) {
+		print "no match found!"
+		exit 1
+	}
+
+	return id
+}
+
+function find_bottom_neighbour(tile,   matches, id, i) {
+	matches = 0
+	cur_bottom = get_bottom(tile)
+
+	for (id in tiles) {
+		if (id in done) {
+			continue
+		}
+
+		for (i = 1; i <= 4; ++i) {
+			if (cur_bottom == get_top(tiles[id])) {
+				matches = 1
+				break
+			}
+			rot_right(tiles[id])
+		}
+
+		if (matches) {
+			break
+		}
+
+		flip_vert(tiles[id])
+
+		for (i = 1; i <= 4; ++i) {
+			if (cur_bottom == get_top(tiles[id])) {
+				matches = 1
+				break
+			}
+			rot_right(tiles[id])
+		}
+
+		if (matches) {
+			break
+		}
+	}
+
+	return id
+}
+
+BEGIN {
+	FS = "\n"
+	RS = ""
+	PROCINFO["sorted_in"] = "@ind_num_asc"
+
+	top = 1
+	right = 2
+	bottom = 3
+	left = 4
+}
+
+{
+	split($1, arr, /[ :]/)
+	id = arr[2]
+
+	for (i = 2; i <= NF; ++i) {
+		tiles[id][i-1] = $i
+	}
+}
+
+END {
+	# Find a corner tile
+	final[1][1] = find_corner(tiles)
+	done[final[1][1]] = 1
+
+	# Rotate to make it the top left corner
+	make_top_left(tiles[final[1][1]], final[1][1])
+
+	# Buld the final map
+	dim = sqrt(length(tiles))
+	for (y = 1; y <= dim; ++y) {
+		for (x = 1; x <= dim; ++x) {
+			if (x == 1 && y == 1) {
+				# We already have the top left corner
+				continue
+			}
+
+			if (x == 1) {
+				final[y][x] = find_bottom_neighbour(tiles[final[y-1][x]])
+			}
+			else {
+				final[y][x] = find_right_neighbour(tiles[final[y][x-1]])
+			}
+			done[final[y][x]] = 1
+		}
+	}
+
+	# Combine full image
+	h = length(tiles[final[1][1]])
+	for (y in final) {
+		for (x in final[y]) {
+			for (yy = 2; yy < h; ++yy) {
+				idx = (y-1)*h + yy
+				combined_raw[idx] = combined_raw[idx] substr(tiles[final[y][x]][yy], 2, h-2)
+			}
+		}
+	}
+
+	idx1 = 0
+	for (idx2 in combined_raw) {
+		combined[++idx1] = combined_raw[idx2]
+	}
+
+	re[1] = "..................#."
+	re[2] = "#....##....##....###"
+	re[3] = ".#..#..#..#..#..#..."
+	per_monster = gsub(/#/, "#", re[1]) + gsub(/#/, "#", re[2]) + gsub(/#/, "#", re[3])
+
+	for (i in combined) {
+		total += gsub(/#/, "#", combined[i])
+	}
+
+
+	while (1) {
+		++attempt
+		for (i in combined) {
+			if (i == 1 || i == length(combined)) {
+				continue
+			}
+
+			delete idxs
+			offset = 1
+			while (1) {
+				if (match(substr(combined[i], offset), re[2])) {
+					idxs[length(idxs)+1] = offset + RSTART - 1
+					offset += RSTART
+					continue
+				}
+				break
+			}
+
+			for (idx in idxs) {
+				if (match(substr(combined[i-1], idxs[idx], length(re[1])), re[1]) \
+					&& match(substr(combined[i+1], idxs[idx], length(re[3])), re[3]))
+				{
+					++monster_count
+				}
+			}
+		}
+
+		if (monster_count) {
+			break
+		}
+
+		rot_right(combined)
+		if (attempt == 4) {
+			flip_vert(combined)
+		}
+
+		if (attempt == 8) {
+			print "no match found"
+			exit 1
+		}
+	}
+
+	print total - monster_count * per_monster
+}
