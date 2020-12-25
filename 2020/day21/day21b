@@ -1,0 +1,88 @@
+#!/usr/bin/awk -f
+
+function intersect(arr1, arr2,   el) {
+	for (el in arr1) {
+		if (! (el in arr2)) {
+			delete arr1[el]
+		}
+	}
+}
+
+BEGIN {
+	FS = "[ (),]+"
+	PROCINFO["sorted_in"] = "@ind_str_asc"
+}
+
+{
+	delete ingredients
+	delete allergens
+	is_ingredient = 1
+	for (i = 1; i <= NF-1; ++i) {
+		if ($i == "contains") {
+			is_ingredient = 0
+			continue
+		}
+
+		if (is_ingredient) {
+			ingredients[$i] = 1
+			++counts[$i]
+		}
+		else {
+			allergens[$i] = 1
+		}
+	}
+
+	for (a in allergens) {
+		if (a in alg_2_ing) {
+			# Remove all candidates that don't show up on this line
+			intersect(alg_2_ing[a], ingredients)
+		}
+		else {
+			# Add all ingredients as candidates
+			for (c in ingredients) {
+				alg_2_ing[a][c] = 1
+			}
+		}
+	}
+}
+
+END {
+	while (1) {
+		done = 0
+		for (alg in alg_2_ing) {
+			if (length(alg_2_ing[alg]) == 1) {
+				++done
+				for (ing in alg_2_ing[alg]) {
+					# Remove this ingredient everywhere
+					for (a in alg_2_ing) {
+						if (a == alg) {
+							continue
+						}
+
+						if (ing in alg_2_ing[a]) {
+							delete alg_2_ing[a][ing]
+						}
+					}
+				}
+			}
+		}
+
+		if (done == length(alg_2_ing)) {
+			break
+		}
+	}
+
+	first = 1
+	for (alg in alg_2_ing) {
+		if (! first) {
+			printf ","
+		}
+		for (ing in alg_2_ing[alg]) {
+			printf ing
+		}
+
+		first = 0
+	}
+
+	print ""
+}
