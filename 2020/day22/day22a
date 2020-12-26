@@ -65,12 +65,6 @@ END {
 	p2[head] = 1
 
 	while (length(p1) > 2 && length(p2) > 2) {
-		print "round", ++round
-		printf "p1: "
-		dump(p1)
-		printf "p2: "
-		dump(p2)
-
 		c1 = dequeue(p1)
 		c2 = dequeue(p2)
 		if (c1 == c2) {
@@ -86,13 +80,7 @@ END {
 			push(p2, c2)
 			push(p2, c1)
 		}
-		print ""
 	}
 
-	if (length(p2) == 2) {
-		print get_score(p1)
-	}
-	else {
-		print get_score(p2)
-	}
+	print length(p2) == 2 ? get_score(p1) : get_score(p2)
 }

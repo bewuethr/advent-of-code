@@ -75,13 +75,7 @@ function call_recursive(p1, p2, c1, c2,   i, p1_cpy, idx, p2_cpy) {
 }
 
 function play_game(p1, p2,   round, c1, c2, seen) {
-	print "game", ++game
-	
 	while (len(p1) && len(p2)) {
-		print "round", ++round
-		dump("p1", p1)
-		dump("p2", p2)
-
 		# Check if we've seen this configuration before
 		if (seen[marshal(p1, p2)]++) {
 			return 1
@@ -95,7 +89,6 @@ function play_game(p1, p2,   round, c1, c2, seen) {
 		}
 
 		if (len(p1) < c1 || len(p2) < c2) {
-			print "playing non-recursive round"
 			if (c1 > c2) {
 				push(p1, c1)
 				push(p1, c2)
@@ -105,11 +98,9 @@ function play_game(p1, p2,   round, c1, c2, seen) {
 				push(p2, c1)
 			}
 
-			print ""
 			continue
 		}
 
-		print ""
 		if (call_recursive(p1, p2, c1, c2) == 1) {
 			push(p1, c1)
 			push(p1, c2)
@@ -146,7 +137,5 @@ END {
 	p2[tail] = length(p2)
 	p2[head] = 1
 
-	result = play_game(p1, p2)
-
-	print result == 1 ? get_score(p1) : get_score(p2)
+	print play_game(p1, p2) == 1 ? get_score(p1) : get_score(p2)
 }
