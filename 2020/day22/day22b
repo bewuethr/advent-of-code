@@ -1,0 +1,152 @@
+#!/usr/bin/awk -f
+
+function len(arr) {
+	return arr[tail] - arr[head] + 1
+}
+
+function dequeue(arr,   el) {
+	el = arr[arr[head]]
+	delete arr[arr[head]]
+	++arr[head]
+	return el
+}
+
+function push(arr, el) {
+	++arr[tail]
+	arr[arr[tail]] = el
+}
+
+function pop(arr,   el) {
+	el = arr[arr[tail]]
+	delete arr[arr[tail]]
+	--arr[tail]
+	return el
+}
+
+function get_score(arr,   sum, factor) {
+	factor = 0
+	while (length(arr) > 2) {
+		sum += ++factor * pop(arr)
+	}
+
+	return sum
+}
+
+function dump(label, arr,   i, first) {
+	printf "%s: ", label
+	first = 1
+	for (i = arr[head]; i <= arr[tail]; ++i) {
+		printf first ? "" : ", "
+		printf arr[i]
+		first = 0
+	}
+
+	print ""
+}
+
+function marshal(p1, p2,   i, res) {
+	for (i = p1[head]; i <= p1[tail]; ++i) {
+		res = res "-" p1[i]
+	}
+	res = res "|"
+	for (i = p2[head]; i <= p2[tail]; ++i) {
+		res = res "-" p2[i]
+	}
+
+	return res
+}
+
+function call_recursive(p1, p2, c1, c2,   i, p1_cpy, idx, p2_cpy) {
+	for (i = p1[head]; i <= p1[head] + c1 - 1; ++i) {
+		p1_cpy[++idx] = p1[i]
+	}
+
+	idx = 0
+	for (i = p2[head]; i <= p2[head] + c2 - 1; ++i) {
+		p2_cpy[++idx] = p2[i]
+	}
+
+	p1_cpy[tail] = length(p1_cpy)
+	p1_cpy[head] = 1
+	p2_cpy[tail] = length(p2_cpy)
+	p2_cpy[head] = 1
+
+	return play_game(p1_cpy, p2_cpy)
+}
+
+function play_game(p1, p2,   round, c1, c2, seen) {
+	print "game", ++game
+	
+	while (len(p1) && len(p2)) {
+		print "round", ++round
+		dump("p1", p1)
+		dump("p2", p2)
+
+		# Check if we've seen this configuration before
+		if (seen[marshal(p1, p2)]++) {
+			return 1
+		}
+
+		c1 = dequeue(p1)
+		c2 = dequeue(p2)
+		if (c1 == c2) {
+			print "both cards have the same value", c1
+			exit 1
+		}
+
+		if (len(p1) < c1 || len(p2) < c2) {
+			print "playing non-recursive round"
+			if (c1 > c2) {
+				push(p1, c1)
+				push(p1, c2)
+			}
+			else if (c1 < c2) {
+				push(p2, c2)
+				push(p2, c1)
+			}
+
+			print ""
+			continue
+		}
+
+		print ""
+		if (call_recursive(p1, p2, c1, c2) == 1) {
+			push(p1, c1)
+			push(p1, c2)
+		}
+		else {
+			push(p2, c2)
+			push(p2, c1)
+		}
+
+	}
+
+	return len(p1) ? 1 : 2
+}
+
+BEGIN {
+	head = "h"
+	tail = "t"
+}
+
+/^$/ { second = 1 }
+
+NF == 1 {
+	if (second) {
+		p2[++idx2] = $1
+	}
+	else {
+		p1[++idx1] = $1
+	}
+}
+
+END {
+	p1[tail] = length(p1)
+	p1[head] = 1
+	p2[tail] = length(p2)
+	p2[head] = 1
+
+	result = play_game(p1, p2)
+
+	print result == 1 ? get_score(p1) : get_score(p2)
+}

@@ -1,0 +1,98 @@
+#!/usr/bin/awk -f
+
+function dequeue(arr,   el) {
+	el = arr[arr[head]]
+	delete arr[arr[head]]
+	++arr[head]
+	return el
+}
+
+function push(arr, el) {
+	++arr[tail]
+	arr[arr[tail]] = el
+}
+
+function pop(arr,   el) {
+	el = arr[arr[tail]]
+	delete arr[arr[tail]]
+	--arr[tail]
+	return el
+}
+
+function get_score(arr,   sum, factor) {
+	factor = 0
+	while (length(arr) > 2) {
+		sum += ++factor * pop(arr)
+	}
+
+	return sum
+}
+
+function dump(arr,   i, first) {
+	first = 1
+	for (i = arr[head]; i <= arr[tail]; ++i) {
+		if (! first) {
+			printf ", "
+		}
+		printf arr[i]
+		first = 0
+	}
+
+	print ""
+}
+
+
+BEGIN {
+	head = "h"
+	tail = "t"
+}
+
+/^$/ { second = 1 }
+
+NF == 1 {
+	if (second) {
+		p2[++idx2] = $1
+	}
+	else {
+		p1[++idx1] = $1
+	}
+}
+
+END {
+	p1[tail] = length(p1)
+	p1[head] = 1
+	p2[tail] = length(p2)
+	p2[head] = 1
+
+	while (length(p1) > 2 && length(p2) > 2) {
+		print "round", ++round
+		printf "p1: "
+		dump(p1)
+		printf "p2: "
+		dump(p2)
+
+		c1 = dequeue(p1)
+		c2 = dequeue(p2)
+		if (c1 == c2) {
+			print "both cards have the same value", c1
+			exit 1
+		}
+
+		if (c1 > c2) {
+			push(p1, c1)
+			push(p1, c2)
+		}
+		else if (c1 < c2) {
+			push(p2, c2)
+			push(p2, c1)
+		}
+		print ""
+	}
+
+	if (length(p2) == 2) {
+		print get_score(p1)
+	}
+	else {
+		print get_score(p2)
+	}
+}
