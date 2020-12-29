@@ -1,0 +1,124 @@
+#!/usr/bin/awk -f
+
+function desparse(arr, cur_idx,   len, i, new_i, new_cur) {
+	len = length(arr)
+	for (i in arr) {
+		arr[++new_i] = arr[i]
+		if (i == cur_idx) {
+			cur_idx = new_i
+		}
+		if (i > len) {
+			delete arr[i]
+		}
+	}
+
+	return cur_idx
+}
+
+function pickup(cur_idx,   i, picked_idx) {
+	for (i = 1; i <= 3; ++i) {
+		picked_idx[i] = cur_idx + i <= length(cups) ? cur_idx + i : cur_idx + i - length(cups)
+		picked[i] = cups[picked_idx[i]]
+	}
+
+	for (i = 1; i <= 3; ++i) {
+		delete cups[picked_idx[i]]
+	}
+
+	return desparse(cups, cur_idx)
+}
+
+function contains(arr, el,   i) {
+	for (i in arr) {
+		if (arr[i] == el) {
+			return 1
+		}
+	}
+
+	return 0
+}
+
+function get_dest_idx(cur,   i) {
+	while (1) {
+		--cur
+		if (cur < 1) {
+			cur += length(cups) + length(picked)
+		}
+
+		if (! contains(picked, cur)) {
+			break
+		}
+	}
+
+	for (i in cups) {
+		if (cups[i] == cur) {
+			return i
+		}
+	}
+
+	print "unable to find destination"
+	exit 1
+}
+
+function dump(cups, descr, cur_idx,   i) {
+	printf "%s: ", descr
+	for (i in cups) {
+		if (i > 1) {
+			printf " "
+		}
+		if (i == cur_idx) {
+			printf "(%d)", cups[i]
+		}
+		else {
+			printf cups[i]
+		}
+	}
+
+	print ""
+}
+
+function insert(cups, picked, dest_idx,   i) {
+	for (i = length(cups); i > dest_idx; --i) {
+		cups[i+3] = cups[i]
+	}
+	for (i = 1; i <= 3; ++i) {
+		cups[dest_idx+i] = picked[i]
+		delete picked[i]
+	}
+
+	if (cur_idx > dest_idx) {
+		cur_idx += 3
+	}
+
+	++cur_idx
+	cur_idx = cur_idx > length(cups) ? cur_idx - length(cups) : cur_idx
+}
+
+function join(arr,   i, res) {
+	for (i in arr) {
+		res = res arr[i]
+	}
+
+	return res
+}
+
+BEGIN { PROCINFO["sorted_in"] = "@ind_num_asc" }
+
+{ split($1, cups, //) }
+
+END {
+	rounds = 100
+	cur_idx = 1
+	while (1) {
+		if (++i > rounds) {
+			break
+		}
+
+		cur_idx = pickup(cur_idx)
+		dest_idx = get_dest_idx(cups[cur_idx])
+		insert(cups, picked, dest_idx)
+	}
+
+	match(join(cups), /(.*)1(.*)/, matches)
+	print matches[2] matches[1]
+}
