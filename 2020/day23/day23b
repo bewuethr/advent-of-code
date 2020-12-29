@@ -1,32 +1,19 @@
 #!/usr/bin/awk -f
 
 function insert(arr, ptr, val,   i) {
-	# printf "ptr: %d, val: %d\n", ptr, val
 	arr[val][prev] = ptr
 	arr[val][nxt] = arr[ptr][nxt]
 	arr[arr[ptr][nxt]][prev] = val
 	arr[ptr][nxt] = val
 
-	# for (i in arr) {
-	# 	printf "%d: prev %d nxt %d\n", i, arr[i][prev], arr[i][nxt]
-	# }
 	return val
 }
 
-function remove(arr, ptr,   node_prev, node_nxt) {
-	node_prev = arr[ptr][prev]
-	node_nxt = arr[ptr][nxt]
-
-	# printf "ptr: %d, prev: %d, nxt: %d\n", ptr, node_prev, node_nxt
-
-	arr[node_prev][nxt] = node_nxt
-	arr[node_nxt][prev] = node_prev
-
-	# printf "prev->nxt: %d, nxt->prev: %d\n", arr[node_prev][nxt], arr[node_nxt][prev]
+function remove(arr, ptr) {
+	arr[arr[ptr][prev]][nxt] = arr[ptr][nxt]
+	arr[arr[ptr][nxt]][prev] = arr[ptr][prev]
 
 	delete arr[ptr]
-
-	return node_prev
 }
 
 function get_dest(ptr, cups, picked,   i, picked_vals) {
@@ -45,7 +32,6 @@ function get_dest(ptr, cups, picked,   i, picked_vals) {
 function dump(arr, ptr,   count) {
 	printf "(%d)", ptr
 	while (++count < length(arr)) {
-		# printf "ptr: %d, ptr[nxt]: %d\n", ptr, arr[ptr][nxt]
 		ptr = arr[ptr][nxt]
 		printf " %d", ptr
 	}
@@ -70,8 +56,6 @@ END {
 
 	ptr = cups[ptr][nxt]
 
-	# print "length(arr):", length(arr)
-
 	for (i = 3; i <= length(arr); ++i) {
 		ptr = insert(cups, ptr, arr[i])
 	}
@@ -80,48 +64,25 @@ END {
 		ptr = insert(cups, ptr, i)
 	}
 
-	# print "length(cups):", length(cups)
-
-	# cups[head][prev] = length(cups)
-	# cups[length(cups)][nxt] = head
-
 	ptr = head
 
 	rounds = 10e6
 	for (i = 1; i <= rounds; ++i) {
-		# printf "-- round %d --\n", i
-		# dump(cups, ptr)
 		picked[1] = cups[ptr][nxt]
 		picked[2] = cups[picked[1]][nxt]
 		picked[3] = cups[picked[2]][nxt]
-		# print "picked:", picked[1], picked[2], picked[3]
 
 		remove(cups, picked[1])
 		remove(cups, picked[2])
 		remove(cups, picked[3])
 
-		# print "after picking:"
-		# dump(cups, ptr)
-
 		dest = get_dest(ptr, cups, picked)
-		# print "dest:", dest
 		for (p = 1; p <= 3; ++p) {
 			dest = insert(cups, dest, picked[p])
 		}
 
-		# print "after inserting:"
-		# dump(cups, ptr)
-
 		ptr = cups[ptr][nxt]
 	}
 
-	# dump(cups, ptr)
 	print cups[1][nxt] * cups[cups[1][nxt]][nxt]
-
-	# for (ptr = head;; ptr = cups[ptr][nxt]) {
-	# 	printf "%d: prev %d, nxt %d\n", ptr, cups[ptr][prev], cups[ptr][nxt]
-	# 	if (++count == 1e6) {
-	# 		break
-	# 	}
-	# }
 }
