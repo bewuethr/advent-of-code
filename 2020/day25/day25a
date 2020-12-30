@@ -1,0 +1,27 @@
+#!/usr/bin/awk -f
+
+function transform(val, subj) {
+	return val * subj % 20201227
+}
+
+NR == 1 { key1 = $1 }
+NR == 2 { key2 = $1 }
+
+END {
+	subj = 7
+	loop_size = 0
+	val = 1
+
+	while (val != key1 && val != key2) {
+		val = transform(val, subj)
+		++loop_size
+	}
+
+	subj = (val == key1) ? key2 : key1
+	val = 1
+	for (i = 1; i <= loop_size; ++i) {
+		val = transform(val, subj)
+	}
+
+	print val
+}
