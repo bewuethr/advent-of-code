@@ -41,4 +41,4 @@ then came back and did everything in Go.
 
 ## 2020
 
-Awk or shell.
+Mostly awk, and a tiny bit sed.
