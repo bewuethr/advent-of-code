@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+sed -E 's/e|se|sw|w|nw|ne/ &/g' "$1" \
+	| awk -f day24a.awk
