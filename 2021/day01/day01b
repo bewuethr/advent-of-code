@@ -1,0 +1,11 @@
+#!/usr/bin/awk -f
+
+{ depth[NR] = $1 }
+
+END {
+	for (i = 1; i <= NR-3; ++i) {
+		if (depth[i] < depth[i+3]) ++count
+	}
+
+	print count
+}
