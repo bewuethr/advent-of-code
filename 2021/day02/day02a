@@ -1,0 +1,15 @@
+#!/usr/bin/awk -f
+
+/forward/ {
+	x += $2
+}
+
+/down/ {
+	d += $2
+}
+
+/up/ {
+	d -= $2
+}
+
+END { print x * d }
