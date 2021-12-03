@@ -1,0 +1,18 @@
+#!/usr/bin/awk -f
+
+{
+	for (i = 1; i <= length($1); ++i) {
+		counts[i] += substr($1, i, 1) == 1
+	}
+}
+
+END {
+	for (i = 1; i <= length($1); ++i) {
+		gamchar = counts[i] > NR / 2 ? 1 : 0
+		epschar = gamchar == 1 ? 0 : 1
+		gamma = gamma gamchar
+		epsilon = epsilon epschar
+	}
+
+	printf "ibase = 2; %s * %s\n", gamma, epsilon | "bc"
+}
