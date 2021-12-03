@@ -1,0 +1,33 @@
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+use feature 'say';
+
+my $fname = shift;
+
+open my $fh, "<", $fname
+  or die "Can't open $fname: $!";
+
+chomp( my @nums = <$fh> );
+
+my @oxy = grep { 1 } @nums;
+my $idx = 0;
+while ( @oxy > 1 ) {
+    my $ones       = grep { substr( $_, $idx, 1 ) == 1 } @oxy;
+    my $mostCommon = $ones >= @oxy / 2 ? 1 : 0;
+    @oxy = grep { substr( $_, $idx, 1 ) == $mostCommon } @oxy;
+    ++$idx;
+}
+
+my @co2 = grep { 1 } @nums;
+$idx = 0;
+while ( @co2 > 1 ) {
+    my $zeroes       = grep { substr( $_, $idx, 1 ) == 0 } @co2;
+    my $leastCommon = $zeroes <= @co2 / 2 ? 0 : 1;
+    @co2 = grep { substr( $_, $idx, 1 ) == $leastCommon } @co2;
+    ++$idx;
+}
+
+exec "echo 'ibase = 2; $oxy[0] * $co2[0]' | bc";
