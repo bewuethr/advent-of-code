@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import  process from "process";
+import process from "process";
 import * as fs from "fs";
 
 let pos = 0;
