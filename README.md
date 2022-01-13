@@ -20,24 +20,24 @@ multiple orders of improved performance.
 Everything in awk, with the odd solution in Perl or Bash and utilities such as
 grep or `sort`.
 
-For MD5 hashing, I used [this awk
-extension](http://git.codu.in/sup/gawk-extensions) written in C.
+For MD5 hashing, I used an extension from
+[here](https://github.com/su8/gawk-extensions), written in C.
 
 ## 2017
 
-Perl for speed, Go to learn.
+Perl for speed (everything), Go to learn (first 13 days).
 
 Uploads are "polished", but the oldest commit per file is the honest version
 used to solve the puzzle.
 
 ## 2018
 
-Perl. First commits per day are the honest truth, afterwards I clean up.
+Perl. First commits per day are the honest truth, afterwards I cleaned up.
 
 ## 2019
 
 I thought "probably Go", but ended up with Perl again for day 1. Then gave up,
-then came back and did everything in Go.
+then came back and did everything in Go[^1].
 
 ## 2020
 
@@ -45,4 +45,6 @@ Mostly awk, and a tiny bit sed.
 
 ## 2021
 
-Awk? Maybe Node.js later?
+Node.js[^1], with the first three days also in awk.
+
+[^1]: In progress
