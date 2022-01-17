@@ -8,9 +8,14 @@ let input = fs.readFileSync(process.argv[2], "utf8")
 	.split(",")
 	.map(Number);
 
-let fuel = input
-	.map(pos => input
-		.reduce((prev, curr) => prev + Math.abs(pos - curr), 0))
-	.reduce((prev, curr) => Math.min(prev, curr));
+let range = input .reduce((prev, curr) => ({
+	min: prev.min ? Math.min(prev.min, curr) : curr,
+	max: prev.max ? Math.max(prev.max, curr) : curr
+}));
 
-console.log(fuel);
+let costs = [];
+for (let pos = range.min; pos <= range.max; ++pos) {
+	costs.push(input.reduce((prev, curr) => prev + Math.abs(pos - curr), 0));
+}
+
+console.log(costs.reduce((prev, curr) => Math.min(prev, curr)));
