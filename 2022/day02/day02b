@@ -1,0 +1,38 @@
+#!/usr/bin/awk -f
+
+BEGIN {
+	map["X"]["A"] = "Z"
+	map["X"]["B"] = "X"
+	map["X"]["C"] = "Y"
+
+	map["Y"]["A"] = "X"
+	map["Y"]["B"] = "Y"
+	map["Y"]["C"] = "Z"
+
+	map["Z"]["A"] = "Y"
+	map["Z"]["B"] = "Z"
+	map["Z"]["C"] = "X"
+}
+
+{ mine = map[$2][$1] }
+
+mine == "X" {
+   	score += 1
+	if ($1 == "A") score += 3
+	if ($1 == "C") score += 6
+}
+
+mine == "Y" {
+   	score += 2
+	if ($1 == "B") score += 3
+	if ($1 == "A") score += 6
+}
+
+mine == "Z" {
+   	score += 3
+	if ($1 == "C") score += 3
+	if ($1 == "B") score += 6
+}
+
+END { print score }
+

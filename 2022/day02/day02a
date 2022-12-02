@@ -1,0 +1,22 @@
+#!/usr/bin/awk -f
+
+$2 == "X" {
+   	score += 1
+	if ($1 == "A") score += 3
+	if ($1 == "C") score += 6
+}
+
+$2 == "Y" {
+   	score += 2
+	if ($1 == "B") score += 3
+	if ($1 == "A") score += 6
+}
+
+$2 == "Z" {
+   	score += 3
+	if ($1 == "C") score += 3
+	if ($1 == "B") score += 6
+}
+
+END { print score }
+
