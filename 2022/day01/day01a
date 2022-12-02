@@ -1,0 +1,14 @@
+#!/usr/bin/awk -f
+
+BEGIN {	RS = "" }
+
+{
+	sum = 0
+	for (i = 1; i <= NF; ++i) {
+		sum += $i
+	}
+
+	max = sum > max ? sum : max
+}
+
+END { print max }

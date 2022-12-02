@@ -1,0 +1,17 @@
+#!/usr/bin/awk -f
+
+BEGIN {	RS = "" }
+
+{
+	sum = 0
+	for (i = 1; i <= NF; ++i) {
+		sum += $i
+	}
+
+	sums[NR] = sum
+}
+
+END {
+	asort(sums, sums, "@val_num_desc")
+	print sums[1] + sums[2] + sums[3]
+}
