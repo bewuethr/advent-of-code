@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+while IFS= read -r line; do
+	len=${#line}
+	comp1=${line:0:len/2}
+	comp2=${line:len/2}
+	comm -12 <(fold -w1 <<< "$comp1" | sort) <(fold -w1 <<< "$comp2" | sort) | uniq
+done < "$1" \
+	| while IFS= read -r char; do
+		if [[ $char == [[:lower:]] ]]; then
+			echo $(($(printf '%d' "'$char") - 96))
+		else
+			echo $(($(printf '%d' "'$char") - 38))
+		fi
+	done \
+	| paste -sd+ | bc

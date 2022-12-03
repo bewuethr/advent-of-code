@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+while IFS= read -r ruck1; do
+	IFS= read -r ruck2
+	IFS= read -r ruck3
+	comm -12 <(fold -w1 <<< "$ruck1" | sort) <(fold -w1 <<< "$ruck2" | sort) \
+		| comm -12 <(fold -w1 <<< "$ruck3" | sort) - | uniq
+done < "$1" \
+	| while IFS= read -r char; do
+		if [[ $char == [[:lower:]] ]]; then
+			echo $(($(printf '%d' "'$char") - 96))
+		else
+			echo $(($(printf '%d' "'$char") - 38))
+		fi
+	done \
+	| paste -sd+ | bc
