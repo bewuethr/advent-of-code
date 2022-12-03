@@ -51,4 +51,4 @@ Node.js[^1], with the first three days also in awk.
 
 ## 2022
 
-Awk so far?
+Awk so far? Some Bash?
