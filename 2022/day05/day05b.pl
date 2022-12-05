@@ -31,8 +31,8 @@ while ( my $line = <$fh> ) {
 }
 
 my $crates;
-foreach my $i ( 1 .. 9 ) {
-    $crates .= pop @{ $stacks{$i} };
+foreach my $key ( sort { $a <=> $b } keys %stacks ) {
+    $crates .= pop @{ $stacks{$key} };
 }
 
 say "$crates";
