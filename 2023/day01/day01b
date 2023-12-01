@@ -12,14 +12,14 @@ DIGITS = {
   "nine" => 9
 }
 
-RE = /one|two|three|four|five|six|seven|eight|nine|\d/
+RE = /(?=(one|two|three|four|five|six|seven|eight|nine|\d))/
 
 file = File.open(ARGV[0])
 
 s = file.readlines.sum do |line|
-  line.scan(RE).values_at(0, -1).tap { |v| p line; p v }.map do |val|
+  line.scan(RE).flatten.values_at(0, -1).map do |val|
     DIGITS.key?(val) ? DIGITS[val] : val
-  end.join("").to_i.tap { |l| p l }
+  end.join("").to_i
 end
 
 puts s
