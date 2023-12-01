@@ -3,7 +3,7 @@
 file = File.open(ARGV[0])
 
 s = file.readlines.sum do |line|
-  line.scan(/\d/).values_at(0, -1).join("").to_i
+  line.scan(/\d/).values_at(0, -1).join.to_i
 end
 
 puts s
