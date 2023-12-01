@@ -12,7 +12,7 @@ DIGITS = {
   "nine" => 9
 }
 
-RE = /(?=(one|two|three|four|five|six|seven|eight|nine|\d))/
+RE = /(?=(#{DIGITS.keys.join("|")}|\d))/
 
 file = File.open(ARGV[0])
 
