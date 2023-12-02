@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+
+file = File.open(ARGV[0])
+
+prod_sum = file.readlines.map do |line|
+  games = line.match(/Game \d+: (.*)/)[1]
+  g = games.split("; ").map do |game|
+    game.split(", ").reduce({}) do |total, val|
+      n, col = val.split(" ")
+      {col => n.to_i}.merge(total)
+    end
+  end
+
+  %w[red green blue].map do |col|
+    g.map { _1[col] }.compact.max
+  end.reduce(:*)
+end.sum
+
+puts prod_sum

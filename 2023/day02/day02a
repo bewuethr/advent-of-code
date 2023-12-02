@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+
+RED_CUBES = 12
+GREEN_CUBES = 13
+BLUES_CUBES = 14
+
+file = File.open(ARGV[0])
+
+id_sum = file.readlines.map do |line|
+  id, games = line.match(/Game (\d+): (.*)/)[1, 2]
+  g = games.split("; ").map do |game|
+    game.split(", ").reduce({}) do |total, val|
+      n, col = val.split(" ")
+      {col => n.to_i}.merge(total)
+    end
+  end
+
+  max_vals = {}
+  %w[red green blue].each do |col|
+    max_vals[col] = g.map { _1[col] }.compact.max
+  end
+
+  id.to_i if max_vals["red"] <= RED_CUBES &&
+    max_vals["green"] <= GREEN_CUBES &&
+    max_vals["blue"] <= BLUES_CUBES
+end.compact.sum
+
+puts id_sum
