@@ -1,0 +1,51 @@
+#!/usr/bin/env ruby
+
+def symbol?(char)
+  char =~ /[^\d.]/
+end
+
+def touches_symbol?(line_no, first, last, schema)
+  y_min = [0, line_no - 1].max
+  y_max = [schema.length - 1, line_no + 1].min
+  x_min = [0, first - 1].max
+  x_max = [schema[line_no].length - 1, last + 1].min
+
+  schema[y_min..y_max].map do |line|
+    line[x_min..x_max].chars.any? { |char| symbol?(char) }
+  end.any?
+end
+
+file = File.open(ARGV[0])
+
+schema = file.readlines.map(&:chomp)
+
+sum = 0
+
+schema.each_with_index do |line, line_no|
+  next unless line.match?(/\d/)
+
+  boundaries = []
+  in_num = false
+
+  line.each_char.with_index do |c, idx|
+    if c.match(/\d/) && !in_num
+      in_num = true
+      boundaries << idx
+    end
+
+    if !c.match(/\d/) && in_num
+      in_num = false
+      boundaries << idx - 1
+    end
+
+    if idx == line.length - 1 && in_num
+      boundaries << idx
+    end
+  end
+
+  boundaries.each_slice(2) do |first, last|
+    sum += line[first..last].to_i if touches_symbol?(line_no, first, last, schema)
+  end
+end
+
+puts sum
