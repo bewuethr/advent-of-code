@@ -47,9 +47,12 @@ Mostly awk, and a tiny bit sed.
 
 Node.js[^1], with the first three days also in awk.
 
-
 ## 2022
 
 Awk so far? Some Bash? Perl?[^1]
+
+## 2023
+
+Ruby[^1]
 
 [^1]: In progress
