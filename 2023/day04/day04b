@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+
+copies = Hash.new(0)
+
+file = File.open(ARGV[0])
+
+count = 0
+
+file.readlines.each_with_index do |line, idx|
+  winning, have = line.split(/[:|]/)[1..].map { |list| list.scan(/\d+/).map(&:to_i) }
+  matches = winning.count { |n| have.include?(n) }
+  (idx + 1..idx + matches).each { |n| copies[n] += 1 + copies[idx] }
+  count += 1
+end
+
+puts copies.values.sum + count
