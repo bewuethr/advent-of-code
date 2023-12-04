@@ -4,8 +4,8 @@ file = File.open(ARGV[0])
 
 s = file.readlines.sum do |line|
   winning, have = line.split(/[:|]/)[1..].map { |list| list.scan(/\d+/).map(&:to_i) }
-  matches = (winning.count { |n| have.include?(n) } - 1)
-  (!matches.negative?) ? 2**matches : 0
+  matches = winning.count { |n| have.include?(n) }
+  matches.positive? ? 2**(matches - 1) : 0
 end
 
 puts s
