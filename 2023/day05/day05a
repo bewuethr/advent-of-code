@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+
+class Mapping
+  def initialize(map_str)
+    header, *raw_ranges = map_str.split("\n")
+    @src, @dst = header.split[0].split("-").values_at(0, -1)
+
+    @ranges = {}
+
+    raw_ranges.each do |line|
+      dst_start, src_start, len = line.split.map(&:to_i)
+      @ranges[(src_start...src_start + len)] = (dst_start...dst_start + len)
+    end
+  end
+
+  def convert(src)
+    key = @ranges.keys.find { |key| key.include?(src) }
+    return src unless key
+
+    @ranges[key].first + src - key.first
+  end
+end
+
+file = File.open(ARGV[0])
+
+seed_str, *mappings_str = file.readlines.join.split("\n\n")
+
+seeds = seed_str.scan(/\d+/).map(&:to_i)
+mappings = mappings_str.map { |str| Mapping.new(str) }
+
+min_loc = seeds.map do |seed|
+  mappings.reduce(seed) { |src, mapping| mapping.convert(src) }
+end.min
+
+puts min_loc
