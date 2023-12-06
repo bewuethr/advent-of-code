@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+file = File.open(ARGV[0])
+
+lines = file.readlines
+
+time = lines[0].scan(/\d+/).join.to_i
+distance = lines[1].scan(/\d+/).join.to_i
+
+puts (1...time).map { |t_charge| (time - t_charge) * t_charge }
+  .count { |d| d > distance }

@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+file = File.open(ARGV[0])
+
+lines = file.readlines
+
+times = lines[0].scan(/\d+/).map(&:to_i)
+distances = lines[1].scan(/\d+/).map(&:to_i)
+
+n_ways = times.map.with_index do |t, idx|
+  (1...t).map { |t_charge| (t - t_charge) * t_charge }
+    .count { |d| d > distances[idx] }
+end
+
+puts n_ways.reduce(:*)
