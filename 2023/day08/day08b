@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+file = File.open(ARGV[0])
+
+lr, _, *instr = file.readlines
+
+nodes = {}
+
+instr.map(&:chomp).each do |line|
+  from, left, right = line.scan(/[[:alnum:]]+/)
+  nodes[from] = {
+    "L" => left,
+    "R" => right
+  }
+end
+
+locs = nodes.keys.select { |n| n.end_with?("A") }
+
+steps = []
+
+locs.each do |loc|
+  count = 0
+  lr.chomp.chars.cycle do |c|
+    loc = nodes[loc][c]
+    count += 1
+    break if loc.end_with?("Z")
+  end
+
+  steps << count
+end
+
+puts steps.reduce(&:lcm)

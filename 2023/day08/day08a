@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+file = File.open(ARGV[0])
+
+lr, _, *instr = file.readlines
+
+nodes = {}
+
+instr.map(&:chomp).each do |line|
+  from, left, right = line.scan(/[A-Z]+/)
+  nodes[from] = {
+    "L" => left,
+    "R" => right
+  }
+end
+
+loc = "AAA"
+count = 0
+
+lr.chomp.chars.cycle do |c|
+  loc = nodes[loc][c]
+  count += 1
+  break if loc.eql?("ZZZ")
+end
+
+puts count
