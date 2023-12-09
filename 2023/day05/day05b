@@ -1,0 +1,79 @@
+#!/usr/bin/env ruby
+
+require "debug"
+
+class Mapping
+  attr_reader :ranges
+
+  def initialize(map_str)
+    header, *raw_ranges = map_str.split("\n")
+    @src, @dst = header.split[0].split("-").values_at(0, -1)
+
+    @ranges = {}
+
+    raw_ranges.each do |line|
+      dst_start, src_start, len = line.split.map(&:to_i)
+      @ranges[(src_start...src_start + len)] = (dst_start...dst_start + len)
+    end
+  end
+
+  def convert(in_ranges)
+    # Input: [st                               ed)  (st = in_range.first, ed = in_range.last)
+    # Map:             [src       src_end]          (src = range.first, src_end = range.last)
+    #        [BEFORE  ][INTER            ][AFTER )
+    # where
+    # before = (st, min(ed, src))
+    # inter  = (max(st, src), min(src_end, ed))
+    # after  = (max(src_end, st), ed)
+    # inter is done; before and after have to try all other maps
+
+    new_ranges = []
+
+    @ranges.keys.each do |range|
+      unchanged_ranges = []
+
+      until in_ranges.empty?
+        in_range = in_ranges.pop
+        before = (in_range.first...[in_range.last, range.first].min)
+        inter = ([in_range.first, range.first].max...[range.last, in_range.last].min)
+        after = ([range.last, in_range.first].max...in_range.last)
+
+        unchanged_ranges << before if before.last > before.first
+        if inter.last > inter.first
+          diff = @ranges[range].first - range.first
+          new_ranges << (inter.first + diff...inter.last + diff)
+        end
+        unchanged_ranges << after if after.last > after.first
+      end
+
+      in_ranges = unchanged_ranges
+    end
+
+    new_ranges + in_ranges
+  end
+end
+
+file = File.open(ARGV[0])
+
+seed_str, *mappings_str = file.readlines.join.split("\n\n")
+
+seeds = []
+seed_str.scan(/\d+/).map(&:to_i).each_slice(2) do |start, len|
+  seeds << (start...start + len)
+end
+
+mappings = mappings_str.map { |str| Mapping.new(str) }
+
+mins = []
+
+seeds.each do |seed_range|
+  ranges = [seed_range]
+
+  mappings.each do |mapping|
+    ranges = mapping.convert(ranges)
+  end
+
+  mins << ranges.map(&:first).min
+end
+
+puts mins.min
