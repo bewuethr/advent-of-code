@@ -64,16 +64,10 @@ end
 
 mappings = mappings_str.map { |str| Mapping.new(str) }
 
-mins = []
+global_min = seeds.map do |seed_range|
+  mappings.reduce([seed_range]) do |ranges, mapping|
+    mapping.convert(ranges)
+  end.map(&:first).min
+end.min
 
-seeds.each do |seed_range|
-  ranges = [seed_range]
-
-  mappings.each do |mapping|
-    ranges = mapping.convert(ranges)
-  end
-
-  mins << ranges.map(&:first).min
-end
-
-puts mins.min
+puts global_min
