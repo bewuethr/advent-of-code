@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+def predict(seq)
+  seqs = [seq]
+  until seqs.last.all?(0)
+    next_seq = []
+    seqs.last.each_cons(2) { |el| next_seq << (el[1] - el[0]) }
+    seqs << next_seq
+  end
+
+  seqs.reverse!
+
+  seqs[1..].each_with_index do |s, idx|
+    s << s.last + seqs[idx].last
+  end
+
+  seqs.last.last
+end
+
+file = File.open(ARGV[0])
+
+s = file.readlines.sum do |line|
+  predict(line.split.map(&:to_i))
+end
+
+puts s
