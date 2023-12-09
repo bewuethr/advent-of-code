@@ -1,0 +1,89 @@
+#!/usr/bin/env ruby
+
+class Hand
+  FIVE_OF_A_KIND = 7
+  FOUR_OF_A_KIND = 6
+  FULL_HOUSE = 5
+  THREE_OF_A_KIND = 4
+  TWO_PAIR = 3
+  ONE_PAIR = 2
+  HIGH_CARD = 1
+
+  ORDER = %w[J 2 3 4 5 6 7 8 9 T Q K A]
+
+  attr_reader :bid, :cards
+
+  def initialize(card_str, bid_str)
+    @cards = card_str.chars
+    @bid = bid_str.to_i
+  end
+
+  def type
+    t = @cards.tally
+    if t["J"] == 1
+      if t.length == 2
+        FIVE_OF_A_KIND
+      elsif t.length == 3 && t.value?(3)
+        FOUR_OF_A_KIND
+      elsif t.length == 3
+        FULL_HOUSE
+      elsif t.length == 4
+        THREE_OF_A_KIND
+      else
+        ONE_PAIR
+      end
+    elsif t["J"] == 2
+      if t.length == 2
+        FIVE_OF_A_KIND
+      elsif t.length == 3
+        FOUR_OF_A_KIND
+      else
+        THREE_OF_A_KIND
+      end
+    elsif t["J"] == 3
+      if t.length == 2
+        FIVE_OF_A_KIND
+      else
+        FOUR_OF_A_KIND
+      end
+    elsif t["J"] == 4
+      FIVE_OF_A_KIND
+    elsif t.length == 1
+      FIVE_OF_A_KIND
+    elsif t.length == 2 && t.value?(4)
+      FOUR_OF_A_KIND
+    elsif t.length == 2
+      FULL_HOUSE
+    elsif t.length == 3 && t.value?(3)
+      THREE_OF_A_KIND
+    elsif t.length == 3
+      TWO_PAIR
+    elsif t.length == 4
+      ONE_PAIR
+    else
+      HIGH_CARD
+    end
+  end
+
+  def cmp(other)
+    return type <=> other.type if type != other.type
+
+    @cards.map { |c| ORDER.index(c) } <=> other.cards.map { |c| ORDER.index(c) }
+  end
+
+  def to_s
+    "Cards: #{@cards.join}\nBid: #{@bid}"
+  end
+end
+
+file = File.open(ARGV[0])
+
+hands = file.readlines.map do |line|
+  Hand.new(*line.split)
+end.sort { |a, b| a.cmp(b) }
+
+s = hands.map.with_index do |h, idx|
+  (idx + 1) * h.bid
+end.sum
+
+puts s
