@@ -1,0 +1,69 @@
+#!/usr/bin/env ruby
+
+class RouteFinder
+  attr_reader :route
+
+  def initialize(input_lines)
+    @sketch = input_lines.map.with_index do |line, idx|
+      offset = line.index("S")
+      @start = {x: offset, y: idx, tile: "S"} if offset
+      line.chomp.chars
+    end
+
+    @finished = false
+    @route = [@start]
+    @range_x, @range_y = (0...@sketch[0].length), (0...@sketch.length)
+  end
+
+  def move
+    pos = @route.last
+    [
+      {coords: {x: pos[:x] - 1, y: pos[:y]}, good_from: "S-7J", good_to: "S-LF"},
+      {coords: {x: pos[:x] + 1, y: pos[:y]}, good_from: "S-FL", good_to: "S-J7"},
+      {coords: {x: pos[:x], y: pos[:y] - 1}, good_from: "S|JL", good_to: "S|7F"},
+      {coords: {x: pos[:x], y: pos[:y] + 1}, good_from: "S|7F", good_to: "S|JL"}
+    ].each do |next_pos|
+      next unless on_sketch?(next_pos[:coords])
+
+      tile = @sketch[next_pos[:coords][:y]][next_pos[:coords][:x]]
+
+      next unless next_pos[:good_from].include?(pos[:tile])
+      next unless next_pos[:good_to].include?(tile)
+
+      if tile == "S" && @route.length > 2
+        @finished = true
+        break
+      end
+
+      next if route.length > 1 && same_pos?(next_pos[:coords], route[-2])
+
+      route << next_pos[:coords].merge({tile: tile})
+      break
+    end
+  end
+
+  def finished? = @finished
+
+  def draw_route
+    filtered = @sketch.map.with_index do |row, y|
+      row.map.with_index { |tile, x| route.include?({x: x, y: y, tile: tile}) ? tile : "." }.join
+    end
+
+    puts filtered
+  end
+
+  private def on_sketch?(point)
+    @range_x.include?(point[:x]) && @range_y.include?(point[:y])
+  end
+
+  private def same_pos?(a, b)
+    a[:x] == b[:x] && a[:y] == b[:y]
+  end
+end
+
+file = File.open(ARGV[0])
+
+finder = RouteFinder.new(file.readlines)
+finder.move until finder.finished?
+
+puts finder.route.length / 2
