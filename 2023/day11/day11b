@@ -1,0 +1,36 @@
+#!/usr/bin/env ruby
+
+EXPANSION = 1_000_000
+
+def dist(a, b, non_empty_rows, non_empty_cols)
+  x_range = ([a.first, b.first].min...[a.first, b.first].max)
+  x_dist = x_range.sum { |x| non_empty_cols.include?(x) ? 1 : EXPANSION }
+
+  y_range = ([a.last, b.last].min...[a.last, b.last].max)
+  y_dist = y_range.sum { |y| non_empty_rows.include?(y) ? 1 : EXPANSION }
+
+  x_dist + y_dist
+end
+
+file = File.open(ARGV[0])
+
+image = []
+non_empty_rows = Set.new
+non_empty_cols = Set.new
+
+file.readlines.map(&:chomp).each_with_index do |line, y|
+  image << line.chars
+
+  line.chars.each_with_index { |c, idx| non_empty_cols.add(idx) if c == "#" }
+  non_empty_rows.add(y) if line.match?("#")
+end
+
+coords = image.each_with_object([]).with_index do |(line, locs), y|
+  line.each_with_index do |c, x|
+    locs << [x, y] if c == "#"
+  end
+
+  locs
+end
+
+puts coords.combination(2).sum { |a, b| dist(a, b, non_empty_rows, non_empty_cols) }

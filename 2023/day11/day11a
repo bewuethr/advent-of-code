@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+
+def dist(a, b)
+  (a.first - b.first).abs + (a.last - b.last).abs
+end
+
+file = File.open(ARGV[0])
+
+image = []
+galaxy_offsets = Set.new
+
+file.readlines.map(&:chomp).each do |line|
+  image << line
+  image << line unless line.match?(/#/)
+
+  line.chars.each_with_index { |c, idx| galaxy_offsets.add(idx) if c == "#" }
+end
+
+image.map! do |line|
+  line.chars.map!.with_index { |c, idx| galaxy_offsets.include?(idx) ? c : ".." }.join
+end
+
+coords = image.each_with_object([]).with_index do |(line, locs), y|
+  line.chars.each_with_index do |c, x|
+    locs << [x, y] if c == "#"
+  end
+
+  locs
+end
+
+puts coords.combination(2).sum { |a, b| dist(a, b) }
