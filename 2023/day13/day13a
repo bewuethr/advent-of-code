@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+
+def is_symmetry_line?(lines, (a, b))
+  while a > 0 && b < lines.length - 1
+    a -= 1
+    b += 1
+    return false if lines[a] != lines[b]
+  end
+
+  true
+end
+
+def find_symmetry(lines)
+  idx_pairs = []
+  lines.each_with_index.each_cons(2) do |((line_a, idx_a), (line_b, idx_b))|
+    idx_pairs << [idx_a, idx_b] if line_a == line_b
+  end
+
+  return nil if idx_pairs.empty?
+
+  sym_line = idx_pairs.select { |pair| is_symmetry_line?(lines, pair) }
+  return nil if sym_line.empty?
+
+  sym_line.first.first + 1
+end
+
+def summarize(pattern)
+  lines = pattern.split("\n")
+  count = find_symmetry(lines)
+  return 100 * count if count
+
+  find_symmetry(lines.map(&:chars).transpose.map(&:join))
+end
+
+file = File.open(ARGV[0])
+
+patterns = file.readlines.join.split("\n\n")
+
+puts patterns.sum { |p| summarize(p) }
