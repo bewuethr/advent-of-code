@@ -11,8 +11,6 @@ def is_symmetry_line?(lines, (a, b))
 end
 
 def find_symmetry(lines)
-  puts "find_symmetry for:"
-  puts lines
   idx_pairs = []
   lines.each_with_index.each_cons(2) do |((line_a, idx_a), (line_b, idx_b))|
     idx_pairs << [idx_a, idx_b] if line_a == line_b
@@ -36,33 +34,23 @@ def summarize(pattern)
     find_symmetry(lines.map(&:chars).transpose.map(&:join))[0]
   end
 
-  puts "original: #{original}"
   counts = Set[original]
 
   (0...lines.length).each do |y|
     (0...lines[0].length).each do |x|
-      puts "Swapping at #{y}/#{x}, counts is #{counts}"
       new_lines = lines.map(&:clone)
-      new_lines[y][x] = new_lines[y][x] == "#" ? "." : "#"
+      new_lines[y][x] = (new_lines[y][x] == "#") ? "." : "#"
 
       count_new = find_symmetry(new_lines)
-      if count_new
-        puts "found #{count_new}"
-        count_new.each { |c| counts.add(100 * c) }
-      end
+      count_new&.each { |c| counts.add(100 * c) }
 
       count_new = find_symmetry(new_lines.map(&:chars).transpose.map(&:join))
-      if count_new
-        puts "found #{count_new}"
-        count_new.each { |c| counts.add(c) }
-      end
+      count_new&.each { |c| counts.add(c) }
     end
 
     break if counts.size == 2
   end
 
-  puts "original: #{original}"
-  p counts
   counts.to_a.find { |c| c != original }
 end
 
