@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+
+def tilt_up(rock_map)
+  rock_map.transpose.map do |line_arr|
+    line = line_arr.join
+    while line.include?(".O")
+      line.gsub!(".O", "O.")
+    end
+
+    line.split("")
+  end.transpose
+end
+
+def calculate_load(rock_map)
+  rock_map.reverse_each.with_index.sum do |line, idx|
+    line.count { |el| el == "O" } * (idx + 1)
+  end
+end
+
+file = File.open(ARGV[0])
+
+rock_map = file.readlines.map(&:chomp).map(&:chars)
+tilted_map = tilt_up(rock_map)
+
+puts calculate_load(tilted_map)
