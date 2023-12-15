@@ -1,4 +1,4 @@
-#!/usr/bin/env -S ruby -W0
+#!/usr/bin/env ruby
 
 def to_list(record)
   record.scan(/#+/).map(&:length).join(",")
@@ -9,10 +9,7 @@ def generate(record)
     locs << idx if c == "?"
   end
 
-  warn "Question mark locations: #{locs}"
-
   len = locs.length
-  warn "Generating #{2**len} patterns"
   (0...2**len).to_a.map do |n|
     arrangement = n.to_s(2).rjust(len, "0").tr("01", ".#")
     new_record = record.clone
@@ -30,9 +27,7 @@ entries = file.readlines.map do |line|
 end
 
 sum_counts = entries.sum do |entry|
-  warn "Original: #{entry[:record]}"
   generate(entry[:record]).count do |record|
-    warn "#{record} vs. #{entry[:list]}"
     to_list(record) == entry[:list]
   end
 end
