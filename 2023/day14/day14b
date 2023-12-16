@@ -1,0 +1,70 @@
+#!/usr/bin/env ruby
+
+def tilt(rock_map, direction)
+  temp_map = rock_map.map(&:clone)
+  temp_map = temp_map.transpose if ["north", "south"].include?(direction)
+
+  from, to = if ["west", "north"].include?(direction)
+    [".O", "O."]
+  else
+    ["O.", ".O"]
+  end
+
+  temp_map.map! do |line_arr|
+    line = line_arr.join
+    while line.include?(from)
+      line.gsub!(from, to)
+    end
+
+    line.chars
+  end
+
+  if ["north", "south"].include?(direction)
+    temp_map.transpose
+  else
+    temp_map
+  end
+end
+
+def do_cycle(rock_map)
+  ["north", "west", "south", "east"].each do |direction|
+    rock_map = tilt(rock_map, direction)
+  end
+
+  rock_map
+end
+
+def calculate_load(rock_map)
+  rock_map.reverse_each.with_index.sum do |line, idx|
+    line.count { |el| el == "O" } * (idx + 1)
+  end
+end
+
+def find_period(seq)
+  (2..seq.length).each do |len|
+    return len if seq.each_slice(len).reject { |nums| nums.length != len }.tally.length == 1
+  end
+end
+
+file = File.open(ARGV[0])
+
+rock_map = file.readlines.map(&:chomp).map(&:chars)
+
+# We make a few ugly assumptions here to programmatically determine the
+# eventual period of the sequence:
+#
+# - The sequence becomes periodic after no later than 200 iterations
+# - The period is less than 75
+# - The period is large enough for 1e9 % period + 5 * period to be an index of
+#   where the sequence is periodic
+#
+# These values _might_ work for other inputs, but might require some tweaking.
+sequence = 350.times.map do |idx|
+  rock_map = do_cycle(rock_map)
+  calculate_load(rock_map)
+end
+
+period = find_period(sequence[200..])
+offset = 1_000_000_000 % period
+
+puts sequence[offset + 5 * period - 1]
