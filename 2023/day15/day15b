@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+
+def hash_func(str)
+  str.chars.reduce(0) do |total, c|
+    total += c.ord
+    total *= 17
+    total % 256
+  end
+end
+
+file = File.open(ARGV[0])
+
+boxes = Array.new(256) { [] }
+
+file.gets.chomp.split(",").each do |step|
+  label, op, foc_len = step.split(/([=-])/)
+  foc_len = foc_len.to_i
+  box_num = hash_func(label)
+  idx = boxes[box_num].find_index { |l| l[0] == label }
+
+  if op == "-"
+    next unless idx
+    boxes[box_num].delete_at(idx)
+  elsif idx
+    boxes[box_num][idx] = [label, foc_len]
+  else
+    boxes[box_num].push([label, foc_len])
+  end
+end
+
+s = boxes.each_with_index.sum do |lenses, box_idx|
+  lenses.each_with_index.sum do |lens, lens_idx|
+    (1 + box_idx) * (lens_idx + 1) * lens[1]
+  end
+end
+
+puts s

@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+def hash(str)
+  str.chars.reduce(0) do |total, c|
+    total += c.ord
+    total *= 17
+    total % 256
+  end
+end
+
+file = File.open(ARGV[0])
+
+puts file.gets.chomp.split(",").sum { |step| hash(step) }
