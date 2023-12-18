@@ -1,0 +1,142 @@
+#!/usr/bin/env ruby
+
+class Layout
+  def initialize(lines)
+    @lines = lines
+    @used = {}
+  end
+
+  def at(pos)
+    @lines[pos.y][pos.x]
+  end
+
+  def mark_used_at(pos, dir)
+    (@used[pos] ||= Set.new).add(dir)
+  end
+
+  def has_dir_at(pos, dir)
+    @used[pos]&.include?(dir)
+  end
+
+  def include?(pos)
+    (0...@lines[0].length).cover?(pos.x) && (0...@lines.length).cover?(pos.y)
+  end
+
+  def count_energized
+    @used.size
+  end
+end
+
+Vec2 = Struct.new(:x, :y) do
+  def +(other)
+    Vec2.new(x + other.x, y + other.y)
+  end
+end
+
+class Beam
+  def initialize(pos, dir)
+    @pos = pos
+    @dir = dir
+    @finished = false
+  end
+
+  def move(layout)
+    (@trail ||= []) << @pos
+    layout.mark_used_at(@pos, @dir)
+    tile = layout.at(@pos)
+
+    case tile
+    when "/"
+      case @dir
+      when Vec2.new(1, 0)
+        @dir = Vec2.new(0, -1)
+      when Vec2.new(-1, 0)
+        @dir = Vec2.new(0, 1)
+      when Vec2.new(0, 1)
+        @dir = Vec2.new(-1, 0)
+      when Vec2.new(0, -1)
+        @dir = Vec2.new(1, 0)
+      end
+    when "\\"
+      case @dir
+      when Vec2.new(1, 0)
+        @dir = Vec2.new(0, 1)
+      when Vec2.new(-1, 0)
+        @dir = Vec2.new(0, -1)
+      when Vec2.new(0, 1)
+        @dir = Vec2.new(1, 0)
+      when Vec2.new(0, -1)
+        @dir = Vec2.new(-1, 0)
+      end
+    when "-"
+      case @dir
+      when Vec2.new(0, 1)
+        @dir = Vec2.new(1, 0)
+        split_beam = Beam.new(@pos, Vec2.new(-1, 0))
+      when Vec2.new(0, -1)
+        @dir = Vec2.new(-1, 0)
+        split_beam = Beam.new(@pos, Vec2.new(1, 0))
+      end
+    when "|"
+      case @dir
+      when Vec2.new(1, 0)
+        @dir = Vec2.new(0, -1)
+        split_beam = Beam.new(@pos, Vec2.new(0, 1))
+      when Vec2.new(-1, 0)
+        @dir = Vec2.new(0, 1)
+        split_beam = Beam.new(@pos, Vec2.new(0, -1))
+      end
+    end
+
+    next_pos = @pos + @dir
+    if layout.include?(next_pos) && !layout.has_dir_at(next_pos, @dir)
+      @pos = next_pos
+    else
+      @finished = true
+    end
+
+    split_beam
+  end
+
+  def finished? = @finished
+end
+
+def run_beam(layout, beam)
+  beams = [beam]
+
+  until beams.all? { |b| b.finished? }
+    current = beams.shift
+    until current.finished?
+      split_beam = current.move(layout)
+      beams.push(split_beam) if split_beam
+    end
+  end
+
+  layout.count_energized
+end
+
+input_lines = ARGF.readlines(chomp: true)
+
+from_top = input_lines[0].length.times.map do |idx|
+  Beam.new(Vec2.new(idx, 0), Vec2.new(0, 1))
+end
+
+from_bottom = input_lines[0].length.times.map do |idx|
+  Beam.new(Vec2.new(idx, -1), Vec2.new(0, -1))
+end
+
+from_left = input_lines.length.times.map do |idx|
+  Beam.new(Vec2.new(0, idx), Vec2.new(1, 0))
+end
+
+from_right = input_lines.length.times.map do |idx|
+  Beam.new(Vec2.new(-1, idx), Vec2.new(-1, 0))
+end
+
+all_seeds = from_top + from_bottom + from_left + from_right
+
+max_val = all_seeds.map do |beam|
+  run_beam(Layout.new(input_lines), beam)
+end.max
+
+puts max_val
