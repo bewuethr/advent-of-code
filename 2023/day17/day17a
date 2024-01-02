@@ -1,0 +1,91 @@
+#!/usr/bin/env ruby
+
+Vec2 = Struct.new(:x, :y) do
+  def +(other)
+    Vec2.new(x + other.x, y + other.y)
+  end
+
+  def to_s
+    "#{x}/#{y}"
+  end
+end
+
+Node = Struct.new(*%i[coord dir]) do
+  def to_s
+    "#{coord},#{dir}"
+  end
+end
+
+def get_next_nodes(node)
+  steps = case node.dir
+  when "v", "^"
+    {
+      ">" => [[1, 0], [2, 0], [3, 0]],
+      "<" => [[-1, 0], [-2, 0], [-3, 0]]
+    }
+  when ">", "<"
+    {
+      "v" => [[0, 1], [0, 2], [0, 3]],
+      "^" => [[0, -1], [0, -2], [0, -3]]
+    }
+  end
+
+  steps.keys.map do |dir|
+    steps[dir].map { |vec| Node.new(node.coord + Vec2.new(*vec), dir) }
+  end.flatten
+end
+
+def within?(map, vec)
+  (0...map[0].length).cover?(vec.x) && (0...map.length).cover?(vec.y)
+end
+
+def get_loss(from, to, losses)
+  seq = if from.x == to.x
+    range = if from.y < to.y
+      (from.y + 1..to.y)
+    else
+      (to.y...from.y)
+    end
+    range.map { |y| Vec2.new(from.x, y) }
+  elsif from.y == to.y
+    range = if from.x < to.x
+      (from.x + 1..to.x)
+    else
+      (to.x...from.x)
+    end
+    range.map { |x| Vec2.new(x, from.y) }
+  else
+    raise "Not a straight line from #{from} to #{to}"
+  end
+
+  seq.sum { |vec| losses[vec.y][vec.x] }
+end
+
+losses = ARGF.readlines(chomp: true).map { |l| l.chars.map(&:to_i) }
+
+start_right = Node.new(Vec2.new(0, 0), ">")
+start_down = start_right.clone
+start_down.dir = "v"
+
+queue = [start_right, start_down]
+costs = {
+  queue[0].to_s => 0,
+  queue[1].to_s => 0
+}
+
+until queue.empty?
+  node = queue.shift
+
+  get_next_nodes(node).each do |next_node|
+    next unless within?(losses, next_node.coord)
+
+    alt = costs[node.to_s] + get_loss(node.coord, next_node.coord, losses)
+    next if costs[next_node.to_s] && costs[next_node.to_s] <= alt
+
+    costs[next_node.to_s] = alt
+    queue.push(next_node)
+  end
+end
+
+goal_coord = Vec2.new(losses[0].length - 1, losses.length - 1)
+puts costs.select { |k| k.start_with?(goal_coord.to_s) }.values.min
