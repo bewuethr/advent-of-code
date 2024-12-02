@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+file = File.open(ARGV[0])
+
+puts file.readlines(chomp: true)
+  .map { _1.split.map(&:to_i) }
+  .transpose
+  .map(&:sort)
+  .transpose
+  .map { (_1[0] - _1[1]).abs }
+  .sum

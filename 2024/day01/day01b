@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+file = File.open(ARGV[0])
+
+l1, l2 = file.readlines(chomp: true)
+  .map { _1.split.map(&:to_i) }
+  .transpose
+
+puts l1.map { _1 * l2.count(_1) }.sum
