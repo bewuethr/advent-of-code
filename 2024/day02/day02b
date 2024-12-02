@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+
+def increasing(levels) = levels.eql?(levels.sort)
+
+def decreasing(levels) = levels.eql?(levels.sort.reverse)
+
+def max_diff(levels)
+  levels.each_cons(2).to_a.all? do |a, b|
+    diff = (a - b).abs
+    (1..3).cover?(diff)
+  end
+end
+
+def are_safe(levels) = (increasing(levels) || decreasing(levels)) && max_diff(levels)
+
+def is_safe(report)
+  levels = report.split.map(&:to_i)
+  return true if are_safe(levels)
+
+  levels.each_with_index.any? do |level, idx|
+    copy = levels.dup
+    copy.delete_at(idx)
+    are_safe(copy)
+  end
+end
+
+file = File.open(ARGV[0])
+
+puts file.readlines(chomp: true).count { is_safe(_1) }
