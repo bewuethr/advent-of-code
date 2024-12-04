@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+search = File.open(ARGV[0]).readlines(chomp: true).map(&:chars)
+range_y = (1...search.size - 1)
+range_x = (1...search.first.size - 1)
+
+count = 0
+
+search.each_with_index do |row, y|
+  row.each_with_index do |char, x|
+    next unless char == "A" && range_y.cover?(y) && range_x.cover?(x)
+
+    if [search[y - 1][x - 1], search[y + 1][x + 1]].sort.join == "MS" &&
+        [search[y + 1][x - 1], search[y - 1][x + 1]].sort.join == "MS"
+      count += 1
+    end
+  end
+end
+
+puts count
