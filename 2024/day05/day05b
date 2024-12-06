@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+
+def is_correct?(list, rules)
+  list.each_with_index.all? do |page, idx|
+    list[idx + 1..].all? { rules.include?([page, _1]) || !rules.include?([_1, page]) }
+  end
+end
+
+def swap(list, idx_a, idx_b)
+  list[idx_a], list[idx_b] = list[idx_b], list[idx_a]
+end
+
+lines = File.readlines(ARGV[0]).map(&:chomp)
+blank_idx = lines.index("")
+
+rules = lines[...blank_idx].map { _1.split("|").map(&:to_i) }.to_set
+pages = lines[blank_idx + 1..].map { _1.split(",").map(&:to_i) }
+
+incorrect_pages = pages.reject { is_correct?(_1, rules) }
+
+total = incorrect_pages.sum do |list|
+  until is_correct?(list, rules)
+    (0...list.length).to_a.combination(2).each do |a, b|
+      swap(list, a, b) if rules.include?([list[b], list[a]])
+    end
+  end
+
+  list[list.length / 2]
+end
+
+puts total

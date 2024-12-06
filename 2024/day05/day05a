@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+lines = File.readlines(ARGV[0]).map(&:chomp)
+blank_idx = lines.index("")
+
+rules = lines[...blank_idx].map { _1.split("|").map(&:to_i) }.to_set
+pages = lines[blank_idx + 1..].map { _1.split(",").map(&:to_i) }
+
+total = pages.select do |list|
+  list.each_with_index.all? do |page, idx|
+    list[idx + 1..].all? { rules.include?([page, _1]) || !rules.include?([_1, page]) }
+  end
+end.map { _1[_1.length / 2] }.sum
+
+puts total
