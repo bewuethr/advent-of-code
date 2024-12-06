@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+
+grid = File.readlines(ARGV[0]).map(&:chomp).map(&:chars)
+
+y_range = (0...grid.length)
+x_range = (0...grid.first.length)
+
+y = grid.index { _1.include?("^") }
+x = grid[y].index("^")
+
+dy = -1
+dx = 0
+
+visited = Set.new
+
+while y_range.cover?(y) && x_range.cover?(x)
+  visited.add([y, x])
+  dy, dx = dx, -dy if y_range.cover?(y + dy) && grid[y + dy][x + dx] == "#"
+  y += dy
+  x += dx
+end
+
+puts visited.size
