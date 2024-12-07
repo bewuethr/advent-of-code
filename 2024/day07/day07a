@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+lines = File.readlines(ARGV[0]).map(&:chomp)
+
+equations = lines.map do |line|
+  test_val = line.split(":").first.to_i
+  numbers = line.split(":").last.strip.split.map(&:to_i)
+  [test_val, numbers]
+end
+
+total = equations.select do |test_val, numbers|
+  ops = [:+, :*].repeated_permutation(numbers.length - 1).to_a
+  ops.any? do |perm|
+    numbers.each_with_index.reduce do |(acc, _), (n, idx)|
+      acc.send(perm[idx - 1], n)
+    end.eql?(test_val)
+  end
+end.sum { _1.first }
+
+puts total
