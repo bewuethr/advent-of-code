@@ -1,0 +1,61 @@
+#!/usr/bin/env ruby
+
+grid = File.readlines(ARGV[0]).map(&:chomp).map(&:chars)
+
+y_range = (0...grid.length)
+x_range = (0...grid.first.length)
+
+y_init = grid.index { _1.include?("^") }
+x_init = grid[y_init].index("^")
+
+dy_init = -1
+dx_init = 0
+
+route = Set.new
+
+y, x = y_init, x_init
+dy, dx = dy_init, dx_init
+route.add({x:, y:})
+
+while y_range.cover?(y) && x_range.cover?(x)
+  dy, dx = dx, -dy while y_range.cover?(y + dy) && x_range.cover?(x + dx) && grid[y + dy][x + dx] == "#"
+  y += dy
+  x += dx
+  route.add({x:, y:}) if y_range.cover?(y) && x_range.cover?(x)
+end
+
+route.delete({x: x_init, y: y_init})
+
+options = route.each.count do |option|
+  grid[option[:y]][option[:x]] = "#"
+
+  is_loop = false
+
+  yy, xx = y_init, x_init
+  dy, dx = dy_init, dx_init
+
+  new_route = Set.new
+
+  if y_range.cover?(yy + dy) && x_range.cover?(xx + dx) && grid[yy + dy][xx + dx] == "#"
+    new_route.add({xx:, yy:, dx:, dy:})
+    dy, dx = dx, -dy
+  end
+
+  while y_range.cover?(yy) && x_range.cover?(xx)
+    while y_range.cover?(yy + dy) && x_range.cover?(xx + dx) && grid[yy + dy][xx + dx] == "#"
+      if !new_route.add?({xx:, yy:, dx:, dy:})
+        is_loop = true
+        break
+      end
+      dy, dx = dx, -dy
+    end
+    break if is_loop
+    yy += dy
+    xx += dx
+  end
+
+  grid[option[:y]][option[:x]] = "."
+  is_loop
+end
+
+puts options
