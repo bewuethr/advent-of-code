@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+
+Vec2 = Struct.new(:x, :y) do
+  def +(other) = Vec2.new(x + other.x, y + other.y)
+
+  def -(other) = Vec2.new(x - other.x, y - other.y)
+end
+
+lines = File.readlines(ARGV[0]).map(&:chomp)
+
+y_range = (0...lines.length)
+x_range = (0...lines[0].length)
+
+antennas = Hash.new { |h, k| h[k] = [] }
+
+lines.each_with_index do |row, y|
+  row.chars.each_with_index do |loc, x|
+    next if loc == "."
+    antennas[loc] << Vec2.new(x, y)
+  end
+end
+
+antinodes = Set.new
+
+antennas.each_pair do |freq, coords|
+  coords.combination(2) do |v1, v2|
+    candidates = [v1 - (v2 - v1), v2 - (v1 - v2)]
+    candidates.each do |v|
+      antinodes.add(v) if y_range.include?(v.y) && x_range.include?(v.x)
+    end
+  end
+end
+
+puts antinodes.size
