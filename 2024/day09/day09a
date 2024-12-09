@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+disk_map = File.read(ARGV[0]).strip
+
+expanded = []
+id = 0
+
+disk_map.chars.map(&:to_i).each_with_index do |n, idx|
+  if idx.even?
+    expanded << [id] * n
+    id += 1
+  else
+    expanded << ["."] * n
+  end
+end
+
+expanded.flatten!
+
+loop do
+  empty_idx = expanded.index(".")
+  block_idx = expanded.rindex { _1 != "." }
+  break unless empty_idx < block_idx
+  expanded[empty_idx], expanded[block_idx] = expanded[block_idx], expanded[empty_idx]
+end
+
+checksum = 0
+
+expanded.each_with_index do |n, idx|
+  checksum += n * idx unless n == "."
+end
+
+puts checksum
