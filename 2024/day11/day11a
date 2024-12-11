@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+
+stones = File.read(ARGV[0]).split
+
+25.times do
+  stones_new = stones.flat_map do |n|
+    if n == "0"
+      "1"
+    elsif n.length.even?
+      [n[...n.length / 2], n[n.length / 2..].to_i.to_s]
+    else
+      (n.to_i * 2024).to_s
+    end
+  end
+
+  stones = stones_new
+end
+
+puts stones.length
