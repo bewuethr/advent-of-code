@@ -7,20 +7,25 @@ id = 0
 
 disk_map.chars.map(&:to_i).each_with_index do |n, idx|
   if idx.even?
-    expanded << [id] * n
+    expanded.concat([id] * n)
     id += 1
   else
-    expanded << ["."] * n
+    expanded.concat(["."] * n)
   end
 end
 
-expanded.flatten!
+empty_slots = expanded.each_with_index
+  .select { |block, _| block == "." }
+  .map { |_, idx| idx }
 
-loop do
-  empty_idx = expanded.index(".")
-  block_idx = expanded.rindex { _1 != "." }
-  break unless empty_idx < block_idx
-  expanded[empty_idx], expanded[block_idx] = expanded[block_idx], expanded[empty_idx]
+block_slots = expanded.each_with_index
+  .reject { |block, _| block == "." }
+  .map { |_, idx| idx }
+  .reverse
+
+empty_slots.each_with_index do |expanded_idx, idx|
+  break if expanded_idx > block_slots[idx]
+  expanded[expanded_idx], expanded[block_slots[idx]] = expanded[block_slots[idx]], expanded[expanded_idx]
 end
 
 checksum = 0
