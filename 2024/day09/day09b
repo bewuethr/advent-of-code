@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+
+BlockFile = Struct.new(:idx, :length)
+
+disk_map = File.read(ARGV[0]).strip
+
+expanded = []
+id = 0
+files = {}
+
+disk_map.chars.map(&:to_i).each_with_index do |n, idx|
+  if idx.even?
+    l = expanded.length
+    expanded.concat([id] * n)
+    files[id] = BlockFile.new(l, n)
+    id += 1
+  else
+    expanded.concat(["."] * n)
+  end
+end
+
+files.to_a.reverse_each do |id, file|
+  free_idx = expanded.each_cons(file.length).each_with_index.find do |slice, idx|
+    slice.all?(".")
+  end&.last
+  next unless free_idx
+  next if free_idx > file.idx
+
+  expanded[free_idx...free_idx + file.length], expanded[file.idx...file.idx + file.length] =
+    expanded[file.idx...file.idx + file.length], expanded[free_idx...free_idx + file.length]
+end
+
+checksum = 0
+
+expanded.each_with_index do |n, idx|
+  checksum += n * idx unless n == "."
+end
+
+puts checksum
