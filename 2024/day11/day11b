@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+def blink(n)
+  if n == "0"
+    ["1"]
+  elsif n.length.even?
+    [n[...n.length / 2], n[n.length / 2..].to_i.to_s]
+  else
+    [(n.to_i * 2024).to_s]
+  end
+end
+
+stones = File.read(ARGV[0]).split
+
+stone_count = stones.tally
+
+75.times do |i|
+  new_count = Hash.new(0)
+  stone_count.keys.each do |key|
+    blink(key).each { new_count[_1] += stone_count[key] }
+  end
+
+  stone_count = new_count
+end
+
+puts stone_count.values.sum
