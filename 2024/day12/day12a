@@ -1,0 +1,65 @@
+#!/usr/bin/env ruby
+
+Point = Struct.new(:x, :y) do
+  def to_s = "#{x}/#{y}"
+end
+
+class Map
+  attr_reader :rows
+
+  def initialize(rows)
+    @rows = rows
+    @y_range = (0...@rows.length)
+    @x_range = (0...@rows[0].length)
+  end
+
+  def include?(p) = @y_range.cover?(p.y) && @x_range.cover?(p.x)
+
+  def at(p)
+    return nil unless include?(p)
+    @rows.dig(p.y, p.x)
+  end
+end
+
+def flood(node, plots, seen)
+  area = 0
+  perimeter = 0
+  plant_type = plots.at(node)
+  q = [node]
+
+  until q.empty?
+    n = q.shift
+    next if seen.include?(n)
+    seen.add(n)
+    area += 1
+
+    [[0, 1], [0, -1], [1, 0], [-1, 0]].each do |dx, dy|
+      p_new = Point.new(n.x + dx, n.y + dy)
+      if plots.at(p_new) == plant_type
+        q.push(p_new)
+      else
+        perimeter += 1
+      end
+    end
+  end
+
+  [area, perimeter]
+end
+
+rows = File.readlines(ARGV[0]).map(&:chomp).map(&:chars)
+
+plots = Map.new(rows)
+seen = Set.new
+price = 0
+
+plots.rows.each_with_index do |row, y|
+  row.each_with_index do |plot, x|
+    p = Point.new(x, y)
+    next if seen.include?(p)
+
+    area, perimeter = flood(p, plots, seen)
+    price += area * perimeter
+  end
+end
+
+puts price
