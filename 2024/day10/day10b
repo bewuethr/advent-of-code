@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+
+Point = Struct.new(:x, :y)
+
+class Map
+  attr_reader :rows
+
+  def initialize(rows)
+    @rows = rows
+    @y_range = (0...@rows.length)
+    @x_range = (0...@rows[0].length)
+  end
+
+  def include?(p) = @y_range.cover?(p.y) && @x_range.cover?(p.x)
+
+  def at(p) = @rows[p.y][p.x]
+end
+
+def bfs(topo_map, root)
+  q = []
+  rating = 0
+  q << root
+
+  until q.empty?
+    v = q.shift
+    rating += 1 if topo_map.at(v) == 9
+
+    [[0, 1], [0, -1], [1, 0], [-1, 0]].each do |dx, dy|
+      w = Point.new(v.x + dx, v.y + dy)
+      q << w if topo_map.include?(w) && topo_map.at(w) == topo_map.at(v) + 1
+    end
+  end
+
+  rating
+end
+
+rows = File.readlines(ARGV[0]).map { _1.chomp.chars.map(&:to_i) }
+topo_map = Map.new(rows)
+
+zeroes = topo_map.rows.each_with_index.select do |row, y|
+  row.include?(0)
+end.flat_map do |row, y|
+  row.each_with_index.select { |pos, x| pos == 0 }
+    .map { |_, x| Point.new(x, y) }
+end
+
+puts zeroes.sum { bfs(topo_map, _1) }
