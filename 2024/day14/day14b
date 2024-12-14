@@ -1,0 +1,44 @@
+#!/usr/bin/env ruby
+
+WIDTH = 101
+HEIGHT = 103
+
+Point = Struct.new(:x, :y) do
+  def to_s = "#{x}/#{y}"
+
+  def +(other) = Point.new((x + other.x) % WIDTH, (y + other.y) % HEIGHT)
+end
+
+def check(robots)
+  robo_map = (0...HEIGHT).map { "." * WIDTH }
+
+  robots.each do |robot|
+    p = robot[:p]
+    robo_map[p.y][p.x] = "X"
+  end
+
+  robo_map.any? { _1.include?("X" * (WIDTH / 10)) }
+end
+
+rows = File.readlines(ARGV[0]).map(&:chomp)
+
+robots = rows.map do |row|
+  x, y, dx, dy = row.scan(/-?\d+/).map(&:to_i)
+  {
+    p: Point.new(x, y),
+    v: Point.new(dx, dy)
+  }
+end
+
+t = 0
+
+until check(robots)
+  robots.map! do |robot|
+    robot[:p] += robot[:v]
+    robot
+  end
+
+  t += 1
+end
+
+puts t
