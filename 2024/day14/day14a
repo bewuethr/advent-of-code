@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+
+WIDTH = 101
+HEIGHT = 103
+
+Point = Struct.new(:x, :y) do
+  def to_s = "#{x}/#{y}"
+
+  def +(other) = Point.new((x + other.x) % WIDTH, (y + other.y) % HEIGHT)
+end
+
+rows = File.readlines(ARGV[0]).map(&:chomp)
+
+robots = rows.map do |row|
+  x, y, dx, dy = row.scan(/-?\d+/).map(&:to_i)
+  {
+    p: Point.new(x, y),
+    v: Point.new(dx, dy)
+  }
+end
+
+100.times do
+  robots.map! do |robot|
+    robot[:p] += robot[:v]
+    robot
+  end
+end
+
+quadrants = robots.map do |robot|
+  p = robot[:p]
+  next if p.x == WIDTH / 2 || p.y == HEIGHT / 2
+
+  if p.y < HEIGHT / 2
+    if p.x < WIDTH / 2
+      "tl"
+    else
+      "tr"
+    end
+  elsif p.x < WIDTH / 2
+    "bl"
+  else
+    "br"
+  end
+end.compact
+
+puts quadrants.tally.values.reduce(&:*)
