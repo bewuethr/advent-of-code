@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+
+COST_A = 3
+COST_B = 1
+
+Point = Struct.new(:x, :y) do
+  def to_s = "#{x}/#{y}"
+
+  def +(other) = Point.new(x + other.x, y + other.y)
+
+  def *(n) = Point.new(x * n, y * n)
+end
+
+def hits_target?(machine, n_a, n_b)
+  (machine[:a] * n_a) + (machine[:b] * n_b) == machine[:target]
+end
+
+def cost(n_a, n_b) = COST_A * n_a + COST_B * n_b
+
+input = File.readlines(ARGV[0]).map(&:chomp)
+
+machines = input.each_slice(4).map do |a, b, prize, _|
+  {
+    a: Point.new(*a.scan(/\d+/).map(&:to_i)),
+    b: Point.new(*b.scan(/\d+/).map(&:to_i)),
+    target: Point.new(*prize.scan(/\d+/).map(&:to_i))
+  }
+end
+
+cost = machines.map do |machine|
+  valid_combos = (0..100).to_a.repeated_permutation(2).select do |n_a, n_b|
+    hits_target?(machine, n_a, n_b)
+  end
+
+  costs = valid_combos.map { |n_a, n_b| cost(n_a, n_b) }
+  costs.min
+end.compact.sum
+
+puts cost

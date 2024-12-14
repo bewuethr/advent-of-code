@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+
+COST_A = 3
+COST_B = 1
+
+Point = Struct.new(:x, :y)
+
+def cost(n_a, n_b) = COST_A * n_a + COST_B * n_b
+
+def solve(machine)
+  a = machine[:a].x
+  b = machine[:b].x
+  t_x = machine[:target].x
+  c = machine[:a].y
+  d = machine[:b].y
+  t_y = machine[:target].y
+
+  n_b = (a * t_y - c * t_x).div(a * d - b * c)
+  n_a = (t_x - b * n_b).div(a)
+
+  return 0 unless n_a * a + n_b * b == t_x && n_a * c + n_b * d == t_y
+  cost(n_a, n_b)
+end
+
+input = File.readlines(ARGV[0]).map(&:chomp)
+
+machines = input.each_slice(4).map do |a, b, prize, _|
+  {
+    a: Point.new(*a.scan(/\d+/).map(&:to_i)),
+    b: Point.new(*b.scan(/\d+/).map(&:to_i)),
+    target: Point.new(*prize.scan(/\d+/).map { _1.to_i + 1_000_0000_000_000 })
+  }
+end
+
+puts machines.sum { solve(_1) }
