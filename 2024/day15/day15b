@@ -1,0 +1,163 @@
+#!/usr/bin/env ruby
+
+require_relative "../map"
+
+BOT = "@"
+BOX = "O"
+WALL = "#"
+EMPTY = "."
+BIG_BOX_LEFT = "["
+BIG_BOX_RIGHT = "]"
+
+RIGHT = Point.new(1, 0)
+LEFT = Point.new(-1, 0)
+UP = Point.new(0, -1)
+DOWN = Point.new(0, 1)
+
+class Robot
+  DIR_MAP = {
+    ">" => RIGHT,
+    "<" => LEFT,
+    "^" => UP,
+    "v" => DOWN
+  }
+
+  def initialize(pos, map)
+    @map = map
+    @pos = @map.find_point(BOT)
+  end
+
+  def move(direction)
+    dp = DIR_MAP[direction]
+    pos_next = @pos + dp
+    case @map[pos_next]
+    when EMPTY
+      @map[@pos] = EMPTY
+      @pos += dp
+      @map[@pos] = BOT
+    when BIG_BOX_LEFT, BIG_BOX_RIGHT
+      if box_can_move?(pos_next, dp)
+        move_boxes(pos_next, dp)
+        @map[@pos] = EMPTY
+        @map[pos_next] = BOT
+        @pos += dp
+      end
+    when WALL
+      # Do nothing
+    else
+      raise "Illegal map character: #{@map[pos_next]}"
+    end
+  end
+
+  private def box_can_move?(p, dp)
+    if [LEFT, RIGHT].include?(dp)
+      box_can_move_horizontal?(p, dp)
+    else
+      box_can_move_vertical?(p, dp)
+    end
+  end
+
+  private def box_can_move_horizontal?(p, dp)
+    p_cur = p + dp
+    p_cur += dp while [BIG_BOX_LEFT, BIG_BOX_RIGHT].include?(@map[p_cur])
+    @map[p_cur] == EMPTY
+  end
+
+  private def box_can_move_vertical?(p, dp)
+    boxes = [p]
+    boxes.push(get_other_half(p))
+
+    until boxes.empty?
+      p_cur = boxes.shift + dp
+      case @map[p_cur]
+      when WALL
+        return false
+      when BIG_BOX_LEFT, BIG_BOX_RIGHT
+        boxes.push(p_cur, get_other_half(p_cur))
+      end
+    end
+
+    true
+  end
+
+  private def get_other_half(p)
+    dir = (@map[p] == BIG_BOX_LEFT) ? RIGHT : LEFT
+    p + dir
+  end
+
+  private def move_boxes(p, dp)
+    if [LEFT, RIGHT].include?(dp)
+      move_boxes_horizontal(p, dp)
+    else
+      move_boxes_vertical(p, dp)
+    end
+  end
+
+  private def move_boxes_horizontal(p, dp)
+    p_cur = Point.new(p.x, p.y)
+    elem = @map[p_cur]
+    @map[p_cur] = EMPTY
+    while [BIG_BOX_LEFT, BIG_BOX_RIGHT].include?(elem)
+      p_cur += dp
+      @map[p_cur], elem = elem, @map[p_cur]
+    end
+  end
+
+  private def move_boxes_vertical(p, dp)
+    frontline = [p]
+    frontline.push(get_other_half(p))
+    cur_positions = {
+      p => @map[p],
+      get_other_half(p) => @map[get_other_half(p)]
+    }
+
+    until frontline.empty?
+      p_cur = frontline.shift + dp
+      if [BIG_BOX_LEFT, BIG_BOX_RIGHT].include?(@map[p_cur])
+        frontline.push(p_cur, get_other_half(p_cur))
+        cur_positions[p_cur] = @map[p_cur]
+        cur_positions[get_other_half(p_cur)] = @map[get_other_half(p_cur)]
+      end
+    end
+
+    cur_positions.each_key { @map[it] = EMPTY }
+    cur_positions.each_pair { |pos, val| @map[pos + dp] = val }
+  end
+end
+
+rows = File.readlines(ARGV[0]).map(&:chomp)
+idx_blank = rows.find_index(&:empty?)
+
+warehouse = Map.new(rows[...idx_blank].map do |row|
+  row.chars.flat_map do |elem|
+    case elem
+    when WALL, EMPTY
+      [elem, elem]
+    when BOX
+      [BIG_BOX_LEFT, BIG_BOX_RIGHT]
+    when BOT
+      [BOT, EMPTY]
+    else
+      raise "Illegal map character: #{elem}"
+    end
+  end
+end)
+moves = rows[idx_blank + 1..].join.chars
+robot = Robot.new(warehouse.find_point("@"), warehouse)
+
+puts warehouse if ENV["DEBUG"]
+
+moves.each do |move|
+  puts move if ENV["DEBUG"]
+  robot.move(move)
+  puts warehouse if ENV["DEBUG"]
+  $stdin.gets if ENV["DEBUG"]
+end
+
+gps = warehouse.rows.each_with_index.select { |row, y| row.include?(BIG_BOX_LEFT) }
+  .sum do |row, y|
+    row.each_with_index.select { |elem, _| elem == BIG_BOX_LEFT }
+      .sum { |_, x| 100 * y + x }
+  end
+
+puts gps

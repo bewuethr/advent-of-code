@@ -1,0 +1,81 @@
+#!/usr/bin/env ruby
+
+require_relative "../map"
+
+class Robot
+  DIR_MAP = {
+    ">" => Point.new(1, 0),
+    "<" => Point.new(-1, 0),
+    "^" => Point.new(0, -1),
+    "v" => Point.new(0, 1)
+  }
+
+  BOT = "@"
+  BOX = "O"
+  WALL = "#"
+  EMPTY = "."
+
+  def initialize(pos, map)
+    @pos = pos
+    @map = map
+  end
+
+  def move(direction)
+    dp = DIR_MAP[direction]
+    pos_next = @pos + dp
+    case @map[pos_next]
+    when EMPTY
+      @map[@pos] = EMPTY
+      @pos += dp
+      @map[@pos] = BOT
+    when BOX
+      if box_can_move?(pos_next, dp)
+        move_boxes(pos_next, dp)
+        @map[@pos] = EMPTY
+        @map[pos_next] = BOT
+        @pos += dp
+      end
+    when WALL
+      # Do nothing
+    else
+      raise "Illegal map character: #{@map[pos_next]}"
+    end
+  end
+
+  private def box_can_move?(p, dp)
+    p_cur = p + dp
+    p_cur += dp while @map[p_cur] == BOX
+    @map[p_cur] == EMPTY
+  end
+
+  private def move_boxes(p, dp)
+    p_cur = Point.new(p.x, p.y)
+    p_cur += dp while @map[p_cur] == BOX
+    @map[p_cur] = BOX
+    @map[p] = EMPTY
+  end
+end
+
+rows = File.readlines(ARGV[0]).map(&:chomp)
+idx_blank = rows.find_index(&:empty?)
+
+warehouse = Map.new(rows[...idx_blank].map(&:chars))
+moves = rows[idx_blank + 1..].join.chars
+robot = Robot.new(warehouse.find_point("@"), warehouse)
+
+puts warehouse if ENV["DEBUG"]
+
+moves.each do |move|
+  puts move if ENV["DEBUG"]
+  robot.move(move)
+  puts warehouse if ENV["DEBUG"]
+  $stdin.gets if ENV["DEBUG"]
+end
+
+gps = warehouse.rows.each_with_index.select { |row, y| row.include?("O") }
+  .sum do |row, y|
+    row.each_with_index.select { |elem, x| elem == "O" }
+      .sum { |elem, x| 100 * y + x }
+  end
+
+puts gps
